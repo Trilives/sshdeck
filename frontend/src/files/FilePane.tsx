@@ -14,6 +14,7 @@ import {
   ChevronDown,
   ChevronRight,
   Eye,
+  EyeOff,
   File,
   Folder,
   FolderOpen,
@@ -65,7 +66,7 @@ export function FilePane(props: {
   const [children, setChildren] = useState<Record<string, FileEntry[]>>({});
   const [loadingPaths, setLoadingPaths] = useState<Set<string>>(new Set());
   const [filter, setFilter] = useState("");
-  const [hidden, setHidden] = useState(false);
+  const [hidden, setHidden] = useState(true);
   const [sort, setSort] = useState<"name" | "size" | "modified">("name");
   const [descending, setDescending] = useState(false);
   const [directoryPickerOpen, setDirectoryPickerOpen] = useState(false);
@@ -407,14 +408,20 @@ export function FilePane(props: {
           <button
             className={cn(
               iconButton,
+              "w-auto gap-1.5 px-2 text-[11px]",
               hidden &&
                 "bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-300",
             )}
             title={ft(lang, "hidden")}
+            aria-label={ft(lang, "hidden")}
             aria-pressed={hidden}
-            onClick={() => setHidden((v) => !v)}
+            onClick={() => {
+              setHidden((v) => !v);
+              if (scroller.current) scroller.current.scrollTop = 0;
+            }}
           >
-            <Eye size={15} />
+            {hidden ? <Eye size={15} /> : <EyeOff size={15} />}
+            <span>{ft(lang, "hiddenFiles")}</span>
           </button>
         </div>
         <button

@@ -486,6 +486,45 @@ test("a late connection cannot replace the newly chosen host", () =>
     assert.deepEqual(errors, []);
   }));
 
+test("local and remote panes show, select and browse dotfiles without the folder dialog", () =>
+  withPage(async (page, errors) => {
+    for (const host of ["", "ready"]) {
+      if (host) await chooseHost(page, host);
+      const root = host ? "/srv/ready" : "C:\\Regression";
+      const separator = host ? "/" : "\\";
+      await page.getByTitle(root, { exact: true }).first().waitFor();
+      const toggle = page
+        .getByRole("button", { name: "显示隐藏文件", exact: true })
+        .first();
+      const filter = page
+        .getByRole("textbox", { name: "筛选当前目录", exact: true })
+        .first();
+      const pane = filter.locator("xpath=../../..");
+      assert.equal(await toggle.getAttribute("aria-pressed"), "true");
+      await filter.fill(".env");
+      const file = pane.getByTitle(`${root}${separator}.env`, { exact: true });
+      await file.waitFor();
+      await file.getByRole("checkbox").check();
+      assert.ok(await file.getByRole("checkbox").isChecked());
+      await toggle.click();
+      await file.waitFor({ state: "hidden" });
+      assert.equal(await toggle.getAttribute("aria-pressed"), "false");
+      await toggle.click();
+      await file.waitFor();
+      await filter.fill("");
+      await pane
+        .getByTitle(`${root}${separator}.config`, { exact: true })
+        .dblclick();
+      await pane
+        .getByTitle(`${root}${separator}.config${separator}.credentials`, {
+          exact: true,
+        })
+        .waitFor();
+      assert.equal(await page.getByRole("dialog").count(), 0);
+    }
+    assert.deepEqual(errors, []);
+  }));
+
 test("double-clicking a file only selects it; folders still navigate", () =>
   withPage(async (page, errors) => {
     const before = await page.evaluate(

@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.4.1-beta.1
+
+**Fixed**
+- Show dotfiles and hidden folders by default in file-transfer panes, with a labeled toggle to change visibility without opening the folder picker.
+
+**Documentation**
+- Update the in-app Chinese and English guide for folder launch actions, file transfers, distribution, direct SSH setup, authentication and update channels.
+
 ## 0.4.0
 
 **Added**

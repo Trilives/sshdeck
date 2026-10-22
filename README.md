@@ -74,6 +74,8 @@ In **Remote Connections**, expand a host and click **Choose folder** to browse i
 3. Select files or folders and click Send, or drag them into the other pane. Confirm the destination and how to handle existing files.
 4. Enable **Distribute** for multiple recipients. For two remote endpoints, **Bypass this computer** is available in the transfer confirmation dialog.
 
+Dotfiles and hidden folders are shown by default. Select, expand or open them directly in the file panes; use the **Hidden files** toolbar button to toggle visibility.
+
 When authentication is needed, connect with a password or upload this computer's public key for future passwordless access. The key button at the top of each remote pane also opens these options. Both key upload and direct setup check existing passwordless access first and skip key changes when it already works.
 
 With **Bypass this computer** enabled, choose **Set up direct SSH access** to authorize the source server's public key on the destination and verify the connection. Configure each recipient separately when distributing files. A dedicated key is generated on the source if needed; its private key stays there. Passwords are requested when needed and never saved to configuration. Automatic setup supports POSIX/OpenSSH servers with standard `/etc/ssh/ssh_host_*_key.pub` files; other environments can be configured manually.

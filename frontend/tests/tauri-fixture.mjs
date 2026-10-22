@@ -46,15 +46,19 @@ export function installTauriFixture() {
       size: isDir ? 0 : 5,
       modified: 0,
     });
-    const entries = nested
-      ? [entry("README.md")]
-      : [
-          entry("Projects", true),
-          ...Array.from({ length: 250 }, (_, i) => entry(`file${i}.txt`)),
-        ];
+    const entries = path.endsWith(".config")
+      ? [entry(".credentials"), entry("settings.json")]
+      : nested
+        ? [entry("README.md")]
+        : [
+            entry("Projects", true),
+            entry(".config", true),
+            entry(".env"),
+            ...Array.from({ length: 250 }, (_, i) => entry(`file${i}.txt`)),
+          ];
     if (fixture.breakNextListing) {
       fixture.breakNextListing = false;
-      entries[0].name = null; // Fault injection exercises the UI error boundary.
+      entries[0].name = {}; // Invalid React child exercises the UI error boundary.
     }
     return { sessionId, path, roots: remote ? ["/"] : ["C:\\"], entries };
   }
@@ -92,7 +96,7 @@ export function installTauriFixture() {
         case "check_ssh":
           return true;
         case "plugin:app|version":
-          return "0.4.0";
+          return "0.4.1-beta.1";
         case "plugin:event|listen": {
           const id = ++sequence;
           listeners.set(id, args);
