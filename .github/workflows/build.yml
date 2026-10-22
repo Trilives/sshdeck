@@ -52,6 +52,11 @@ jobs:
       - name: Install frontend dependencies
         run: npm --prefix frontend ci
 
+      - name: Test file transfer interactions
+        working-directory: frontend
+        # The Windows runner includes Edge, matching the WebView2 browser engine.
+        run: npm test
+
       # Builds the frontend (via beforeBuildCommand), compiles the Rust app, and
       # bundles the NSIS installer. On a v* tag it also drafts a Release.
       - name: Build Tauri app

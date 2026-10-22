@@ -14,6 +14,7 @@ import { LogsPage } from "./pages/LogsPage";
 import { SettingsPage } from "./pages/SettingsPage";
 import { GuidePage } from "./pages/GuidePage";
 import { FileTransferPage } from "./pages/FileTransferPage";
+import { FileTransferBoundary } from "./files/FileTransferBoundary";
 import type { AppSettings, CriticalErrorPayload, Forward, HistoryEntry, Host, LogEntry, LogLevel, UpdateChannel, UpdateState } from "./types";
 
 const defaultSettings: AppSettings = { theme: "light", language: "zh-CN", logLevel: "info", closeBehavior: "ask", autoUpdate: false, updateChannel: "stable" };
@@ -778,7 +779,9 @@ export function App() {
           )}
           <div className="animate-[fadeIn_220ms_ease-out]">
             <div className={page === "files" ? "" : "hidden"}>
-              <FileTransferPage language={language} hosts={hosts} active={page === "files"} />
+              <FileTransferBoundary language={language}>
+                <FileTransferPage language={language} hosts={hosts} active={page === "files"} />
+              </FileTransferBoundary>
             </div>
             {page === "dashboard" && (
               <DashboardPage

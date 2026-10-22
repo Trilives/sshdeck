@@ -39,7 +39,7 @@ SSHDeck 是一个面向 Windows 的 SSH 管理工具，在一个界面里管理�
 
 ## 下载与运行
 
-文件传输和新目录选择器目前在 [0.4 预览版](https://github.com/Trilives/sshdeck/releases/tag/v0.4.0-beta.2)中提供。安装版用户也可选择「预览」更新通道体验。
+文件传输和新目录选择器目前在 [0.4 预览版](https://github.com/Trilives/sshdeck/releases/tag/v0.4.0-beta.3)中提供。安装版用户也可选择「预览」更新通道体验。
 
 从 GitHub Releases 下载 `v0.3.1`：
 

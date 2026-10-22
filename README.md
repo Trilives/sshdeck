@@ -39,7 +39,7 @@ Click an image to view it at full size. Screenshots show the 0.4 preview.
 
 ## Download & Run
 
-File transfer and the new folder picker are available in the [0.4 preview](https://github.com/Trilives/sshdeck/releases/tag/v0.4.0-beta.2). Choose the Preview update channel to try them in an installed edition.
+File transfer and the new folder picker are available in the [0.4 preview](https://github.com/Trilives/sshdeck/releases/tag/v0.4.0-beta.3). Choose the Preview update channel to try them in an installed edition.
 
 Download `v0.3.1` from GitHub Releases:
 

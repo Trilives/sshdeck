@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.4.0-beta.3
+
+**Fixed**
+- Fix a deferred scroll update that could clear the entire UI when browsing directories or switching file-transfer hosts.
+- Keep navigation and the close confirmation available if the file-transfer page encounters a rendering error, with an option to reopen the page.
+
+**Tests**
+- Add browser regression coverage for scrolling and host changes, connection failures, password prompts, late connections, double-click navigation, and recovery after a rendering error. Run it before packaging releases.
+
 ## 0.4.0-beta.2
 
 **Changed**

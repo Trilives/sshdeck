@@ -505,9 +505,11 @@ export function FilePane(props: {
           dropPath === b.listing?.path &&
             "bg-blue-50/60 ring-2 ring-inset ring-blue-400 dark:bg-blue-950/20",
         )}
-        onScroll={(e) =>
-          setViewport((v) => ({ ...v, top: e.currentTarget.scrollTop }))
-        }
+        onScroll={(e) => {
+          // React clears currentTarget after dispatch; state updaters may run later.
+          const top = e.currentTarget.scrollTop;
+          setViewport((v) => ({ ...v, top }));
+        }}
         onDragOver={(e) => b.listing && dragOver(e, b.listing.path)}
         onDragLeave={(e) => {
           if (!e.currentTarget.contains(e.relatedTarget as Node))
