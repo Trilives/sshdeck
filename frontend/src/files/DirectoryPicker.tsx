@@ -9,6 +9,8 @@ import {
   LoaderCircle,
   Pencil,
   Search,
+  Terminal,
+  Code2,
   X,
 } from "lucide-react";
 import type { Language } from "../types";
@@ -36,6 +38,7 @@ export function DirectoryPicker({
   listing,
   onClose,
   onChoose,
+  openActions,
 }: {
   language: Language;
   hostId: string;
@@ -43,6 +46,10 @@ export function DirectoryPicker({
   listing: FileListing;
   onClose: () => void;
   onChoose: (path: string) => void;
+  openActions?: {
+    terminal: (path: string) => void;
+    vscode: (path: string) => void;
+  };
 }) {
   const initialCrumbs = pathCrumbs(listing.path);
   const [selected, setSelected] = useState(listing.path);
@@ -299,7 +306,7 @@ export function DirectoryPicker({
               </span>
             </h2>
             <p className="mt-1 text-xs text-slate-400">
-              {ft(lang, "browseHint")}
+              {ft(lang, openActions ? "openFolderHint" : "browseHint")}
             </p>
           </div>
           <button
@@ -519,15 +526,35 @@ export function DirectoryPicker({
             <Button variant="secondary" onClick={onClose}>
               {ft(lang, "cancel")}
             </Button>
-            <Button
-              disabled={!valid || loading.has(selected)}
-              onClick={() => onChoose(selected)}
-            >
-              {loading.has(selected) && (
-                <LoaderCircle size={14} className="animate-spin" />
-              )}
-              {ft(lang, "choosePath")}
-            </Button>
+            {openActions ? (
+              <>
+                <Button
+                  variant="secondary"
+                  disabled={!valid || loading.has(selected)}
+                  onClick={() => openActions.terminal(selected)}
+                >
+                  <Terminal size={16} />
+                  {ft(lang, "openTerminal")}
+                </Button>
+                <Button
+                  disabled={!valid || loading.has(selected)}
+                  onClick={() => openActions.vscode(selected)}
+                >
+                  <Code2 size={16} />
+                  {ft(lang, "openVscode")}
+                </Button>
+              </>
+            ) : (
+              <Button
+                disabled={!valid || loading.has(selected)}
+                onClick={() => onChoose(selected)}
+              >
+                {loading.has(selected) && (
+                  <LoaderCircle size={14} className="animate-spin" />
+                )}
+                {ft(lang, "choosePath")}
+              </Button>
+            )}
           </div>
         </footer>
       </div>

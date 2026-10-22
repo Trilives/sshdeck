@@ -107,6 +107,14 @@ pub fn build_key_upload_command(host: &Host) -> Result<Vec<String>, String> {
         "-o".to_string(),
         "BatchMode=no".to_string(),
         "-o".to_string(),
+        "ConnectTimeout=8".to_string(),
+        "-o".to_string(),
+        "NumberOfPasswordPrompts=1".to_string(),
+        "-o".to_string(),
+        "ServerAliveInterval=5".to_string(),
+        "-o".to_string(),
+        "ServerAliveCountMax=3".to_string(),
+        "-o".to_string(),
         "StrictHostKeyChecking=accept-new".to_string(),
         "-p".to_string(),
         empty_default(&host.ssh_port, "22").to_string(),
@@ -117,7 +125,7 @@ pub fn build_key_upload_command(host: &Host) -> Result<Vec<String>, String> {
     push_proxy_jump(host, &mut command);
     command.push(destination(host));
     command.push(
-        "umask 077; mkdir -p ~/.ssh && touch ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys && key=$(cat) && { grep -qxF \"$key\" ~/.ssh/authorized_keys || printf '%s\\n' \"$key\" >> ~/.ssh/authorized_keys; }"
+        "umask 077; mkdir -p ~/.ssh && chmod 700 ~/.ssh && touch ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys && key=$(cat) && { grep -qxF -- \"$key\" ~/.ssh/authorized_keys || printf '\\n%s\\n' \"$key\" >> ~/.ssh/authorized_keys; }"
             .to_string(),
     );
     Ok(command)

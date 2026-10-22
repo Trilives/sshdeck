@@ -1,6 +1,6 @@
 use std::{
     fs,
-    io::{Read, Write},
+    io::Read,
     path::{Path, PathBuf},
     process::{Command, Stdio},
     thread,
@@ -283,12 +283,4 @@ pub fn apply_askpass(process: &mut Command, helper: PathBuf, password: &str) {
         .env("SSH_ASKPASS_REQUIRE", "force")
         .env("DISPLAY", "sshdeck")
         .env("SSHDECK_PASSWORD", password);
-}
-
-/// Write data to a child process's stdin.
-pub fn write_stdin(child: &mut std::process::Child, data: &[u8]) -> Result<(), String> {
-    if let Some(stdin) = child.stdin.as_mut() {
-        stdin.write_all(data).map_err(|err| err.to_string())?;
-    }
-    Ok(())
 }

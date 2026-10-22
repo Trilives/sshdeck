@@ -19,6 +19,22 @@ const zh = {
   disconnected: "未连接",
   connecting: "连接中…",
   passwordLogin: "使用密码连接",
+  authentication: "连接认证",
+  uploadKey: "一键上传密钥",
+  uploadAndConnect: "上传密钥并连接",
+  uploadKeyHint:
+    "输入密码可直接连接；上传密钥前会先检测免密登录，已可用则跳过上传。需要上传时请填写服务器密码，未配置本机密钥时会自动生成。",
+  openTerminal: "终端",
+  openVscode: "VS Code",
+  openFolderHint: "展开目录树，选择目录后用终端或 VS Code 打开。",
+  setupDirect: "配置直传密钥",
+  setupDirectHint:
+    "先检测直传免密连接，已可用则跳过配置。否则将源服务器公钥加入接收端；需要时在源服务器生成专用密钥，私钥留在那里。",
+  setupReady: "直传连接已验证",
+  alreadyPasswordless: "已免密，跳过上传",
+  setupWorking: "正在配置并验证…",
+  setupPasswordHint: "此密码仅用于本次密钥配置，不会保存。",
+  continue: "继续",
   passwordNote: "密码仅保留在本次文件连接中，断开后释放，不写入配置。",
   password: "密码 / 私钥口令",
   cancel: "取消",
@@ -137,6 +153,24 @@ const en: Record<Key, string> = {
   disconnected: "Disconnected",
   connecting: "Connecting…",
   passwordLogin: "Connect with password",
+  authentication: "Connection authentication",
+  uploadKey: "Upload SSH key",
+  uploadAndConnect: "Upload key and connect",
+  uploadKeyHint:
+    "Connect with a password, or upload this computer's public key. Upload first checks passwordless access and skips changes if it already works. Enter the server password when upload is needed; a local key is generated if necessary.",
+  openTerminal: "Terminal",
+  openVscode: "VS Code",
+  openFolderHint:
+    "Expand the tree, select a folder, then open it in Terminal or VS Code.",
+  setupDirect: "Set up direct SSH access",
+  setupDirectHint:
+    "Check direct passwordless access first and skip setup if it works. Otherwise, authorize the source's public key on the destination. A dedicated key is generated on the source if needed; its private key stays there.",
+  setupReady: "Direct connection verified",
+  alreadyPasswordless: "Already passwordless; upload skipped",
+  setupWorking: "Setting up and verifying…",
+  setupPasswordHint:
+    "This password is used only for this setup and is never saved.",
+  continue: "Continue",
   passwordNote:
     "Credentials stay in this file session only and are never saved to configuration.",
   password: "Password / key passphrase",

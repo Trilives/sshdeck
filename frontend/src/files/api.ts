@@ -14,4 +14,20 @@ export const filesApi = {
     invoke<TransferProgress>("start_file_transfer", { request }),
   jobs: () => invoke<TransferProgress[]>("list_file_transfers"),
   cancel: (id: string) => invoke<void>("cancel_file_transfer", { id }),
+  setupDirect: (
+    sourceSession: string,
+    targetSession: string,
+    sourcePassword?: string,
+    targetPassword?: string,
+  ) =>
+    invoke<{
+      ready: boolean;
+      passwordFor: "source" | "target" | null;
+      alreadyReady: boolean;
+    }>("setup_direct_access", {
+      sourceSession,
+      targetSession,
+      sourcePassword: sourcePassword ?? null,
+      targetPassword: targetPassword ?? null,
+    }),
 };

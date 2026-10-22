@@ -39,7 +39,7 @@ Click an image to view it at full size. Screenshots show the 0.4 preview.
 
 ## Download & Run
 
-File transfer and the new folder picker are available in the [0.4 preview](https://github.com/Trilives/sshdeck/releases/tag/v0.4.0-beta.5). Choose the Preview update channel to try them in an installed edition.
+File transfer and the new folder picker are available in the [0.4 preview](https://github.com/Trilives/sshdeck/releases/tag/v0.4.0-beta.6). Choose the Preview update channel to try them in an installed edition.
 
 Download `v0.3.1` from GitHub Releases:
 
@@ -67,7 +67,7 @@ ssh -V
 3. Click "Connect" on the forward. The app detects the auth method automatically: it connects directly when passwordless, or pops up a password prompt when needed.
 4. Use the Home page to watch current connections and key events, and the Logs page for the full runtime log.
 
-In **Remote Connections**, expand a host and click **Choose folder** to browse its directories or history. Confirm a folder, then open it with **Terminal** or **VS Code**.
+In **Remote Connections**, expand a host and click **Choose folder** to browse its directories or history. Open the selected folder directly with **Terminal** or **VS Code** in the dialog.
 
 ## File Transfer
 
@@ -76,7 +76,11 @@ In **Remote Connections**, expand a host and click **Choose folder** to browse i
 3. Select files or folders and click Send, or drag them into the other pane. Confirm the destination and how to handle existing files.
 4. Enable **Distribute** for multiple recipients. For two remote endpoints, **Bypass this computer** is available in the transfer confirmation dialog.
 
-Direct transfers require `sftp` on the source server, passwordless access to the destination, and a trusted destination host key. Otherwise, leave the option off to transfer through your computer. Symbolic links and special files are not copied yet; remote overwrite requires the OpenSSH `posix-rename` extension. The portable edition updates by downloading a newer ZIP.
+When authentication is needed, connect with a password or upload this computer's public key for future passwordless access. The key button at the top of each remote pane also opens these options. Both key upload and direct setup check existing passwordless access first and skip key changes when it already works.
+
+With **Bypass this computer** enabled, choose **Set up direct SSH access** to authorize the source server's public key on the destination and verify the connection. Configure each recipient separately when distributing files. A dedicated key is generated on the source if needed; its private key stays there. Passwords are requested when needed and never saved to configuration. Automatic setup supports POSIX/OpenSSH servers with standard `/etc/ssh/ssh_host_*_key.pub` files; other environments can be configured manually.
+
+Direct transfers require `sftp` on the source and a destination address and port reachable from it. Symbolic links and special files are not copied yet; remote overwrite requires the OpenSSH `posix-rename` extension. The portable edition updates by downloading a newer ZIP.
 
 ## Common Example
 

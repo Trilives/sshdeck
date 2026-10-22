@@ -185,7 +185,7 @@ fn batch_quote(s: &str) -> Result<String, String> {
             .replace('[', "\\[")
     ))
 }
-fn direct_command(target: &crate::model::Host) -> Result<String, String> {
+pub(super) fn direct_command(target: &crate::model::Host) -> Result<String, String> {
     let host = target.ssh_host.trim();
     let user = target.ssh_user.trim();
     if host.starts_with('-')
@@ -217,7 +217,12 @@ fn direct_command(target: &crate::model::Host) -> Result<String, String> {
     if port == 0 {
         return Err("Invalid destination port".into());
     }
-    Ok(format!("sftp -b - -P {port} -o BatchMode=yes -o StrictHostKeyChecking=yes -o ConnectTimeout=10 -o ServerAliveInterval=5 -o ServerAliveCountMax=3 -- {}",shell_quote(&destination)))
+    let managed_file = format!(
+        "sshdeck_known_hosts_{}_{}",
+        target.ssh_host.trim().trim_matches(['[', ']']),
+        port
+    );
+    Ok(format!("set --; if [ -f \"$HOME/.ssh/{managed_file}\" ]; then set -- -i \"$HOME/.ssh/sshdeck_ed25519\" -o \"UserKnownHostsFile=$HOME/.ssh/{managed_file}\"; fi; sftp \"$@\" -b - -P {port} -o BatchMode=yes -o StrictHostKeyChecking=yes -o ConnectTimeout=10 -o ServerAliveInterval=5 -o ServerAliveCountMax=3 -- {}",shell_quote(&destination)))
 }
 fn direct_file(
     source: &Endpoint,

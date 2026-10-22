@@ -18,6 +18,7 @@ import { Button } from "../components/ui/button";
 import { cn } from "../lib/utils";
 import { filesApi } from "../files/api";
 import { FilePane, type FileDrop } from "../files/FilePane";
+import { DirectAccessSetup } from "../files/DirectAccessSetup";
 import {
   DistributionTargets,
   type PathCommand,
@@ -36,6 +37,7 @@ import type {
 interface Pending {
   requests: Omit<TransferRequest, "conflict" | "direct">[];
   sources: string[];
+  sourceName: string;
   targetNames: string[];
   canBypass: boolean;
 }
@@ -74,6 +76,7 @@ export function FileTransferPage({
   const [pending, setPending] = useState<Pending | null>(null);
   const [conflict, setConflict] = useState<ConflictPolicy>("skip");
   const [submitting, setSubmitting] = useState(false);
+  const [setupBusy, setSetupBusy] = useState(false);
   const [jobs, setJobs] = useState<TransferProgress[]>([]);
   const [error, setError] = useState("");
   const [queueError, setQueueError] = useState("");
@@ -252,6 +255,7 @@ export function FileTransferPage({
         destination: t.path,
       })),
       sources: chosen,
+      sourceName: targetName(source === "left" ? leftId : rightId),
       targetNames: targets.map((t) => t.name),
       canBypass:
         !!(source === "left" ? leftId : rightId) &&
@@ -269,7 +273,7 @@ export function FileTransferPage({
     prepare(source, drop.paths, path);
   }
   async function startPending() {
-    if (!pending || submitting) return;
+    if (!pending || submitting || setupBusy) return;
     setSubmitting(true);
     setError("");
     const failures: string[] = [];
@@ -535,7 +539,7 @@ export function FileTransferPage({
                 <button
                   type="button"
                   aria-pressed={direct}
-                  disabled={submitting}
+                  disabled={submitting || setupBusy}
                   onClick={() => setDirect((v) => !v)}
                   className={cn(
                     "flex items-center gap-2 rounded-lg border px-3 py-2 text-xs transition",
@@ -551,6 +555,15 @@ export function FileTransferPage({
                   <Info size={12} className="mt-1 shrink-0" />
                   {ft(lang, direct ? "directHint" : "relayHint")}
                 </p>
+                {direct && (
+                  <DirectAccessSetup
+                    language={lang}
+                    sourceName={pending.sourceName}
+                    requests={pending.requests}
+                    targetNames={pending.targetNames}
+                    onBusy={setSetupBusy}
+                  />
+                )}
               </div>
             )}
             <label className="mb-5 flex items-center justify-between gap-3 text-xs">
@@ -568,12 +581,15 @@ export function FileTransferPage({
             <div className="flex justify-end gap-2">
               <Button
                 variant="secondary"
-                disabled={submitting}
+                disabled={submitting || setupBusy}
                 onClick={() => setPending(null)}
               >
                 {ft(lang, "cancel")}
               </Button>
-              <Button disabled={submitting} onClick={() => void startPending()}>
+              <Button
+                disabled={submitting || setupBusy}
+                onClick={() => void startPending()}
+              >
                 {submitting ? (
                   <LoaderCircle size={14} className="animate-spin" />
                 ) : (

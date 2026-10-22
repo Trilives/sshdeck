@@ -13,11 +13,15 @@ export function RemoteDirectoryPicker({
   language,
   onClose,
   onChoose,
+  onOpenTerminal,
+  onOpenVscode,
 }: {
   host: Host;
   language: Language;
   onClose: () => void;
   onChoose: (path: string) => void;
+  onOpenTerminal: (path: string) => void;
+  onOpenVscode: (path: string) => void;
 }) {
   const browser = useFileBrowser(host.id, true);
   if (browser.listing)
@@ -28,6 +32,16 @@ export function RemoteDirectoryPicker({
         hostName={host.name || host.sshHost}
         listing={browser.listing}
         onClose={onClose}
+        openActions={{
+          terminal: (path) => {
+            recordFolderVisit(host.id, path);
+            onOpenTerminal(path);
+          },
+          vscode: (path) => {
+            recordFolderVisit(host.id, path);
+            onOpenVscode(path);
+          },
+        }}
         onChoose={(path) => {
           recordFolderVisit(host.id, path);
           onChoose(path);

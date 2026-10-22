@@ -54,6 +54,7 @@ pub fn run() {
             commands::exec::send_command,
             commands::exec::cancel_command,
             commands::files::open_file_session,
+            commands::files::setup_direct_access,
             commands::files::list_files,
             commands::files::close_file_session,
             commands::files::start_file_transfer,

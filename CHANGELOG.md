@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.4.0-beta.6
+
+**Added**
+- Open a selected remote folder directly in Terminal or VS Code from the folder picker.
+- Connect file browsers with a one-time password or upload this computer's public key from the authentication dialog.
+- Set up direct SSH access per recipient from transfer confirmation: generate a dedicated source-server key if needed, authorize its public key on the destination, and verify the connection. Private keys stay on their server; passwords are requested only when needed.
+
+**Fixed**
+- Detect existing passwordless access before uploading keys or configuring direct access, and skip all key changes when it already works.
+- Bound key-upload SSH waits so unavailable networks cannot leave setup waiting indefinitely.
+
+**Tests**
+- Cover folder launch actions, password/key-upload retry, direct-access password prompts and multiple recipients. Execute key-generation and authorization scripts against isolated temporary folders to verify deduplication and private-key isolation.
+
 ## 0.4.0-beta.5
 
 **Fixed**

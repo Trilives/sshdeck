@@ -1,7 +1,7 @@
 use tauri::{AppHandle, Manager, State};
 
 use crate::model::HostView;
-use crate::ssh::keys::{ensure_public_key, upload_key_to_remote};
+use crate::ssh::keys::{ensure_public_key, upload_if_needed, upload_key_to_remote};
 use crate::ssh::probe::{
     get_host_fingerprint as fingerprint, probe_connection as probe,
     remove_known_host as remove_host,
@@ -16,18 +16,28 @@ pub async fn upload_public_key(
     state: State<'_, AppState>,
     app: AppHandle,
 ) -> Result<HostView, String> {
-    if password.is_empty() {
-        return Err("Password is required.".to_string());
-    }
     let host = state.find_host(&host_id)?;
     validate_host_connection(&host)?;
     tauri::async_runtime::spawn_blocking(move || {
         let state = app.state::<AppState>();
-        let public_key = ensure_public_key(&host, &app)?;
-        upload_key_to_remote(&host, &public_key, &password, state.inner(), &app)?;
+        // Recheck at the mutation boundary, including callers outside the host
+        // page. Existing agent/key access must not generate or upload a new key.
+        let status = probe(&host, state.inner(), &app)?;
+        let uploaded = upload_if_needed(&status, &password, || {
+            let public_key = ensure_public_key(&host, &app)?;
+            upload_key_to_remote(&host, &public_key, &password, state.inner(), &app)
+        })?;
         state.add_log(
             "info",
-            format!("[{}] public key uploaded", host.name),
+            format!(
+                "[{}] {}",
+                host.name,
+                if uploaded {
+                    "public key uploaded"
+                } else {
+                    "passwordless access already works; key upload skipped"
+                }
+            ),
             Some(&app),
         );
         Ok(state.host_view(host))

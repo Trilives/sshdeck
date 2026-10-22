@@ -31,7 +31,7 @@ import type { Host, Language } from "../types";
 import { api } from "../api";
 import { cn } from "../lib/utils";
 import { Button } from "../components/ui/button";
-import { InputPasswordDialog } from "../components/dialogs";
+import { FileAuthentication } from "./FileAuthentication";
 import { filesApi } from "./api";
 import { ft } from "./i18n";
 import { HostPicker } from "./HostPicker";
@@ -74,7 +74,6 @@ export function FilePane(props: {
     [],
   );
   const [passwordOpen, setPasswordOpen] = useState(false);
-  const [password, setPassword] = useState("");
   const [fingerprint, setFingerprint] = useState("");
   const [trustOpen, setTrustOpen] = useState(false);
   const [trustBusy, setTrustBusy] = useState(false);
@@ -84,6 +83,11 @@ export function FilePane(props: {
   const rootVersion = useRef(0);
   const anchor = useRef<string | null>(null);
   const onSelection = props.onSelection;
+
+  useEffect(() => {
+    setPasswordOpen(false);
+    setTrustOpen(false);
+  }, [props.hostId]);
 
   useEffect(() => {
     onSelection?.([...selected.values()]);
@@ -333,9 +337,8 @@ export function FilePane(props: {
         {!!props.hostId && (
           <button
             className={iconButton}
-            title={ft(lang, "passwordLogin")}
+            title={ft(lang, "authentication")}
             onClick={() => {
-              setPassword("");
               setPasswordOpen(true);
             }}
           >
@@ -449,6 +452,15 @@ export function FilePane(props: {
           <p className="max-h-24 overflow-auto whitespace-pre-wrap break-words">
             {b.error}
           </p>
+          {!!props.hostId && !b.busy && (
+            <button
+              onClick={() => setPasswordOpen(true)}
+              className="mt-2 flex items-center gap-1 font-semibold underline"
+            >
+              <KeyRound size={13} />
+              {ft(lang, "passwordLogin")} / {ft(lang, "uploadKey")}
+            </button>
+          )}
           {/host identification has changed|host key verification failed/i.test(
             b.error,
           ) &&
@@ -714,21 +726,15 @@ export function FilePane(props: {
           }}
         />
       )}
-      {passwordOpen && (
-        <InputPasswordDialog
+      {passwordOpen && host && (
+        <FileAuthentication
+          key={host.id}
+          host={host}
           language={lang}
-          title={`${ft(lang, "passwordLogin")} · ${host?.name || host?.sshHost || ""}`}
-          description={ft(lang, "passwordNote")}
-          password={password}
-          setPassword={setPassword}
-          submitLabel={ft(lang, "connect")}
-          onCancel={() => {
+          onClose={() => {
             setPasswordOpen(false);
-            setPassword("");
           }}
-          onSubmit={() => {
-            const value = password;
-            setPassword("");
+          onConnect={(value) => {
             setPasswordOpen(false);
             void b.connect(value);
           }}

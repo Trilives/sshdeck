@@ -25,6 +25,35 @@ fn session(app: &AppHandle, id: &str) -> Result<Arc<Session>, String> {
 }
 
 #[tauri::command]
+pub async fn setup_direct_access(
+    source_session: String,
+    target_session: String,
+    source_password: Option<String>,
+    target_password: Option<String>,
+    app: AppHandle,
+) -> Result<crate::files::access::SetupOutcome, String> {
+    let source = session(&app, &source_session)?;
+    let target = session(&app, &target_session)?;
+    if source.endpoint.host.is_none() || target.endpoint.host.is_none() {
+        return Err("Direct mode requires two remote hosts".into());
+    }
+    let dir = app.state::<AppState>().data_dir.clone();
+    tauri::async_runtime::spawn_blocking(move || {
+        let mut from = source.endpoint.clone();
+        let mut to = target.endpoint.clone();
+        if let Some(password) = source_password {
+            from.password = Some(password);
+        }
+        if let Some(password) = target_password {
+            to.password = Some(password);
+        }
+        crate::files::access::configure(&from, &to, &dir, &source.cancel, &target.cancel)
+    })
+    .await
+    .map_err(|e| e.to_string())?
+}
+
+#[tauri::command]
 pub async fn open_file_session(
     host_id: Option<String>,
     password: Option<String>,

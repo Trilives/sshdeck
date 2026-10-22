@@ -194,6 +194,16 @@ function RemoteHostCard(props: {
           host={props.host}
           language={lang}
           onClose={closePicker}
+          onOpenTerminal={(selected) => {
+            setCustomPath(selected);
+            setPickerOpen(false);
+            props.onOpenTerminalPath(selected);
+          }}
+          onOpenVscode={(selected) => {
+            setCustomPath(selected);
+            setPickerOpen(false);
+            props.onOpenVscodePath(selected);
+          }}
           onChoose={(selected) => {
             setCustomPath(selected);
             setPickerOpen(false);
