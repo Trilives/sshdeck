@@ -1,5 +1,6 @@
 import {
   useEffect,
+  useCallback,
   useMemo,
   useRef,
   useState,
@@ -19,7 +20,6 @@ import {
   KeyRound,
   Link2,
   LoaderCircle,
-  Pencil,
   PlugZap,
   RefreshCw,
   Search,
@@ -34,7 +34,8 @@ import { InputPasswordDialog } from "../components/dialogs";
 import { filesApi } from "./api";
 import { ft } from "./i18n";
 import { HostPicker } from "./HostPicker";
-import { bytes, parentPath, pathCrumbs } from "./utils";
+import { bytes, parentPath } from "./utils";
+import { DirectoryPicker } from "./DirectoryPicker";
 import type { FileBrowser } from "./useFileBrowser";
 import type { FileEntry } from "./types";
 
@@ -66,8 +67,11 @@ export function FilePane(props: {
   const [hidden, setHidden] = useState(false);
   const [sort, setSort] = useState<"name" | "size" | "modified">("name");
   const [descending, setDescending] = useState(false);
-  const [editingPath, setEditingPath] = useState(false);
-  const [pathInput, setPathInput] = useState("");
+  const [directoryPickerOpen, setDirectoryPickerOpen] = useState(false);
+  const closeDirectoryPicker = useCallback(
+    () => setDirectoryPickerOpen(false),
+    [],
+  );
   const [passwordOpen, setPasswordOpen] = useState(false);
   const [password, setPassword] = useState("");
   const [fingerprint, setFingerprint] = useState("");
@@ -90,8 +94,7 @@ export function FilePane(props: {
     setChildren({});
     setLoadingPaths(new Set());
     anchor.current = null;
-    setPathInput(b.listing?.path || "");
-    setEditingPath(false);
+    setDirectoryPickerOpen(false);
     setDropPath(null);
     if (scroller.current) scroller.current.scrollTop = 0;
   }, [b.revision, b.listing?.sessionId]);
@@ -410,59 +413,22 @@ export function FilePane(props: {
             <Eye size={15} />
           </button>
         </div>
-        <div className="flex h-9 min-w-0 items-center gap-1 rounded-xl border border-slate-200 bg-slate-50 px-2 dark:border-slate-800 dark:bg-slate-900/70">
-          {editingPath ? (
-            <input
-              className="min-w-0 flex-1 bg-transparent font-mono text-xs outline-none"
-              autoFocus
-              aria-label={ft(lang, "path")}
-              value={pathInput}
-              onChange={(e) => setPathInput(e.target.value)}
-              onBlur={() => setEditingPath(false)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  void b.navigate(pathInput);
-                  setEditingPath(false);
-                }
-                if (e.key === "Escape") setEditingPath(false);
-              }}
-            />
-          ) : (
-            <div className="flex min-w-0 flex-1 items-center gap-0.5 overflow-x-auto whitespace-nowrap text-xs [scrollbar-width:none]">
-              {b.listing ? (
-                pathCrumbs(b.listing.path).map((crumb, i) => (
-                  <span key={crumb.path} className="flex items-center">
-                    {i > 0 && (
-                      <ChevronRight size={11} className="text-slate-300" />
-                    )}
-                    <button
-                      className="rounded px-1 py-1 text-slate-600 hover:bg-slate-200 dark:text-slate-300 dark:hover:bg-slate-800"
-                      onClick={() => void b.navigate(crumb.path)}
-                    >
-                      {crumb.label}
-                    </button>
-                  </span>
-                ))
-              ) : (
-                <span className="text-slate-400">
-                  {ft(lang, "disconnected")}
-                </span>
-              )}
-            </div>
-          )}
-          <button
-            className="shrink-0 p-1 text-slate-400 hover:text-blue-500 disabled:opacity-30"
-            title={ft(lang, "path")}
-            disabled={!b.listing || b.busy}
-            onMouseDown={(e) => e.preventDefault()}
-            onClick={() => {
-              setPathInput(b.listing?.path || "");
-              setEditingPath((v) => !v);
-            }}
+        <button
+          className="flex h-9 w-full min-w-0 items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 text-left transition hover:border-blue-300 disabled:opacity-40 dark:border-slate-800 dark:bg-slate-900/70 dark:hover:border-blue-700"
+          title={b.listing?.path || ft(lang, "chooseDirectory")}
+          aria-label={ft(lang, "chooseDirectory")}
+          disabled={!b.listing || b.busy}
+          onClick={() => setDirectoryPickerOpen(true)}
+        >
+          <FolderOpen size={14} className="shrink-0 text-slate-400" />
+          <span
+            className="min-w-0 flex-1 truncate font-mono text-xs text-slate-600 dark:text-slate-300"
+            dir="rtl"
           >
-            <Pencil size={12} />
-          </button>
-        </div>
+            {b.listing?.path || ft(lang, "disconnected")}
+          </span>
+          <ChevronDown size={13} className="shrink-0 text-slate-400" />
+        </button>
         <div className="mt-2 flex items-center gap-2 px-1 text-slate-400">
           <Search size={13} />
           <input
@@ -584,11 +550,15 @@ export function FilePane(props: {
                       e.isDir && !e.isLink && dragOver(ev, e.path)
                     }
                     onDrop={(ev) => e.isDir && !e.isLink && drop(ev, e.path)}
-                    onClick={(ev) =>
-                      choose(e, ev.ctrlKey || ev.metaKey, ev.shiftKey)
-                    }
-                    onDoubleClick={() => {
-                      if (e.isDir && !e.isLink) void b.navigate(e.path);
+                    onClick={(ev) => {
+                      if (ev.detail <= 1)
+                        choose(e, ev.ctrlKey || ev.metaKey, ev.shiftKey);
+                    }}
+                    onDoubleClick={(ev) => {
+                      ev.preventDefault();
+                      ev.stopPropagation();
+                      if (e.isDir && !e.isLink && !b.busy)
+                        void b.navigate(e.path);
                     }}
                     title={`${e.path}${e.isLink ? ` — ${ft(lang, "link")}` : ""}`}
                     className={cn(
@@ -727,6 +697,20 @@ export function FilePane(props: {
         </span>
         {props.footer}
       </div>
+      {directoryPickerOpen && b.listing && (
+        <DirectoryPicker
+          key={b.listing.sessionId}
+          language={lang}
+          hostId={props.hostId}
+          hostName={host?.name || host?.sshHost || ft(lang, "local")}
+          listing={b.listing}
+          onClose={closeDirectoryPicker}
+          onChoose={(path) => {
+            setDirectoryPickerOpen(false);
+            void b.navigate(path);
+          }}
+        />
+      )}
       {passwordOpen && (
         <InputPasswordDialog
           language={lang}

@@ -2,50 +2,44 @@
 
 **English** | [中文](README.zh.md)
 
-SSHDeck is a visual SSH management tool for Windows. Since v0.2.0 it is **host-centric**: each SSH server is a top-level item, with multiple port forwards (second level) nested beneath it, plus actions like sending commands, opening a terminal, and uploading keys.
+SSHDeck is a Windows app for managing SSH connections, port forwarding, and file transfers in one place.
 
 ## Screenshots
 
-Click either preview to open the original 1440×900 image.
+Click an image to view it at full size. Screenshots show the 0.4 preview.
+
+### File Transfer
+
+[![SSHDeck English interface — File Transfer](docs/Pictures/preview-en-files.jpg)](docs/Pictures/preview-en-files.jpg)
+
+<details>
+<summary>Folder picker and history</summary>
+
+[![SSHDeck English interface — Folder Picker](docs/Pictures/preview-en-folders.jpg)](docs/Pictures/preview-en-folders.jpg)
+
+</details>
 
 ### Remote Connections
 
-[![SSHDeck English interface — Remote Connections](docs/Pictures/preview-en-remote.png)](docs/Pictures/preview-en-remote.png)
+[![SSHDeck English interface — Remote Connections](docs/Pictures/preview-en-remote.jpg)](docs/Pictures/preview-en-remote.jpg)
 
 ### Port Forwarding
 
-[![SSHDeck English interface — Port Forwarding](docs/Pictures/preview-en-forwarding.png)](docs/Pictures/preview-en-forwarding.png)
+[![SSHDeck English interface — Port Forwarding](docs/Pictures/preview-en-forwarding.jpg)](docs/Pictures/preview-en-forwarding.jpg)
 
 ## Features
 
-- **Host-centric, two-level structure**: a host (connection parameters) is the top level, and a port forward (bind/target parameters) is the second level — click a host to expand it.
-- Supports Local, Remote, and Dynamic SOCKS forwarding modes.
-- Each forward connects/disconnects independently; you can disconnect a whole host or everything, with keep-alive auto-reconnect.
-- **Dedicated Remote Connections and Port Forwarding pages**: both pages are grouped by host. Remote Connections centralizes host creation, editing, deletion, pinning, import/export, and historical remote paths; Port Forwarding focuses only on current forwarding configuration and connection controls.
-- **Open in browser**: a running forward can be opened in your default browser at its listening port (`http://<bind host>:<local port>`, with `0.0.0.0` treated as `127.0.0.1`) — available on both the Home and Port Forwarding pages; most useful for Local forwards.
-- **File transfer**: a dedicated two-pane SFTP browser for local and remote folders, with expandable directories, multiple selection, drag and drop, recursive copies, and existing-file policies. A background queue shows progress, speed and ETA, with cancellation and retry. Distribution mode sends selected files to multiple recipients, each with its own destination folder.
-- **Direct server transfers**: manually enable when both endpoints are remote to keep file contents off this computer. The source needs OpenSSH `sftp`, passwordless access using its own keys or SSH agent, and a trusted destination host key. Local credentials and jump-host settings are not copied to the source. Progress is estimated from the destination temporary file size. Otherwise, files stream through this computer without a full local temporary copy. Symbolic links and special files are not copied yet; replacing remote files requires the OpenSSH `posix-rename` extension so existing files remain intact until the copy completes.
-- **Send command**: run a single command on the host over SSH, with output shown in a dialog; works passwordless or with a one-time password. Network waits run in the background and can be cancelled, with a 120-second timeout and bounded output. Use a terminal for long-running tasks.
-- **Open terminal**: launches an external PowerShell window already connected to the server over SSH, with Tab completion.
-- **Open in VS Code**: the Remote Connections page reads VS Code Remote-SSH history (preferring the extension's freshest list), matches folders to each host by IP, and lets you reopen a path in VS Code or a terminal. You can also connect directly or enter a remote path manually; `~` and relative paths resolve against the remote home directory. VS Code and the Remote-SSH extension are detected automatically.
-- **Upload key**: writes your local public key into the remote `authorized_keys` for passwordless login (it first checks whether passwordless access already works).
-- **Jump host (ProxyJump)**: a host can specify a jump host to connect through another machine (optional).
-- **Import / export hosts**: import from an exported file or your local `~/.ssh/config`; export to a file (with forwards and ports, re-importable) or write into `~/.ssh/config` (only the ssh-resolvable parts). Deduplicated by host IP — on conflict, choose "Overwrite all" or "Import non-duplicates only".
-- **Config edits take effect immediately**: changing a host's IP or user restarts that host's running forwards; changing a forward's ip / port disconnects and reconnects just that forward.
-- The host list supports **pinning** and is sorted by last modified time, newest first.
-- **Automatic local-port fallback**: on connect, if the configured local port is already in use, it auto-increments (+1) to the first free port and listens there; the Home page and "Open in browser" show the actual port. It only errors if a whole range from that port is occupied (and then names the forward or process, with PID).
-- Authentication is detected automatically on connect: passwordless if possible, otherwise a password prompt appears (passwords are never written to config).
-- If the remote host key changes, a dialog warns you so you can verify the fingerprint before deciding to trust the new key and retry.
-- The Home page is a lightweight dashboard: current connections are grouped by host, each forward can be disconnected individually, and there is a "New" shortcut; pinned hosts provide quick access to Remote Connections, while full logs live on a separate Logs page.
-- New forwards default to "keep connected" off; once enabled, saving connects automatically and caches the password for reconnects.
-- The Port Forwarding page returns to Home after 3 minutes of inactivity.
-- Log levels: Debug, Info, Warning, Error.
-- Dark / light themes and Chinese / English UI; **light by default**, and the settings options follow the UI language.
-- On startup it checks whether the OpenSSH client is installed; if not, a dialog offers one-click install (admin rights, downloaded from Windows Update).
-- On exit, it cleans up the SSH forward processes it started; connection processes run in the background without extra terminal windows.
-- **In-app updates**: Settings → Software Update checks GitHub Releases and installs a newer signed build in place (with a restart), so you don't have to download the installer manually. Turn on **Automatic updates** to have updates install on startup; leave it off and a small notice appears on the main screen when one is available.
+- **Manage your servers** — save and pin hosts, use jump hosts, and import or export SSH configurations.
+- **Forward ports** — local, reverse, and SOCKS forwarding, with automatic reconnect and one-click browser access.
+- **Transfer files** — browse two folders side by side, choose from directory trees or history, and copy files or folders with multiple selection and drag and drop.
+- **Distribute to multiple hosts** — choose recipients and destination folders; optionally send directly between servers without routing file contents through your computer.
+- **Open your workspace** — choose a remote folder from the tree or history, open it in a terminal or VS Code, run commands, and set up key-based login.
+- **Track activity** — view connections, transfer progress and logs, and cancel or retry transfers as needed.
+- **Make it yours** — light/dark themes, Chinese/English, and in-app updates with Stable and Preview channels.
 
 ## Download & Run
+
+File transfer and the new folder picker are available in the [0.4 preview](https://github.com/Trilives/sshdeck/releases/tag/v0.4.0-beta.2). Choose the Preview update channel to try them in an installed edition.
 
 Download `v0.3.1` from GitHub Releases:
 
@@ -72,6 +66,17 @@ ssh -V
 2. Go to Port Forwarding, expand the host, click "New Forward", and fill in the bind and target parameters.
 3. Click "Connect" on the forward. The app detects the auth method automatically: it connects directly when passwordless, or pops up a password prompt when needed.
 4. Use the Home page to watch current connections and key events, and the Logs page for the full runtime log.
+
+In **Remote Connections**, expand a host and click **Choose folder** to browse its directories or history. Confirm a folder, then open it with **Terminal** or **VS Code**.
+
+## File Transfer
+
+1. Open **File Transfer** and choose a computer or saved server on each side.
+2. Click a path bar to open the folder picker. Expand the tree or choose a history entry, then click **Use this folder**.
+3. Select files or folders and click Send, or drag them into the other pane. Confirm the destination and how to handle existing files.
+4. Enable **Distribute** for multiple recipients. For two remote endpoints, **Bypass this computer** is available in the transfer confirmation dialog.
+
+Direct transfers require `sftp` on the source server, passwordless access to the destination, and a trusted destination host key. Otherwise, leave the option off to transfer through your computer. Symbolic links and special files are not copied yet; remote overwrite requires the OpenSSH `posix-rename` extension. The portable edition updates by downloading a newer ZIP.
 
 ## Common Example
 

@@ -33,9 +33,10 @@ import type {
 } from "../files/types";
 
 interface Pending {
-  requests: Omit<TransferRequest, "conflict">[];
+  requests: Omit<TransferRequest, "conflict" | "direct">[];
   sources: string[];
   targetNames: string[];
+  canBypass: boolean;
 }
 function stored(key: string) {
   try {
@@ -130,14 +131,6 @@ export function FileTransferPage({
       }),
     [],
   );
-  const directAvailable =
-    !!leftId &&
-    (distribution
-      ? selectedRecipients.length > 0 && selectedRecipients.every(Boolean)
-      : !!rightId);
-  useEffect(() => {
-    if (!directAvailable) setDirect(false);
-  }, [directAvailable]);
   useEffect(() => {
     if (!visited) return;
     let disposed = false;
@@ -211,7 +204,12 @@ export function FileTransferPage({
       setError(ft(lang, "invalidSelection"));
       return;
     }
-    let targets: { sessionId: string; path: string; name: string }[] = [];
+    let targets: {
+      sessionId: string;
+      path: string;
+      name: string;
+      remote: boolean;
+    }[] = [];
     if (distribution && source === "left") {
       if (!selectedRecipients.length) {
         setError(ft(lang, "noRecipients"));
@@ -227,6 +225,7 @@ export function FileTransferPage({
           sessionId: r.sessionId,
           path: r.path,
           name: targetName(id),
+          remote: !!id,
         });
       }
     } else {
@@ -239,19 +238,23 @@ export function FileTransferPage({
           sessionId: to.listing.sessionId,
           path: destination || to.listing.path,
           name: targetName(source === "left" ? rightId : leftId),
+          remote: !!(source === "left" ? rightId : leftId),
         },
       ];
     }
+    setDirect(false);
     setPending({
       requests: targets.map((t) => ({
         sourceSession: from.listing!.sessionId,
         targetSession: t.sessionId,
         paths: chosen,
         destination: t.path,
-        direct: direct && directAvailable,
       })),
       sources: chosen,
       targetNames: targets.map((t) => t.name),
+      canBypass:
+        !!(source === "left" ? leftId : rightId) &&
+        targets.every((t) => t.remote),
     });
   }
   function dropped(side: "left" | "right", drop: FileDrop, path: string) {
@@ -271,7 +274,11 @@ export function FileTransferPage({
     const failures: string[] = [];
     try {
       for (let i = 0; i < pending.requests.length; i++) {
-        const request = { ...pending.requests[i], conflict };
+        const request = {
+          ...pending.requests[i],
+          conflict,
+          direct: direct && pending.canBypass,
+        };
         try {
           const job = await filesApi.start(request);
           requests.current.set(job.id, request);
@@ -340,23 +347,6 @@ export function FileTransferPage({
         </div>
         <div className="flex items-center gap-2">
           <button
-            type="button"
-            aria-pressed={direct}
-            disabled={!directAvailable}
-            onClick={() => setDirect((v) => !v)}
-            title={ft(lang, directAvailable ? "directHint" : "directDisabled")}
-            className={cn(
-              "flex cursor-pointer items-center gap-2 rounded-xl border px-3 py-2 text-xs transition",
-              direct
-                ? "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950/30 dark:text-emerald-300"
-                : "border-slate-200 text-slate-500 dark:border-slate-800 dark:text-slate-400",
-              !directAvailable && "cursor-not-allowed opacity-40",
-            )}
-          >
-            <Network size={13} />
-            {ft(lang, "direct")}
-          </button>
-          <button
             aria-pressed={distribution}
             className={cn(
               "flex items-center gap-2 rounded-xl border px-3 py-2 text-xs transition",
@@ -371,17 +361,6 @@ export function FileTransferPage({
           </button>
         </div>
       </header>
-      <div
-        className={cn(
-          "flex shrink-0 items-start gap-2 rounded-xl px-3 py-2 text-[11px] leading-5",
-          direct
-            ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/25 dark:text-emerald-300"
-            : "bg-slate-100/80 text-slate-400 dark:bg-slate-900/60",
-        )}
-      >
-        <Info size={13} className="mt-0.5 shrink-0" />
-        <p>{ft(lang, direct ? "directHint" : "relayHint")}</p>
-      </div>
       {error && (
         <div className="flex shrink-0 items-start gap-2 rounded-xl bg-rose-50 px-3 py-2 text-xs text-rose-600 dark:bg-rose-950/25 dark:text-rose-300">
           <p className="max-h-24 min-w-0 flex-1 overflow-auto whitespace-pre-wrap break-words">
@@ -546,10 +525,33 @@ export function FileTransferPage({
               <p className="mt-3 text-[10px] text-blue-500">
                 {ft(
                   lang,
-                  pending.requests[0]?.direct ? "directBadge" : "relayBadge",
+                  direct && pending.canBypass ? "directBadge" : "relayBadge",
                 )}
               </p>
             </div>
+            {pending.canBypass && (
+              <div className="mb-4 rounded-xl border border-slate-200 p-3 dark:border-slate-800">
+                <button
+                  type="button"
+                  aria-pressed={direct}
+                  disabled={submitting}
+                  onClick={() => setDirect((v) => !v)}
+                  className={cn(
+                    "flex items-center gap-2 rounded-lg border px-3 py-2 text-xs transition",
+                    direct
+                      ? "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950/30 dark:text-emerald-300"
+                      : "border-slate-200 text-slate-500 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-900",
+                  )}
+                >
+                  <Network size={14} />
+                  {ft(lang, "direct")}
+                </button>
+                <p className="mt-2 flex items-start gap-1.5 text-[11px] leading-5 text-slate-400">
+                  <Info size={12} className="mt-1 shrink-0" />
+                  {ft(lang, direct ? "directHint" : "relayHint")}
+                </p>
+              </div>
+            )}
             <label className="mb-5 flex items-center justify-between gap-3 text-xs">
               <span>{ft(lang, "conflict")}</span>
               <select

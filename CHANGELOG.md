@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.4.0-beta.2
+
+**Changed**
+- Choose folders in a single dialog with an expandable root-to-folder tree, recent folders, and existing remote connection history. Navigation only applies after confirmation.
+- Use the same folder picker in Remote Connections to choose the working directory for SSH terminals and VS Code.
+- Move the direct-transfer toggle into the transfer confirmation dialog and rename it to **Bypass this computer / 不经过本机**.
+- Refresh English/Chinese README screenshots and shorten Features to focus on everyday use.
+
+**Fixed**
+- Ignore repeated activation of ordinary files, keep directory double-click navigation, and reject non-directory browse requests without losing the file connection.
+
 ## 0.4.0-beta.1
 
 **Added**

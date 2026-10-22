@@ -193,6 +193,12 @@ impl FileSystem {
     }
     pub fn listing(&mut self, session_id: String, path: &str) -> Result<Listing, String> {
         let path = self.realpath(path)?;
+        if !self
+            .stat(&path)?
+            .is_some_and(|attrs| attrs.is_dir() && !attrs.is_link())
+        {
+            return Err(format!("Not a directory / 不是目录: {path}"));
+        }
         let entries = self.list(&path)?;
         let roots = if self.is_local() {
             ('A'..='Z')
@@ -310,6 +316,28 @@ impl FileSystem {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn listing_a_file_returns_error_and_keeps_session_usable() {
+        let root = std::env::temp_dir().join(format!("sshdeck-listing-{}", uuid::Uuid::new_v4()));
+        fs::create_dir_all(&root).unwrap();
+        let file = root.join("example.txt");
+        fs::write(&file, "example").unwrap();
+        let mut browser = FileSystem::Local;
+        assert!(browser
+            .listing("test".into(), file.to_str().unwrap())
+            .err()
+            .unwrap()
+            .contains("Not a directory"));
+        assert_eq!(
+            browser
+                .listing("test".into(), root.to_str().unwrap())
+                .unwrap()
+                .entries
+                .len(),
+            1
+        );
+        fs::remove_dir_all(root).unwrap();
+    }
     #[test]
     fn rejects_local_path_injection_and_devices() {
         for name in [
