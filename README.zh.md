@@ -6,26 +6,26 @@ SSHDeck 是一个面向 Windows 的 SSH 管理工具，在一个界面里管理�
 
 ## 界面预览
 
-点击图片可查看原图。截图展示 0.4 版本界面。
+点击图片可查看 3200 × 2000 高清 PNG 原图。截图展示 0.4 版本界面，使用示例主机和文件。
 
-### 文件传输
+### 远程连接
 
-[![SSHDeck 中文界面——文件传输](docs/Pictures/preview-zh-files.jpg)](docs/Pictures/preview-zh-files.jpg)
+[![SSHDeck 中文界面——远程连接](docs/Pictures/remote-zh.png)](docs/Pictures/remote-zh.png)
 
 <details>
 <summary>目录选择与历史记录</summary>
 
-[![SSHDeck 中文界面——目录选择](docs/Pictures/preview-zh-folders.jpg)](docs/Pictures/preview-zh-folders.jpg)
+[![SSHDeck 中文界面——目录选择](docs/Pictures/folder-picker-zh.png)](docs/Pictures/folder-picker-zh.png)
 
 </details>
 
-### 远程连接
+### 文件传输
 
-[![SSHDeck 中文界面——远程连接](docs/Pictures/preview-zh-remote.jpg)](docs/Pictures/preview-zh-remote.jpg)
+[![SSHDeck 中文界面——文件传输](docs/Pictures/file-transfer-zh.png)](docs/Pictures/file-transfer-zh.png)
 
 ### 端口转发
 
-[![SSHDeck 中文界面——端口转发](docs/Pictures/preview-zh-forwarding.jpg)](docs/Pictures/preview-zh-forwarding.jpg)
+[![SSHDeck 中文界面——端口转发](docs/Pictures/port-forwarding-zh.png)](docs/Pictures/port-forwarding-zh.png)
 
 ## 主要功能
 

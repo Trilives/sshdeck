@@ -6,26 +6,26 @@ SSHDeck is a Windows app for managing SSH connections, port forwarding, and file
 
 ## Screenshots
 
-Click an image to view it at full size. Screenshots show the 0.4 interface.
+Click an image to open the full-resolution 3200 × 2000 PNG. Screenshots show the 0.4 interface with sample hosts and files.
 
-### File Transfer
+### Remote Connections
 
-[![SSHDeck English interface — File Transfer](docs/Pictures/preview-en-files.jpg)](docs/Pictures/preview-en-files.jpg)
+[![SSHDeck English interface — Remote Connections](docs/Pictures/remote-en.png)](docs/Pictures/remote-en.png)
 
 <details>
 <summary>Folder picker and history</summary>
 
-[![SSHDeck English interface — Folder Picker](docs/Pictures/preview-en-folders.jpg)](docs/Pictures/preview-en-folders.jpg)
+[![SSHDeck English interface — Folder Picker](docs/Pictures/folder-picker-en.png)](docs/Pictures/folder-picker-en.png)
 
 </details>
 
-### Remote Connections
+### File Transfer
 
-[![SSHDeck English interface — Remote Connections](docs/Pictures/preview-en-remote.jpg)](docs/Pictures/preview-en-remote.jpg)
+[![SSHDeck English interface — File Transfer](docs/Pictures/file-transfer-en.png)](docs/Pictures/file-transfer-en.png)
 
 ### Port Forwarding
 
-[![SSHDeck English interface — Port Forwarding](docs/Pictures/preview-en-forwarding.jpg)](docs/Pictures/preview-en-forwarding.jpg)
+[![SSHDeck English interface — Port Forwarding](docs/Pictures/port-forwarding-en.png)](docs/Pictures/port-forwarding-en.png)
 
 ## Features
 
