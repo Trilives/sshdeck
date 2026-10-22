@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.4.0-beta.3
+## 0.4.0-beta.4
 
 **Fixed**
 - Fix a deferred scroll update that could clear the entire UI when browsing directories or switching file-transfer hosts.

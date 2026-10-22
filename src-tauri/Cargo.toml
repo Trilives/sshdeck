@@ -1,6 +1,6 @@
 [package]
 name = "sshdeck"
-version = "0.4.0-beta.3"
+version = "0.4.0-beta.4"
 description = "A modern visual SSH port forwarding manager for Windows."
 authors = ["Trlives"]
 edition = "2021"
