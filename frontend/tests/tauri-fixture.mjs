@@ -39,23 +39,32 @@ export function installTauriFixture() {
     const nested = path.endsWith("Projects");
     const entry = (name, isDir = false) => ({
       name,
-      path: `${path}${remote ? "/" : "\\"}${name}`,
+      path: `${path.replace(/[\\/]+$/, "")}${remote ? "/" : "\\"}${name}`,
       isDir,
       isFile: !isDir,
       isLink: false,
       size: isDir ? 0 : 5,
       modified: 0,
     });
-    const entries = path.endsWith(".config")
-      ? [entry(".credentials"), entry("settings.json")]
-      : nested
-        ? [entry("README.md")]
-        : [
-            entry("Projects", true),
-            entry(".config", true),
-            entry(".env"),
-            ...Array.from({ length: 250 }, (_, i) => entry(`file${i}.txt`)),
-          ];
+    const entries =
+      path === "C:\\"
+        ? [entry("Regression", true)]
+        : path === "/"
+          ? [entry("srv", true)]
+          : path === "/srv"
+            ? [entry(sessions.get(sessionId), true)]
+            : path.endsWith(".config")
+              ? [entry(".credentials"), entry("settings.json")]
+              : nested
+                ? [entry("README.md")]
+                : [
+                    entry("Projects", true),
+                    entry(".config", true),
+                    entry(".env"),
+                    ...Array.from({ length: 250 }, (_, i) =>
+                      entry(`file${i}.txt`),
+                    ),
+                  ];
     if (fixture.breakNextListing) {
       fixture.breakNextListing = false;
       entries[0].name = {}; // Invalid React child exercises the UI error boundary.
@@ -96,7 +105,7 @@ export function installTauriFixture() {
         case "check_ssh":
           return true;
         case "plugin:app|version":
-          return "0.4.1-beta.1";
+          return "0.4.1-beta.2";
         case "plugin:event|listen": {
           const id = ++sequence;
           listeners.set(id, args);

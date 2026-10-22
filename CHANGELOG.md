@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.4.1-beta.2
+
+**Changed**
+- Hide dotfiles and hidden folders by default in file-transfer panes while keeping the labeled visibility toggle.
+- Add the same toggle to folder pickers, including directory trees and history, with hidden folders off by default each time the picker opens.
+
+**Documentation**
+- Update the guide and screenshots to match the visibility controls and defaults.
+
 ## 0.4.1-beta.1
 
 **Fixed**

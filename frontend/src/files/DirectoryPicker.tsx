@@ -4,6 +4,8 @@ import {
   ChevronDown,
   ChevronRight,
   Clock3,
+  Eye,
+  EyeOff,
   Folder,
   HardDrive,
   LoaderCircle,
@@ -69,6 +71,7 @@ export function DirectoryPicker({
   );
   const [historyBusy, setHistoryBusy] = useState(false);
   const [query, setQuery] = useState("");
+  const [hidden, setHidden] = useState(false);
   const [manual, setManual] = useState(false);
   const [manualPath, setManualPath] = useState(listing.path);
   const [scrollTop, setScrollTop] = useState(0);
@@ -255,6 +258,7 @@ export function DirectoryPicker({
     }[] = [];
     const walk = (node: Node, depth: number, root = false) => {
       if (depth > 128) return;
+      if (!root && !hidden && node.name.startsWith(".")) return;
       result.push({ node, depth, root, error: cache[node.path]?.error });
       if (!expanded.has(node.path)) return;
       let children = cache[node.path]?.entries;
@@ -270,7 +274,7 @@ export function DirectoryPicker({
           r.node.name.toLocaleLowerCase().includes(query.toLocaleLowerCase()),
         )
       : result;
-  }, [roots, cache, expanded, spine, query]);
+  }, [roots, cache, expanded, spine, query, hidden]);
   const selectedIndex = rows.findIndex((r) => r.node.path === selected);
   useEffect(() => {
     if (tab !== "browse" || !scroll.current || selectedIndex < 0) return;
@@ -284,8 +288,13 @@ export function DirectoryPicker({
     rows.length,
     start + Math.ceil(viewportHeight / 36) + 12,
   );
-  const history = visits.filter((v) =>
-    v.path.toLocaleLowerCase().includes(query.toLocaleLowerCase()),
+  const history = visits.filter(
+    (v) =>
+      (hidden ||
+        !pathCrumbs(v.path)
+          .slice(1)
+          .some((c) => c.label.startsWith("."))) &&
+      v.path.toLocaleLowerCase().includes(query.toLocaleLowerCase()),
   );
 
   return (
@@ -358,6 +367,24 @@ export function DirectoryPicker({
               }}
             />
           </label>
+          <button
+            className={cn(
+              "flex h-8 shrink-0 items-center gap-1.5 rounded-lg px-2 text-[11px] text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800",
+              hidden &&
+                "bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-300",
+            )}
+            title={ft(lang, "hidden")}
+            aria-label={ft(lang, "hidden")}
+            aria-pressed={hidden}
+            onClick={() => {
+              setHidden((v) => !v);
+              setScrollTop(0);
+              if (scroll.current) scroll.current.scrollTop = 0;
+            }}
+          >
+            {hidden ? <Eye size={15} /> : <EyeOff size={15} />}
+            <span>{ft(lang, "hiddenFiles")}</span>
+          </button>
         </div>
         <div
           ref={scroll}

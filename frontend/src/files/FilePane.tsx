@@ -66,7 +66,7 @@ export function FilePane(props: {
   const [children, setChildren] = useState<Record<string, FileEntry[]>>({});
   const [loadingPaths, setLoadingPaths] = useState<Set<string>>(new Set());
   const [filter, setFilter] = useState("");
-  const [hidden, setHidden] = useState(true);
+  const [hidden, setHidden] = useState(false);
   const [sort, setSort] = useState<"name" | "size" | "modified">("name");
   const [descending, setDescending] = useState(false);
   const [directoryPickerOpen, setDirectoryPickerOpen] = useState(false);

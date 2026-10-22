@@ -201,7 +201,7 @@ export function GuidePage(props: { language: Language }) {
         ],
         [
           "浏览与勾选",
-          "双击文件夹进入，点击小箭头展开目录树；点击路径栏可打开目录选择器，使用目录树或历史目录。默认显示 . 开头的隐藏文件和文件夹，工具栏「隐藏文件」可切换显示。勾选框、Ctrl / Shift 和全选可用于多选；双击普通文件不会进入目录。",
+          "双击文件夹进入，点击小箭头展开目录树；点击路径栏可打开目录选择器，使用目录树或历史目录。默认不显示 . 开头的隐藏文件和文件夹，文件面板和目录选择弹窗均可点击「隐藏文件」按钮显示。勾选框、Ctrl / Shift 和全选可用于多选；双击普通文件不会进入目录。",
         ],
         [
           "发送与同名文件",
@@ -231,7 +231,7 @@ export function GuidePage(props: { language: Language }) {
         ],
         [
           "Browse and select",
-          "Double-click folders to enter, or use the arrows to expand the tree. Click a path bar for the folder picker and history. Dotfiles and hidden folders are visible by default; toggle Hidden files in the toolbar. Use checkboxes, Ctrl / Shift or Select all for multiple selection. Double-clicking a regular file does not open a folder.",
+          "Double-click folders to enter, or use the arrows to expand the tree. Click a path bar for the folder picker and history. Dotfiles and hidden folders are hidden by default; use Hidden files in either the file pane or folder picker to show them. Use checkboxes, Ctrl / Shift or Select all for multiple selection. Double-clicking a regular file does not open a folder.",
         ],
         [
           "Send and handle conflicts",

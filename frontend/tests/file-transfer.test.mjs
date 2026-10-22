@@ -486,7 +486,7 @@ test("a late connection cannot replace the newly chosen host", () =>
     assert.deepEqual(errors, []);
   }));
 
-test("local and remote panes show, select and browse dotfiles without the folder dialog", () =>
+test("local and remote panes hide dotfiles by default and can show, select and browse them", () =>
   withPage(async (page, errors) => {
     for (const host of ["", "ready"]) {
       if (host) await chooseHost(page, host);
@@ -500,9 +500,12 @@ test("local and remote panes show, select and browse dotfiles without the folder
         .getByRole("textbox", { name: "筛选当前目录", exact: true })
         .first();
       const pane = filter.locator("xpath=../../..");
-      assert.equal(await toggle.getAttribute("aria-pressed"), "true");
+      assert.equal(await toggle.getAttribute("aria-pressed"), "false");
       await filter.fill(".env");
       const file = pane.getByTitle(`${root}${separator}.env`, { exact: true });
+      assert.equal(await file.count(), 0);
+      await toggle.click();
+      assert.equal(await toggle.getAttribute("aria-pressed"), "true");
       await file.waitFor();
       await file.getByRole("checkbox").check();
       assert.ok(await file.getByRole("checkbox").isChecked());
@@ -521,6 +524,70 @@ test("local and remote panes show, select and browse dotfiles without the folder
         })
         .waitFor();
       assert.equal(await page.getByRole("dialog").count(), 0);
+      await toggle.click();
+    }
+    assert.deepEqual(errors, []);
+  }));
+
+test("directory pickers default to hiding dotfolders in the tree and history", () =>
+  withPage(async (page, errors) => {
+    for (const host of ["", "ready"]) {
+      if (host) await chooseHost(page, host);
+      const root = host ? "/srv/ready" : "C:\\Regression";
+      const separator = host ? "/" : "\\";
+      const hiddenPath = `${root}${separator}.config`;
+      const hiddenVisit = `${hiddenPath}${separator}Projects`;
+      const visibleVisit = `${root}${separator}Projects`;
+      await page.evaluate(
+        ({ host, hiddenVisit, visibleVisit }) => {
+          localStorage.setItem(
+            `sshdeck.file.recent.${host || "local"}`,
+            JSON.stringify(
+              [hiddenVisit, visibleVisit].map((path) => ({
+                path,
+                visitedAt: Date.now(),
+              })),
+            ),
+          );
+        },
+        { host, hiddenVisit, visibleVisit },
+      );
+      const open = page
+        .getByRole("button", { name: "选择目录", exact: true })
+        .first();
+      await open.click();
+      const dialog = page.getByRole("dialog", { name: /选择目录/ });
+      const toggle = dialog.getByRole("button", {
+        name: "显示隐藏文件",
+        exact: true,
+      });
+      const folder = dialog.getByTitle(hiddenPath, { exact: true });
+      assert.equal(await toggle.getAttribute("aria-pressed"), "false");
+      assert.equal(await folder.count(), 0);
+      await toggle.click();
+      await folder.waitFor();
+      await toggle.click();
+      await folder.waitFor({ state: "hidden" });
+      await dialog.getByRole("tab", { name: "历史目录", exact: true }).click();
+      await dialog.getByTitle(visibleVisit, { exact: true }).waitFor();
+      assert.equal(
+        await dialog.getByTitle(hiddenVisit, { exact: true }).count(),
+        0,
+      );
+      await toggle.click();
+      await dialog.getByTitle(hiddenVisit, { exact: true }).waitFor();
+      await dialog.getByRole("button", { name: "取消", exact: true }).click();
+      await open.click();
+      assert.equal(await toggle.getAttribute("aria-pressed"), "false");
+      assert.equal(await folder.count(), 0);
+      await dialog.getByRole("button", { name: "取消", exact: true }).click();
+      assert.equal(
+        await page
+          .getByRole("button", { name: "显示隐藏文件", exact: true })
+          .first()
+          .getAttribute("aria-pressed"),
+        "false",
+      );
     }
     assert.deepEqual(errors, []);
   }));

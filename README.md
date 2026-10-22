@@ -74,7 +74,7 @@ In **Remote Connections**, expand a host and click **Choose folder** to browse i
 3. Select files or folders and click Send, or drag them into the other pane. Confirm the destination and how to handle existing files.
 4. Enable **Distribute** for multiple recipients. For two remote endpoints, **Bypass this computer** is available in the transfer confirmation dialog.
 
-Dotfiles and hidden folders are shown by default. Select, expand or open them directly in the file panes; use the **Hidden files** toolbar button to toggle visibility.
+Dotfiles and hidden folders are hidden by default. Use the **Hidden files** button in each file pane or folder picker to show them, including hidden folders in history.
 
 When authentication is needed, connect with a password or upload this computer's public key for future passwordless access. The key button at the top of each remote pane also opens these options. Both key upload and direct setup check existing passwordless access first and skip key changes when it already works.
 
