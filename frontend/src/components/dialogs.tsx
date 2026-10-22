@@ -1,3 +1,4 @@
+import { ModalOverlay } from "./ui/ModalOverlay";
 import { type ReactNode, useState } from "react";
 import { X } from "lucide-react";
 import { Button } from "./ui/button";
@@ -9,13 +10,13 @@ import type { CriticalErrorPayload, Forward, Host, Language, TunnelMode } from "
 
 function Modal(props: { children: ReactNode; maxWidth?: string }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/55 p-6 backdrop-blur-sm">
+    <ModalOverlay className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/55 p-6 backdrop-blur-sm">
       <Card
         className={`max-h-[calc(100vh-3rem)] w-full ${props.maxWidth ?? "max-w-xl"} overflow-auto border-blue-200 bg-white dark:border-blue-900 dark:bg-slate-950`}
       >
         {props.children}
       </Card>
-    </div>
+    </ModalOverlay>
   );
 }
 
@@ -231,7 +232,7 @@ export function InputPasswordDialog(props: {
 }) {
   const lang = props.language;
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-950/55 p-6 backdrop-blur-sm">
+    <ModalOverlay className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-950/55 p-6 backdrop-blur-sm">
       <Card className="w-full max-w-md border-blue-200 bg-white dark:border-blue-900 dark:bg-slate-950">
         <CardHeader>
           <CardTitle>{props.title}</CardTitle>
@@ -254,7 +255,7 @@ export function InputPasswordDialog(props: {
           </div>
         </div>
       </Card>
-    </div>
+    </ModalOverlay>
   );
 }
 
@@ -340,7 +341,7 @@ export function HostKeyChangedDialog(props: {
 }) {
   const lang = props.language;
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/55 p-6 backdrop-blur-sm">
+    <ModalOverlay className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/55 p-6 backdrop-blur-sm">
       <Card className="w-full max-w-lg border-amber-300 bg-white dark:border-amber-800 dark:bg-slate-950">
         <CardHeader>
           <CardTitle>⚠️ {t(lang, "hostKeyChangedTitle")}</CardTitle>
@@ -357,7 +358,7 @@ export function HostKeyChangedDialog(props: {
           </div>
         </div>
       </Card>
-    </div>
+    </ModalOverlay>
   );
 }
 
@@ -371,7 +372,7 @@ export function ConfirmDialog(props: {
 }) {
   const lang = props.language;
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-950/55 p-6 backdrop-blur-sm">
+    <ModalOverlay className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-950/55 p-6 backdrop-blur-sm">
       <Card className="w-full max-w-md border-rose-200 bg-white dark:border-rose-900 dark:bg-slate-950">
         <CardHeader>
           <CardTitle>{props.title}</CardTitle>
@@ -382,7 +383,7 @@ export function ConfirmDialog(props: {
           <Button variant="danger" onClick={props.onConfirm}>{props.confirmLabel}</Button>
         </div>
       </Card>
-    </div>
+    </ModalOverlay>
   );
 }
 
@@ -393,7 +394,7 @@ export function SshMissingDialog(props: {
 }) {
   const lang = props.language;
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/55 p-6 backdrop-blur-sm">
+    <ModalOverlay className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/55 p-6 backdrop-blur-sm">
       <Card className="w-full max-w-md border-amber-300 bg-white dark:border-amber-800 dark:bg-slate-950">
         <CardHeader>
           <CardTitle>⚠️ {t(lang, "sshMissingTitle")}</CardTitle>
@@ -404,7 +405,7 @@ export function SshMissingDialog(props: {
           <Button onClick={props.onInstall}>{t(lang, "install")}</Button>
         </div>
       </Card>
-    </div>
+    </ModalOverlay>
   );
 }
 
@@ -423,7 +424,7 @@ export function SelectHostsDialog(props: {
   const lang = props.language;
   const empty = props.items.length === 0;
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-950/55 p-6 backdrop-blur-sm">
+    <ModalOverlay className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-950/55 p-6 backdrop-blur-sm">
       <Card className="w-full max-w-lg border-blue-200 bg-white dark:border-blue-900 dark:bg-slate-950">
         <DialogHeader title={props.title} onClose={props.onCancel} />
         {empty ? (
@@ -462,7 +463,7 @@ export function SelectHostsDialog(props: {
           <Button onClick={props.onConfirm} disabled={empty || props.selected.size === 0}>{props.confirmLabel}</Button>
         </div>
       </Card>
-    </div>
+    </ModalOverlay>
   );
 }
 
@@ -476,7 +477,7 @@ export function ImportConflictDialog(props: {
 }) {
   const lang = props.language;
   return (
-    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-slate-950/55 p-6 backdrop-blur-sm">
+    <ModalOverlay className="fixed inset-0 z-[70] flex items-center justify-center bg-slate-950/55 p-6 backdrop-blur-sm">
       <Card className="w-full max-w-md border-amber-300 bg-white dark:border-amber-800 dark:bg-slate-950">
         <CardHeader>
           <CardTitle>⚠️ {t(lang, "importConflictTitle")}</CardTitle>
@@ -491,7 +492,7 @@ export function ImportConflictDialog(props: {
           <Button variant="danger" onClick={props.onOverwrite}>{t(lang, "overwriteAll")}</Button>
         </div>
       </Card>
-    </div>
+    </ModalOverlay>
   );
 }
 
@@ -502,7 +503,7 @@ export function ConnectionErrorDialog(props: {
 }) {
   const lang = props.language;
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/55 p-6 backdrop-blur-sm">
+    <ModalOverlay className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/55 p-6 backdrop-blur-sm">
       <Card className="w-full max-w-lg border-rose-200 bg-white dark:border-rose-900 dark:bg-slate-950">
         <CardHeader>
           <CardTitle>{t(lang, "connectFailedTitle")}</CardTitle>
@@ -515,7 +516,7 @@ export function ConnectionErrorDialog(props: {
           <Button onClick={props.onClose}>{t(lang, "close")}</Button>
         </div>
       </Card>
-    </div>
+    </ModalOverlay>
   );
 }
 
@@ -533,7 +534,7 @@ export function CloseBehaviorDialog(props: {
   const lang = props.language;
   const [remember, setRemember] = useState(false);
   return (
-    <div className="fixed inset-0 z-[80] flex items-center justify-center bg-slate-950/55 p-6 backdrop-blur-sm">
+    <ModalOverlay className="fixed inset-0 z-[80] flex items-center justify-center bg-slate-950/55 p-6 backdrop-blur-sm">
       <Card className="w-full max-w-md border-blue-200 bg-white dark:border-blue-900 dark:bg-slate-950">
         <CardHeader>
           <CardTitle>{t(lang, "closePromptTitle")}</CardTitle>
@@ -554,7 +555,7 @@ export function CloseBehaviorDialog(props: {
           <Button variant="danger" onClick={() => props.onExit(remember)}>{t(lang, "closePromptExit")}</Button>
         </div>
       </Card>
-    </div>
+    </ModalOverlay>
   );
 }
 
@@ -567,7 +568,7 @@ export function VscodeMissingDialog(props: {
   const title = props.kind === "vscode" ? t(lang, "vscodeMissingTitle") : t(lang, "vscodeRemoteSshMissingTitle");
   const desc = props.kind === "vscode" ? t(lang, "vscodeMissingDesc") : t(lang, "vscodeRemoteSshMissingDesc");
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-950/55 p-6 backdrop-blur-sm">
+    <ModalOverlay className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-950/55 p-6 backdrop-blur-sm">
       <Card className="w-full max-w-md border-amber-300 bg-white dark:border-amber-800 dark:bg-slate-950">
         <CardHeader>
           <CardTitle>⚠️ {title}</CardTitle>
@@ -577,7 +578,7 @@ export function VscodeMissingDialog(props: {
           <Button onClick={props.onClose}>{t(lang, "close")}</Button>
         </div>
       </Card>
-    </div>
+    </ModalOverlay>
   );
 }
 
@@ -588,7 +589,7 @@ export function CriticalErrorDialog(props: {
 }) {
   const lang = props.language;
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/55 p-6 backdrop-blur-sm">
+    <ModalOverlay className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/55 p-6 backdrop-blur-sm">
       <Card className="w-full max-w-lg border-rose-200 bg-white dark:border-rose-900 dark:bg-slate-950">
         <CardHeader>
           <CardTitle>{t(lang, "criticalTitle")}</CardTitle>
@@ -601,6 +602,6 @@ export function CriticalErrorDialog(props: {
           <Button onClick={props.onClose}>{t(lang, "close")}</Button>
         </div>
       </Card>
-    </div>
+    </ModalOverlay>
   );
 }

@@ -1,3 +1,4 @@
+import { ModalOverlay } from "../components/ui/ModalOverlay";
 import {
   useEffect,
   useCallback,
@@ -734,7 +735,7 @@ export function FilePane(props: {
         />
       )}
       {trustOpen && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-950/55 p-6 backdrop-blur-sm">
+        <ModalOverlay className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-950/55 p-6 backdrop-blur-sm">
           <div className="w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-6 shadow-xl dark:border-slate-700 dark:bg-slate-950">
             <h3 className="font-semibold">{ft(lang, "trustTitle")}</h3>
             <p className="mt-2 text-sm text-slate-400">
@@ -768,7 +769,7 @@ export function FilePane(props: {
               </Button>
             </div>
           </div>
-        </div>
+        </ModalOverlay>
       )}
     </div>
   );

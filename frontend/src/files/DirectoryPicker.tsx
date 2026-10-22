@@ -1,3 +1,4 @@
+import { ModalOverlay } from "../components/ui/ModalOverlay";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ChevronDown,
@@ -281,7 +282,7 @@ export function DirectoryPicker({
   );
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 p-6 backdrop-blur-sm">
+    <ModalOverlay className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 p-6 backdrop-blur-sm">
       <div
         ref={dialog}
         role="dialog"
@@ -530,6 +531,6 @@ export function DirectoryPicker({
           </div>
         </footer>
       </div>
-    </div>
+    </ModalOverlay>
   );
 }

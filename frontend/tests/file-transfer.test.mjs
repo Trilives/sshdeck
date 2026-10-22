@@ -90,6 +90,115 @@ async function rapidScroll(page) {
     });
 }
 
+async function openLongRemotePage(page) {
+  await page.getByRole("button", { name: "远程连接", exact: true }).click();
+  for (const id of ["ready", "refused", "password", "slow"]) {
+    await page
+      .getByRole("button", { name: new RegExp(`^Remote ${id} test@`) })
+      .click();
+  }
+  const scroller = page.locator("main > div > section");
+  assert.ok(
+    await scroller.evaluate((el) => el.scrollHeight > el.clientHeight * 1.5),
+  );
+  return scroller;
+}
+
+async function assertInViewport(page, locator) {
+  const rect = await locator.boundingBox();
+  assert.ok(rect, "dialog content is rendered");
+  const viewport = page.viewportSize();
+  assert.ok(
+    rect.x >= 0 &&
+      rect.y >= 0 &&
+      rect.x + rect.width <= viewport.width + 1 &&
+      rect.y + rect.height <= viewport.height + 1,
+    `content must fit in viewport: ${JSON.stringify(rect)} / ${JSON.stringify(viewport)}`,
+  );
+  return rect;
+}
+
+test("directory modal stays centered in the window on a long scrolled page", () =>
+  withPage(async (page, errors) => {
+    const scroller = await openLongRemotePage(page);
+    await page
+      .getByRole("button", { name: "选择目录", exact: true })
+      .last()
+      .click();
+    const confirm = page.getByRole("button", {
+      name: "使用此目录",
+      exact: true,
+    });
+    await confirm.waitFor();
+    assert.ok(
+      await scroller.evaluate((el) => el.scrollTop > 0),
+      "underlying page is scrolled",
+    );
+    const dialog = page.getByRole("dialog", { name: /选择目录/ });
+    for (const height of [800, 640]) {
+      await page.setViewportSize({ width: 1280, height });
+      const rect = await assertInViewport(page, dialog);
+      assert.ok(
+        Math.abs(rect.y + rect.height / 2 - height / 2) < 2,
+        "dialog is vertically centered in the window",
+      );
+      await assertInViewport(page, confirm);
+    }
+    await page
+      .getByRole("button", { name: "手动输入路径", exact: true })
+      .click();
+    await assertInViewport(page, confirm);
+    await scroller.evaluate((el) => {
+      el.scrollTop = 0;
+    });
+    await assertInViewport(page, dialog);
+    await page.getByRole("button", { name: "取消", exact: true }).click();
+    assert.deepEqual(errors, []);
+  }));
+
+test("long forms and stacked password dialogs fit a small window in dark mode", () =>
+  withPage(async (page, errors) => {
+    await page.setViewportSize({ width: 1280, height: 640 });
+    await openLongRemotePage(page);
+    await page.evaluate(() => document.documentElement.classList.add("dark"));
+    await page
+      .getByRole("button", { name: "编辑主机", exact: true })
+      .last()
+      .click();
+    const form = page.locator("[data-modal-overlay] > *").last();
+    const rect = await assertInViewport(page, form);
+    assert.ok(Math.abs(rect.y + rect.height / 2 - 320) < 2);
+    assert.equal(
+      await form.evaluate((el) => getComputedStyle(el).backgroundColor),
+      "rgb(2, 6, 23)",
+    );
+    const save = page.getByRole("button", { name: "保存", exact: true });
+    await save.scrollIntoViewIfNeeded();
+    await assertInViewport(page, save);
+    await page.getByRole("button", { name: "取消", exact: true }).click();
+
+    const passwordHost = page
+      .getByRole("button", { name: /^Remote password test@/ })
+      .locator("..")
+      .locator("..");
+    await passwordHost
+      .getByRole("button", { name: "选择目录", exact: true })
+      .click();
+    const input = page.locator('input[type="password"]');
+    await input.waitFor();
+    await assertInViewport(page, input);
+    assert.equal(await page.locator("[data-modal-overlay]").count(), 2);
+    const passwordDialog = page.locator("[data-modal-overlay] > *").last();
+    const passwordRect = await assertInViewport(page, passwordDialog);
+    assert.ok(Math.abs(passwordRect.y + passwordRect.height / 2 - 320) < 2);
+    await page.getByRole("button", { name: "取消", exact: true }).click();
+    await page
+      .locator("[data-modal-overlay]")
+      .getByRole("button", { name: "关闭", exact: true })
+      .click();
+    assert.deepEqual(errors, []);
+  }));
+
 test("scrolling then switching hosts keeps the page mounted", () =>
   withPage(async (page, errors) => {
     await rapidScroll(page);

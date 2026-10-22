@@ -1,3 +1,4 @@
+import { ModalOverlay } from "../components/ui/ModalOverlay";
 import { LoaderCircle, X } from "lucide-react";
 import type { Host, Language } from "../types";
 import { DirectoryPicker } from "./DirectoryPicker";
@@ -34,7 +35,7 @@ export function RemoteDirectoryPicker({
       />
     );
   return (
-    <div
+    <ModalOverlay
       className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 p-6 backdrop-blur-sm"
       onKeyDown={(e) => {
         if (e.key === "Escape") onClose();
@@ -75,6 +76,6 @@ export function RemoteDirectoryPicker({
           </div>
         )}
       </div>
-    </div>
+    </ModalOverlay>
   );
 }

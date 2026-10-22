@@ -1,3 +1,4 @@
+import { ModalOverlay } from "../ui/ModalOverlay";
 import { useEffect, useState } from "react";
 import { Code2, FolderOpen, PenLine, Terminal, X } from "lucide-react";
 import { t } from "../../i18n";
@@ -34,7 +35,7 @@ export function RemoteConnectionDialog(props: {
   }, [path, props]);
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-950/55 p-6 backdrop-blur-sm">
+    <ModalOverlay className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-950/55 p-6 backdrop-blur-sm">
       <Card className="w-full max-w-lg border-blue-200 bg-white dark:border-blue-900 dark:bg-slate-950">
         <CardHeader className="flex flex-row items-start justify-between gap-4">
           <div>
@@ -78,6 +79,6 @@ export function RemoteConnectionDialog(props: {
           <Button variant="secondary" onClick={props.onCancel}>{t(lang, "cancel")}</Button>
         </div>
       </Card>
-    </div>
+    </ModalOverlay>
   );
 }

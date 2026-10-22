@@ -1,3 +1,4 @@
+import { ModalOverlay } from "../components/ui/ModalOverlay";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ArrowLeft,
@@ -495,7 +496,7 @@ export function FileTransferPage({
         error={queueError}
       />
       {pending && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 p-6 backdrop-blur-sm">
+        <ModalOverlay className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 p-6 backdrop-blur-sm">
           <div
             role="dialog"
             aria-modal="true"
@@ -582,7 +583,7 @@ export function FileTransferPage({
               </Button>
             </div>
           </div>
-        </div>
+        </ModalOverlay>
       )}
     </div>
   );

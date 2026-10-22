@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.4.0-beta.5
+
+**Fixed**
+- Anchor all dialogs to the window viewport so long or scrolled pages cannot push them below the visible area.
+- Keep oversized dialog content scrollable inside the window, including smaller windows and stacked password prompts.
+
+**Tests**
+- Add layout checks for directory pickers on long pages, window resizing, long forms, dark mode and nested dialogs.
+
 ## 0.4.0-beta.4
 
 **Fixed**
