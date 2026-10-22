@@ -6,7 +6,7 @@ SSHDeck 是一个面向 Windows 的 SSH 管理工具，在一个界面里管理�
 
 ## 界面预览
 
-点击图片可查看原图。截图展示 0.4 预览版。
+点击图片可查看原图。截图展示 0.4 版本界面。
 
 ### 文件传输
 
@@ -39,18 +39,16 @@ SSHDeck 是一个面向 Windows 的 SSH 管理工具，在一个界面里管理�
 
 ## 下载与运行
 
-文件传输和新目录选择器目前在 [0.4 预览版](https://github.com/Trilives/sshdeck/releases/tag/v0.4.0-beta.6)中提供。安装版用户也可选择「预览」更新通道体验。
+从 GitHub Releases 下载 [v0.4.0 稳定版](https://github.com/Trilives/sshdeck/releases/tag/v0.4.0)：
 
-从 GitHub Releases 下载 `v0.3.1`：
-
-- 推荐下载安装包：`SSHDeck_0.3.1_x64-setup.exe`
-- 免安装压缩包：`SSHDeck_0.3.1_x64-portable.zip`，解压后直接运行 `SSHDeck.exe`。
+- 推荐下载安装包：`SSHDeck_0.4.0_x64-setup.exe`
+- 免安装压缩包：`SSHDeck_0.4.0_x64-portable.zip`，解压后直接运行 `SSHDeck.exe`。
 
 直接运行安装包时，会先显示简体中文 / English 语言下拉选择框，随后进入标准安装向导，可保留或修改安装位置。应用内升级会沿用现有安装目录并原地覆盖，不改变当前升级体验。
 
 免安装版的设置与主机数据保存在 `%LOCALAPPDATA%\SSHDeck\data`，不会写在程序旁边；系统需要 Windows OpenSSH Client 和 Microsoft Edge WebView2 Runtime。如需保持免安装方式，请手动下载新版 ZIP，应用内更新沿用安装版更新流程。
 
-> 从 beta.4 或更早版本升级：请先导出主机，升级后再在 v0.3.1 中导入。旧数据目录不会自动迁移。
+> 从 v0.3.0-beta.4 或更早版本升级：请先导出主机，升级后再导入。旧数据目录不会自动迁移。
 
 使用安装版时，可直接打开「设置 → 软件更新」，点击「检查更新」。
 

@@ -6,7 +6,7 @@ SSHDeck is a Windows app for managing SSH connections, port forwarding, and file
 
 ## Screenshots
 
-Click an image to view it at full size. Screenshots show the 0.4 preview.
+Click an image to view it at full size. Screenshots show the 0.4 interface.
 
 ### File Transfer
 
@@ -39,18 +39,16 @@ Click an image to view it at full size. Screenshots show the 0.4 preview.
 
 ## Download & Run
 
-File transfer and the new folder picker are available in the [0.4 preview](https://github.com/Trilives/sshdeck/releases/tag/v0.4.0-beta.6). Choose the Preview update channel to try them in an installed edition.
+Download the [v0.4.0 stable release](https://github.com/Trilives/sshdeck/releases/tag/v0.4.0) from GitHub Releases:
 
-Download `v0.3.1` from GitHub Releases:
-
-- Recommended installer: `SSHDeck_0.3.1_x64-setup.exe`
-- Install-free ZIP: `SSHDeck_0.3.1_x64-portable.zip` — extract it, then run `SSHDeck.exe` directly.
+- Recommended installer: `SSHDeck_0.4.0_x64-setup.exe`
+- Install-free ZIP: `SSHDeck_0.4.0_x64-portable.zip` — extract it, then run `SSHDeck.exe` directly.
 
 When launched directly, the installer first offers a Simplified Chinese / English language selector, then shows the standard setup wizard where you can keep or change the installation folder. In-app upgrades keep the existing installation folder and replace the installed version in place.
 
 The portable package stores settings and hosts in `%LOCALAPPDATA%\SSHDeck\data`, not beside the executable. It requires Windows OpenSSH Client and Microsoft Edge WebView2 Runtime. To remain install-free, update it by downloading a newer portable ZIP; the in-app updater follows the installer update path.
 
-> Upgrading from beta.4 or earlier: export your hosts before updating, then import them in v0.3.1. The old data directory is not migrated automatically.
+> Upgrading from v0.3.0-beta.4 or earlier: export your hosts before updating, then import them after launching the new version. The old data directory is not migrated automatically.
 
 Using the installed edition? Open **Settings → Software Update** and click **Check for updates**.
 

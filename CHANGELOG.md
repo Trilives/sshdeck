@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.4.0
+
+**Added**
+- File Transfer page with local/remote folder browsers, directory trees, history, multiple selection, drag and drop, and recursive folder copies.
+- Background transfer queue with progress, cancellation, retry, and configurable handling of existing files.
+- Multiple-recipient distribution and optional direct server-to-server transfers, with per-recipient SSH key setup and password prompts when needed.
+- Open a selected remote folder directly in Terminal or VS Code from the folder picker.
+- File-browser password login and public-key upload, with passwordless-access checks that skip unnecessary key changes. Private keys stay on their own host.
+
+**Fixed**
+- Keep slow SSH commands and key operations off the UI thread, with bounded waits and command cancellation.
+- Prevent file-pane scroll updates and file double-clicks from blanking or freezing the interface.
+- Keep dialogs centered in the current window on long pages, with scrolling for oversized content.
+
+**Documentation**
+- Refresh English/Chinese screenshots, simplify Features, and document transfer and authentication options.
+
 ## 0.4.0-beta.6
 
 **Added**
