@@ -37,6 +37,7 @@ export interface AppDialogsProps {
   commandBusy: boolean;
   closeSendCommand: () => void;
   runSendCommand: () => void;
+  cancelSendCommand: () => void;
   sendCmdPwOpen: boolean;
   setSendCmdPwOpen: Setter<boolean>;
   sendCmdPwValue: string;
@@ -105,6 +106,7 @@ export function AppDialogs(props: AppDialogsProps) {
           busy={props.commandBusy}
           onClose={props.closeSendCommand}
           onRun={props.runSendCommand}
+          onCancel={props.cancelSendCommand}
           onRunWithPassword={() => { props.setSendCmdPwValue(""); props.setSendCmdPwOpen(true); }}
         />
       )}

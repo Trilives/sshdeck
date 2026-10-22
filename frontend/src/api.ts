@@ -43,9 +43,10 @@ export const api = {
   disconnectAll: () => invoke<void>("disconnect_all"),
 
   // Command / terminal / keys
-  sendCommand: (hostId: string, command: string) => invoke<string>("send_command", { hostId, command }),
-  sendCommandWithPassword: (hostId: string, command: string, password: string) =>
-    invoke<string>("send_command_with_password", { hostId, command, password }),
+  sendCommand: (hostId: string, command: string, runId: string) => invoke<string>("send_command", { hostId, command, runId }),
+  sendCommandWithPassword: (hostId: string, command: string, password: string, runId: string) =>
+    invoke<string>("send_command_with_password", { hostId, command, password, runId }),
+  cancelCommand: (runId: string) => invoke<void>("cancel_command", { runId }),
   openTerminal: (hostId: string, path?: string) => invoke<void>("open_terminal", { hostId, path: path ?? null }),
   openUrl: (url: string) => invoke<void>("open_url", { url }),
   uploadPublicKey: (hostId: string, password: string) => invoke<Host>("upload_public_key", { hostId, password }),

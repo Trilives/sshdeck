@@ -67,9 +67,10 @@ pub fn build_ssh_command(host: &Host, forward: &Forward) -> Result<Vec<String>, 
                 forward.target_port.trim()
             ),
         ]),
-        TunnelMode::Dynamic => {
-            command.extend(["-D".to_string(), format!("{}:{}", bind, forward.bind_port.trim())])
-        }
+        TunnelMode::Dynamic => command.extend([
+            "-D".to_string(),
+            format!("{}:{}", bind, forward.bind_port.trim()),
+        ]),
     }
     command.push(destination(host));
     Ok(command)
@@ -129,7 +130,11 @@ pub fn build_send_command(
     remote_command: &str,
     with_password: bool,
 ) -> Result<Vec<String>, String> {
-    let batch_mode = if with_password { "BatchMode=no" } else { "BatchMode=yes" };
+    let batch_mode = if with_password {
+        "BatchMode=no"
+    } else {
+        "BatchMode=yes"
+    };
     let prompts = if with_password {
         "NumberOfPasswordPrompts=1"
     } else {
@@ -137,6 +142,10 @@ pub fn build_send_command(
     };
     let mut command = vec![
         "ssh".to_string(),
+        "-o".to_string(),
+        "ServerAliveInterval=5".to_string(),
+        "-o".to_string(),
+        "ServerAliveCountMax=3".to_string(),
         "-T".to_string(),
         "-o".to_string(),
         batch_mode.to_string(),
@@ -178,7 +187,9 @@ pub fn build_terminal_args(host: &Host, path: Option<&str>) -> Result<Vec<String
         // Single-quote the path (escaping embedded quotes) so spaces/special chars survive the remote shell.
         // A non-login interactive shell keeps the cwd we just cd'd into (a login shell's profile might reset it).
         let quoted = format!("'{}'", path.replace('\'', "'\\''"));
-        command.push(format!("cd {quoted} 2>/dev/null; exec \"${{SHELL:-/bin/bash}}\""));
+        command.push(format!(
+            "cd {quoted} 2>/dev/null; exec \"${{SHELL:-/bin/bash}}\""
+        ));
     }
     Ok(command)
 }

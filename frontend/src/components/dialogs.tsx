@@ -177,6 +177,7 @@ export function SendCommandDialog(props: {
   busy: boolean;
   onClose: () => void;
   onRun: () => void;
+  onCancel: () => void;
   onRunWithPassword: () => void;
 }) {
   const lang = props.language;
@@ -208,6 +209,7 @@ export function SendCommandDialog(props: {
         )}
         <div className="flex justify-end gap-3">
           <Button variant="secondary" onClick={props.onClose}>{t(lang, "close")}</Button>
+          {props.busy && <Button variant="danger" onClick={props.onCancel}>{t(lang, "cancel")}</Button>}
           <Button variant="secondary" onClick={props.onRunWithPassword} disabled={disabled}>{t(lang, "sendWithPassword")}</Button>
           <Button onClick={props.onRun} disabled={disabled}>{t(lang, "run")}</Button>
         </div>

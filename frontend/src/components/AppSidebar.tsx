@@ -1,9 +1,9 @@
-import { Activity, BookOpen, History, Network, ScrollText, Settings as SettingsIcon, Terminal } from "lucide-react";
+import { Activity, BookOpen, FolderSync, History, Network, ScrollText, Settings as SettingsIcon, Terminal } from "lucide-react";
 import { t } from "../i18n";
 import { cn } from "../lib/utils";
 import type { Language } from "../types";
 
-export type AppPage = "dashboard" | "remote" | "forwarding" | "logs" | "settings" | "guide";
+export type AppPage = "dashboard" | "remote" | "files" | "forwarding" | "logs" | "settings" | "guide";
 
 export function AppSidebar(props: {
   language: Language;
@@ -13,6 +13,7 @@ export function AppSidebar(props: {
   const nav = [
     { id: "dashboard" as const, label: t(props.language, "dashboard"), icon: Activity },
     { id: "remote" as const, label: t(props.language, "remoteConnections"), icon: History },
+    { id: "files" as const, label: t(props.language, "fileTransfer"), icon: FolderSync },
     { id: "forwarding" as const, label: t(props.language, "portForwarding"), icon: Network },
     { id: "logs" as const, label: t(props.language, "logs"), icon: ScrollText },
     { id: "settings" as const, label: t(props.language, "settings"), icon: SettingsIcon },

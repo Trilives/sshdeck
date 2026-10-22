@@ -3,13 +3,16 @@ use std::process::Command;
 use tauri::{AppHandle, State};
 
 use crate::ssh::exec::run_command;
+use crate::ssh::worker::CommandRuns;
 use crate::state::AppState;
 use crate::terminal::open_terminal as open_terminal_window;
 use crate::util::no_window;
+use tauri::Manager;
 
 /// Run a single command on the host over SSH, returning the output (relies on passwordless login being configured).
 #[tauri::command]
 pub async fn send_command(
+    run_id: String,
     host_id: String,
     command: String,
     state: State<'_, AppState>,
@@ -26,14 +29,13 @@ pub async fn send_command(
         Some(&app),
     );
     let data_dir = state.data_dir.clone();
-    tauri::async_runtime::spawn_blocking(move || run_command(&host, &command, None, &data_dir))
-        .await
-        .map_err(|err| err.to_string())?
+    execute(run_id, host, command, None, data_dir, app).await
 }
 
 /// Run a single command on the host over SSH, using a one-time password (injected via askpass).
 #[tauri::command]
 pub async fn send_command_with_password(
+    run_id: String,
     host_id: String,
     command: String,
     password: String,
@@ -54,11 +56,31 @@ pub async fn send_command_with_password(
         Some(&app),
     );
     let data_dir = state.data_dir.clone();
-    tauri::async_runtime::spawn_blocking(move || {
-        run_command(&host, &command, Some(&password), &data_dir)
+    execute(run_id, host, command, Some(password), data_dir, app).await
+}
+
+async fn execute(
+    run_id: String,
+    host: crate::model::Host,
+    command: String,
+    password: Option<String>,
+    data_dir: std::path::PathBuf,
+    app: AppHandle,
+) -> Result<String, String> {
+    let cancel = app.state::<CommandRuns>().register(&run_id)?;
+    let result = tauri::async_runtime::spawn_blocking(move || {
+        run_command(&host, &command, password.as_deref(), &data_dir, &cancel)
     })
-    .await
-    .map_err(|err| err.to_string())?
+    .await;
+    if let Ok(mut map) = app.state::<CommandRuns>().active.lock() {
+        map.remove(&run_id);
+    }
+    result.map_err(|e| e.to_string())?
+}
+
+#[tauri::command]
+pub fn cancel_command(run_id: String, runs: State<CommandRuns>) -> Result<(), String> {
+    runs.cancel(&run_id)
 }
 
 /// Open an external PowerShell terminal window connected to the host, optionally `cd`'d into a remote path.

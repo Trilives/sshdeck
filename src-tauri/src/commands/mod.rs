@@ -1,4 +1,5 @@
 pub mod exec;
+pub mod files;
 pub mod forwards;
 pub mod history;
 pub mod hosts;

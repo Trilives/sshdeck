@@ -13,6 +13,7 @@ import { RemoteConnectionsPage } from "./pages/RemoteConnectionsPage";
 import { LogsPage } from "./pages/LogsPage";
 import { SettingsPage } from "./pages/SettingsPage";
 import { GuidePage } from "./pages/GuidePage";
+import { FileTransferPage } from "./pages/FileTransferPage";
 import type { AppSettings, CriticalErrorPayload, Forward, HistoryEntry, Host, LogEntry, LogLevel, UpdateChannel, UpdateState } from "./types";
 
 const defaultSettings: AppSettings = { theme: "light", language: "zh-CN", logLevel: "info", closeBehavior: "ask", autoUpdate: false, updateChannel: "stable" };
@@ -61,6 +62,7 @@ export function App() {
   const [commandOutput, setCommandOutput] = useState("");
   const [commandBusy, setCommandBusy] = useState(false);
   const commandRunId = useRef(0);
+  const activeCommand = useRef<string | null>(null);
   const [sendCmdPwOpen, setSendCmdPwOpen] = useState(false);
   const [sendCmdPwValue, setSendCmdPwValue] = useState("");
   const [passwordTarget, setPasswordTarget] = useState<{ host: Host; forward: Forward } | null>(null);
@@ -526,24 +528,29 @@ export function App() {
 
   // ---- Send command ----
   async function runSendCommand() {
-    if (!sendCmd || !command.trim()) return;
+    if (!sendCmd || !command.trim() || activeCommand.current) return;
+    const operationId = crypto.randomUUID();
+    activeCommand.current = operationId;
     const runId = ++commandRunId.current;
     const target = sendCmd;
     const remoteCommand = command;
     setCommandBusy(true);
     setCommandOutput("");
     try {
-      const output = await api.sendCommand(target.hostId, remoteCommand);
+      const output = await api.sendCommand(target.hostId, remoteCommand, operationId);
       if (commandRunId.current === runId) setCommandOutput(output);
     } catch (err) {
       if (commandRunId.current === runId) setCommandOutput(String(err));
     } finally {
+      if (activeCommand.current === operationId) activeCommand.current = null;
       if (commandRunId.current === runId) setCommandBusy(false);
     }
   }
 
   async function runSendCommandWithPassword() {
-    if (!sendCmd || !command.trim() || !sendCmdPwValue) return;
+    if (!sendCmd || !command.trim() || !sendCmdPwValue || activeCommand.current) return;
+    const operationId = crypto.randomUUID();
+    activeCommand.current = operationId;
     const password = sendCmdPwValue;
     const runId = ++commandRunId.current;
     const target = sendCmd;
@@ -553,16 +560,18 @@ export function App() {
     setCommandBusy(true);
     setCommandOutput("");
     try {
-      const output = await api.sendCommandWithPassword(target.hostId, remoteCommand, password);
+      const output = await api.sendCommandWithPassword(target.hostId, remoteCommand, password, operationId);
       if (commandRunId.current === runId) setCommandOutput(output);
     } catch (err) {
       if (commandRunId.current === runId) setCommandOutput(String(err));
     } finally {
+      if (activeCommand.current === operationId) activeCommand.current = null;
       if (commandRunId.current === runId) setCommandBusy(false);
     }
   }
 
   function openSendCommand(host: Host) {
+    cancelSendCommand();
     commandRunId.current += 1;
     setSendCmd({ hostId: host.id, hostName: host.name });
     setCommand("");
@@ -573,11 +582,20 @@ export function App() {
   }
 
   function closeSendCommand() {
+    cancelSendCommand();
     commandRunId.current += 1;
     setSendCmd(null);
     setSendCmdPwOpen(false);
     setSendCmdPwValue("");
     setCommandBusy(false);
+  }
+
+  function cancelSendCommand() {
+    if (activeCommand.current) void api.cancelCommand(activeCommand.current).catch(() => {});
+    activeCommand.current = null;
+    commandRunId.current += 1;
+    setCommandBusy(false);
+    setCommandOutput(language === "zh-CN" ? "操作已取消。" : "Operation cancelled.");
   }
 
   async function openForwardWeb(forward: Forward) {
@@ -730,6 +748,7 @@ export function App() {
     sendCmd, command, setCommand, commandOutput, commandBusy, closeSendCommand, runSendCommand,
     sendCmdPwOpen, setSendCmdPwOpen, sendCmdPwValue, setSendCmdPwValue, runSendCommandWithPassword,
     passwordTarget, setPasswordTarget, passwordValue, setPasswordValue, connectWithPassword,
+    cancelSendCommand,
     keyUploadTarget, setKeyUploadTarget, keyUploadPassword, setKeyUploadPassword, uploadKeyWithPassword,
     hostKeyTarget, setHostKeyTarget, hostKeyFingerprint, hostKeyFetching, trustHostKeyAndRetry,
     criticalError, setCriticalError, connectError, setConnectError, selectHosts, setSelectHosts,
@@ -758,6 +777,9 @@ export function App() {
             </div>
           )}
           <div className="animate-[fadeIn_220ms_ease-out]">
+            <div className={page === "files" ? "" : "hidden"}>
+              <FileTransferPage language={language} hosts={hosts} active={page === "files"} />
+            </div>
             {page === "dashboard" && (
               <DashboardPage
                 language={language}

@@ -8,13 +8,22 @@ use tauri::AppHandle;
 use crate::model::Host;
 use crate::ssh::command::build_probe_command;
 use crate::ssh::diagnose::{classify_ssh_failure, format_failure, SshFailureKind};
+use crate::ssh::worker::Worker;
 use crate::state::AppState;
 use crate::util::{empty_default, no_window};
+use std::{
+    sync::{atomic::AtomicBool, Arc},
+    time::Duration,
+};
 
 /// Probe the connection, returning "ready" / "password_required" / "host_key_changed", or an unreachable error.
 pub fn probe_connection(host: &Host, state: &AppState, app: &AppHandle) -> Result<String, String> {
     let command = build_probe_command(host)?;
-    state.add_log("debug", format!("[{}] probe $ {}", host.name, command.join(" ")), Some(app));
+    state.add_log(
+        "debug",
+        format!("[{}] probe $ {}", host.name, command.join(" ")),
+        Some(app),
+    );
     let mut process = Command::new(&command[0]);
     process
         .args(&command[1..])
@@ -22,12 +31,12 @@ pub fn probe_connection(host: &Host, state: &AppState, app: &AppHandle) -> Resul
         .stdout(Stdio::null())
         .stderr(Stdio::piped());
     no_window(&mut process);
-    let output = process.output().map_err(|err| err.to_string())?;
-    if output.status.success() {
+    let (status, stderr) = Worker::spawn(&mut process)?
+        .wait(Duration::from_secs(20), &Arc::new(AtomicBool::new(false)))?;
+    if status.success() {
         return Ok("ready".to_string());
     }
 
-    let stderr = String::from_utf8_lossy(&output.stderr);
     match classify_ssh_failure(&stderr) {
         SshFailureKind::HostKeyChanged => Ok("host_key_changed".to_string()),
         // Connected to the host but passwordless isn't available / auth failed → show a password prompt.
@@ -42,7 +51,7 @@ pub fn get_host_fingerprint(host: &Host) -> Result<String, String> {
     let target = host.ssh_host.trim();
 
     let mut scan = Command::new("ssh-keyscan");
-    scan.args(["-p", port, target])
+    scan.args(["-T", "5", "-p", port, target])
         .stdin(Stdio::null())
         .stdout(Stdio::piped())
         .stderr(Stdio::null());
@@ -61,7 +70,9 @@ pub fn get_host_fingerprint(host: &Host) -> Result<String, String> {
     no_window(&mut keygen);
     let mut child = keygen.spawn().map_err(|err| err.to_string())?;
     if let Some(stdin) = child.stdin.as_mut() {
-        stdin.write_all(&scan_output.stdout).map_err(|err| err.to_string())?;
+        stdin
+            .write_all(&scan_output.stdout)
+            .map_err(|err| err.to_string())?;
     }
     let output = child.wait_with_output().map_err(|err| err.to_string())?;
     let fingerprint = String::from_utf8_lossy(&output.stdout).trim().to_string();

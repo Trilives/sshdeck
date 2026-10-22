@@ -1,5 +1,6 @@
 mod app_data;
 mod commands;
+mod files;
 mod history;
 mod model;
 mod portcheck;
@@ -31,6 +32,8 @@ pub fn run() {
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_process::init())
         .manage(AppState::new())
+        .manage(crate::files::FileTransfers::default())
+        .manage(crate::ssh::worker::CommandRuns::default())
         .invoke_handler(tauri::generate_handler![
             commands::hosts::list_hosts,
             commands::hosts::save_host,
@@ -49,6 +52,13 @@ pub fn run() {
             commands::forwards::disconnect_host,
             commands::forwards::disconnect_all,
             commands::exec::send_command,
+            commands::exec::cancel_command,
+            commands::files::open_file_session,
+            commands::files::list_files,
+            commands::files::close_file_session,
+            commands::files::start_file_transfer,
+            commands::files::list_file_transfers,
+            commands::files::cancel_file_transfer,
             commands::exec::send_command_with_password,
             commands::exec::open_terminal,
             commands::exec::open_url,
@@ -87,8 +97,46 @@ pub fn run() {
         .expect("error while building tauri application")
         .run(|app_handle, event| {
             if let tauri::RunEvent::ExitRequested { .. } = event {
+                app_handle
+                    .state::<crate::files::FileTransfers>()
+                    .cancel_all();
+                if let Ok(runs) = app_handle
+                    .state::<crate::ssh::worker::CommandRuns>()
+                    .active
+                    .lock()
+                {
+                    for cancel in runs.values() {
+                        cancel.store(true, std::sync::atomic::Ordering::Relaxed);
+                    }
+                }
                 let state = app_handle.state::<AppState>();
                 cleanup_tunnels(state.inner(), Some(app_handle));
+                // Give cancelled workers time to close their SSH children before the runtime exits.
+                let deadline = std::time::Instant::now() + std::time::Duration::from_secs(2);
+                while std::time::Instant::now() < deadline {
+                    let commands = app_handle
+                        .state::<crate::ssh::worker::CommandRuns>()
+                        .active
+                        .lock()
+                        .map(|r| r.len())
+                        .unwrap_or(0);
+                    if commands == 0
+                        && app_handle
+                            .state::<crate::files::FileTransfers>()
+                            .active_count()
+                            == 0
+                    {
+                        break;
+                    }
+                    std::thread::sleep(std::time::Duration::from_millis(40));
+                }
+                if let Ok(mut sessions) = app_handle
+                    .state::<crate::files::FileTransfers>()
+                    .sessions
+                    .lock()
+                {
+                    sessions.clear();
+                }
             }
         });
 }
@@ -99,7 +147,14 @@ fn handle_close_requested(window: &tauri::Window, api: &tauri::CloseRequestApi) 
     let app = window.app_handle();
     let state = app.state::<AppState>();
     let behavior = state.close_behavior();
-    let active = state.active_tunnel_count() > 0;
+    let active = state.active_tunnel_count() > 0
+        || app.state::<crate::files::FileTransfers>().active_count() > 0
+        || app
+            .state::<crate::ssh::worker::CommandRuns>()
+            .active
+            .lock()
+            .map(|runs| !runs.is_empty())
+            .unwrap_or(false);
 
     if behavior == "minimize" {
         api.prevent_close();

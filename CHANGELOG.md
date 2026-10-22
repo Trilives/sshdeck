@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.4.0-beta.1
+
+**Added**
+- Dedicated file transfer page with local/SFTP directory trees, multiple selection, drag and drop, recursive folder copies, and skip/overwrite/keep-both policies.
+- Background transfer queue with progress, speed, ETA, cancellation and retry; transfers continue when navigating between pages.
+- Optional distribution mode with multiple recipients and individual destination folders.
+- Optional direct transfers between remote hosts, with estimated progress and an indicator that file contents bypass this computer. The source must have `sftp`, passwordless destination access, and a trusted destination host key.
+
+**Fixed**
+- Move connection probes and key operations off the UI thread, bound one-off command execution to 120 seconds, cap captured output, and allow cancelling commands during poor network conditions.
+- Prevent a cancellation arriving before command registration from being lost; guard application exit while transfers or commands are active.
+
+**Preview notes**
+- Symbolic links and special files are not copied. Replacing remote files requires the OpenSSH `posix-rename` extension.
+- Direct transfers require server-side authentication and reachability; local private keys and jump-host settings are not forwarded to the source.
+
 ## 0.3.1
 
 **Fixed**

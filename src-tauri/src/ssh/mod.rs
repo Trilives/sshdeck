@@ -5,3 +5,5 @@ pub mod keys;
 pub mod probe;
 pub mod process;
 pub mod readiness;
+pub mod sftp;
+pub mod worker;
