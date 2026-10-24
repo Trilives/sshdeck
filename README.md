@@ -39,10 +39,10 @@ Click an image to open the full-resolution 3200 × 2000 PNG. Screenshots show th
 
 ## Download & Run
 
-Download the [v0.4.0 stable release](https://github.com/Trilives/sshdeck/releases/tag/v0.4.0) from GitHub Releases:
+Download the [v0.4.1 stable release](https://github.com/Trilives/sshdeck/releases/tag/v0.4.1) from GitHub Releases:
 
-- Recommended installer: `SSHDeck_0.4.0_x64-setup.exe`
-- Install-free ZIP: `SSHDeck_0.4.0_x64-portable.zip` — extract it, then run `SSHDeck.exe` directly.
+- Recommended installer: `SSHDeck_0.4.1_x64-setup.exe`
+- Install-free ZIP: `SSHDeck_0.4.1_x64-portable.zip` — extract it, then run `SSHDeck.exe` directly.
 
 When launched directly, the installer first offers a Simplified Chinese / English language selector, then shows the standard setup wizard where you can keep or change the installation folder. In-app upgrades keep the existing installation folder and replace the installed version in place.
 

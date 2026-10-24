@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.4.1
+
+**Changed**
+- Add clear hidden-file toggles to file-transfer panes and folder pickers. Dotfiles and hidden folders are hidden by default; the picker toggle also applies to folder history.
+
+**Documentation**
+- Refresh the English and Chinese in-app guide for remote folders, transfers, authentication, distribution, direct SSH access and updates.
+- Update the README and high-resolution screenshots to match the visibility controls and defaults.
+
 ## 0.4.1-beta.2
 
 **Changed**

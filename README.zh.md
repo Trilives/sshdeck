@@ -39,10 +39,10 @@ SSHDeck 是一个面向 Windows 的 SSH 管理工具，在一个界面里管理�
 
 ## 下载与运行
 
-从 GitHub Releases 下载 [v0.4.0 稳定版](https://github.com/Trilives/sshdeck/releases/tag/v0.4.0)：
+从 GitHub Releases 下载 [v0.4.1 稳定版](https://github.com/Trilives/sshdeck/releases/tag/v0.4.1)：
 
-- 推荐下载安装包：`SSHDeck_0.4.0_x64-setup.exe`
-- 免安装压缩包：`SSHDeck_0.4.0_x64-portable.zip`，解压后直接运行 `SSHDeck.exe`。
+- 推荐下载安装包：`SSHDeck_0.4.1_x64-setup.exe`
+- 免安装压缩包：`SSHDeck_0.4.1_x64-portable.zip`，解压后直接运行 `SSHDeck.exe`。
 
 直接运行安装包时，会先显示简体中文 / English 语言下拉选择框，随后进入标准安装向导，可保留或修改安装位置。应用内升级会沿用现有安装目录并原地覆盖，不改变当前升级体验。
 
