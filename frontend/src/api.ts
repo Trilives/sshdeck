@@ -21,6 +21,7 @@ export const api = {
   // Hosts (level 1)
   listHosts: () => invoke<Host[]>("list_hosts"),
   saveHost: (host: Host) => invoke<Host>("save_host", { host }),
+  moveHost: (id: string, targetId: string) => invoke<void>("move_host", { id, targetId }),
   setHostPinned: (id: string, pinned: boolean) => invoke<Host>("set_host_pinned", { id, pinned }),
   deleteHost: (id: string) => invoke<void>("delete_host", { id }),
 
@@ -78,5 +79,7 @@ export const api = {
   // Settings / logs
   getSettings: () => invoke<AppSettings>("get_settings"),
   saveSettings: (settings: AppSettings) => invoke<AppSettings>("save_settings_cmd", { settings }),
+  getLaunchAtLogin: () => invoke<boolean>("get_launch_at_login"),
+  setLaunchAtLogin: (enabled: boolean) => invoke<boolean>("set_launch_at_login", { enabled }),
   listLogs: (level: string) => invoke<LogEntry[]>("list_logs", { level }),
 };

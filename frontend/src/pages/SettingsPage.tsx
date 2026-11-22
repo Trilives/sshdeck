@@ -1,4 +1,5 @@
-import { type ReactNode } from "react";
+import { useEffect, useId, useState, type ReactNode } from "react";
+import { api } from "../api";
 import { Button } from "../components/ui/button";
 import { Card, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
 import { Select } from "../components/ui/select";
@@ -14,6 +15,77 @@ function SettingSelect(props: { label: string; value: string; onChange: (value: 
         {props.children}
       </Select>
     </label>
+  );
+}
+
+function SettingToggle(props: {
+  label: string;
+  description: string;
+  checked: boolean;
+  disabled?: boolean;
+  onChange: (checked: boolean) => void;
+}) {
+  const descriptionId = useId();
+  return (
+    <div className="grid grid-cols-[160px_1fr] gap-4 text-sm">
+      <span className="pt-0.5 font-medium text-slate-600 dark:text-slate-300">{props.label}</span>
+      <div className="space-y-1">
+        <label className="relative inline-flex cursor-pointer items-center has-[:disabled]:cursor-default has-[:disabled]:opacity-50">
+          <input
+            type="checkbox"
+            role="switch"
+            className="peer sr-only"
+            aria-label={props.label}
+            aria-describedby={descriptionId}
+            checked={props.checked}
+            disabled={props.disabled}
+            onChange={(event) => props.onChange(event.target.checked)}
+          />
+          <span className="h-5 w-9 rounded-full bg-slate-300 transition after:absolute after:left-0.5 after:top-0.5 after:h-4 after:w-4 after:rounded-full after:bg-white after:transition-transform peer-checked:bg-blue-600 peer-checked:after:translate-x-4 peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-blue-500 dark:bg-slate-700" />
+        </label>
+        <p id={descriptionId} className="text-slate-500 dark:text-slate-400">{props.description}</p>
+      </div>
+    </div>
+  );
+}
+
+function LaunchAtLoginSetting({ lang }: { lang: Language }) {
+  const [enabled, setEnabled] = useState<boolean | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    let current = true;
+    void api.getLaunchAtLogin().then(
+      (value) => { if (current) setEnabled(value); },
+      (err) => { if (current) setError(String(err)); },
+    );
+    return () => { current = false; };
+  }, []);
+
+  async function toggle(next: boolean) {
+    setBusy(true);
+    setError("");
+    try {
+      setEnabled(await api.setLaunchAtLogin(next));
+    } catch (err) {
+      setError(String(err));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div>
+      <SettingToggle
+        label={t(lang, "launchAtLogin")}
+        description={t(lang, "launchAtLoginDesc")}
+        checked={enabled === true}
+        disabled={enabled === null || busy}
+        onChange={toggle}
+      />
+      {error && <p role="alert" className="ml-44 mt-1 text-sm text-rose-600 dark:text-rose-400">{error}</p>}
+    </div>
   );
 }
 
@@ -134,6 +206,13 @@ export function SettingsPage(props: {
           <option value="minimize">{t(lang, "closeBehaviorMinimize")}</option>
           <option value="exit">{t(lang, "closeBehaviorExit")}</option>
         </SettingSelect>
+        <LaunchAtLoginSetting lang={lang} />
+        <SettingToggle
+          label={t(lang, "autoSortHosts")}
+          description={t(lang, "autoSortHostsDesc")}
+          checked={props.settings.autoSortHosts}
+          onChange={(autoSortHosts) => props.setSettings({ autoSortHosts })}
+        />
         <UpdateSection
           lang={lang}
           appVersion={props.appVersion}

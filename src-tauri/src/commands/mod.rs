@@ -5,6 +5,7 @@ pub mod history;
 pub mod hosts;
 pub mod keys;
 pub mod settings;
+pub mod startup;
 pub mod system;
 pub mod transfer;
 pub mod update;

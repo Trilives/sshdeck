@@ -77,6 +77,60 @@ async function chooseHost(page, id) {
     })
     .click();
 }
+
+test("launch at login is opt-in and the settings page reloads its state", () =>
+  withPage(async (page) => {
+    const settings = page.getByRole("button", { name: "设置", exact: true });
+    await settings.click();
+    const startup = page.getByRole("switch", { name: "开机自启", exact: true });
+    await page.waitForFunction(() => !document.querySelector('[aria-label="开机自启"]')?.disabled);
+    assert.equal(await startup.isChecked(), false);
+    await startup.press("Space");
+    await page.waitForFunction(() => document.querySelector('[aria-label="开机自启"]')?.checked);
+    await page.getByRole("button", { name: "远程连接", exact: true }).click();
+    await settings.click();
+    await page.waitForFunction(() => document.querySelector('[aria-label="开机自启"]')?.checked);
+    await startup.press("Space");
+    await page.waitForFunction(() => !document.querySelector('[aria-label="开机自启"]')?.checked);
+    const changes = await page.evaluate(() => window.fixture.requests.filter((entry) => entry.command === "set_launch_at_login").map((entry) => entry.enabled));
+    assert.deepEqual(changes, [true, false]);
+  }));
+
+test("long-press reorders hosts in both pages and automatic mode hides the handles", () =>
+  withPage(async (page, errors) => {
+    const remote = page.getByRole("button", { name: "远程连接", exact: true });
+    await remote.click();
+    const handles = page.getByRole("button", { name: /^调整 Remote/ });
+    const ready = await handles.nth(0).boundingBox();
+    const password = await handles.nth(2).boundingBox();
+    assert.ok(ready && password);
+    await page.mouse.move(ready.x + ready.width / 2, ready.y + ready.height / 2);
+    await page.mouse.down();
+    await page.waitForFunction(() => document.querySelector('[aria-label="调整 Remote ready 的顺序"]')?.getAttribute("aria-pressed") === "true");
+    await page.mouse.move(password.x + password.width / 2, password.y + password.height / 2, { steps: 8 });
+    await page.mouse.up();
+    await page.waitForFunction(() => document.querySelector('button[aria-label^="调整 Remote"]')?.getAttribute("aria-label") === "调整 Remote refused 的顺序");
+    assert.deepEqual(await handles.evaluateAll((buttons) => buttons.map((button) => button.getAttribute("aria-label"))), [
+      "调整 Remote refused 的顺序", "调整 Remote password 的顺序", "调整 Remote ready 的顺序", "调整 Remote slow 的顺序",
+    ]);
+    await page.getByRole("button", { name: "端口转发", exact: true }).click();
+    assert.equal(await handles.first().getAttribute("aria-label"), "调整 Remote refused 的顺序");
+
+    const settings = page.getByRole("button", { name: "设置", exact: true });
+    await settings.click();
+    const autoSort = page.getByRole("switch", { name: "自动排序主机", exact: true });
+    assert.equal(await autoSort.isChecked(), false);
+    await autoSort.press("Space");
+    await page.waitForFunction(() => document.querySelector('[aria-label="自动排序主机"]')?.checked);
+    await remote.click();
+    assert.equal(await handles.count(), 0);
+    await settings.click();
+    await autoSort.press("Space");
+    await page.waitForFunction(() => !document.querySelector('[aria-label="自动排序主机"]')?.checked);
+    await remote.click();
+    assert.equal(await handles.first().getAttribute("aria-label"), "调整 Remote refused 的顺序");
+    assert.deepEqual(errors, []);
+  }));
 async function rapidScroll(page) {
   await page
     .locator('[tabindex="0"]')

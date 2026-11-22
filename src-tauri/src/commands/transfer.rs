@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 use tauri::{AppHandle, State};
 use uuid::Uuid;
 
-use crate::model::Host;
+use crate::{host_order, model::Host};
 use crate::sshconfig::{
     parse_ssh_config, render_managed_block, ssh_config_path, strip_managed_block,
     upsert_managed_block,
@@ -138,7 +138,7 @@ pub fn import_hosts(
             // New host: assign a new id to avoid colliding with existing or sibling entries.
             host.id = Uuid::new_v4().to_string();
             host.updated_at = now;
-            existing.push(host);
+            host_order::append(&mut existing, host);
             added += 1;
         }
     }

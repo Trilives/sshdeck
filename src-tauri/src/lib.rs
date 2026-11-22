@@ -2,6 +2,7 @@ mod app_data;
 mod commands;
 mod files;
 mod history;
+mod host_order;
 mod model;
 mod portcheck;
 mod ssh;
@@ -37,6 +38,7 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             commands::hosts::list_hosts,
             commands::hosts::save_host,
+            commands::hosts::move_host,
             commands::hosts::set_host_pinned,
             commands::hosts::delete_host,
             commands::transfer::read_import_file,
@@ -69,6 +71,8 @@ pub fn run() {
             commands::keys::remove_known_host,
             commands::settings::get_settings,
             commands::settings::save_settings_cmd,
+            commands::startup::get_launch_at_login,
+            commands::startup::set_launch_at_login,
             commands::settings::list_logs,
             commands::system::check_ssh,
             commands::system::install_openssh,

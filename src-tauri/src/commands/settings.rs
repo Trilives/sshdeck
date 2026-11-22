@@ -21,11 +21,14 @@ pub fn save_settings_cmd(
         language: normalize_choice(&settings.language, &["zh-CN", "en-US"], "zh-CN"),
         log_level: normalize_choice(&settings.log_level, &["debug", "info", "warning", "error"], "info"),
         close_behavior: normalize_choice(&settings.close_behavior, &["ask", "minimize", "exit"], "ask"),
+        auto_sort_hosts: settings.auto_sort_hosts,
         auto_update: settings.auto_update,
         update_channel: normalize_choice(&settings.update_channel, &["stable", "preview"], "stable"),
     };
-    *state.settings.lock().map_err(lock_error)? = normalized.clone();
+    let mut settings = state.settings.lock().map_err(lock_error)?;
     write_json(state.settings_path(), &normalized)?;
+    *settings = normalized.clone();
+    drop(settings);
     state.add_log(
         "info",
         format!(

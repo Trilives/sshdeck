@@ -156,6 +156,7 @@ function installDemo({ language }) {
             language,
             logLevel: "info",
             closeBehavior: "ask",
+            autoSortHosts: false,
             autoUpdate: false,
             updateChannel: "stable",
           };

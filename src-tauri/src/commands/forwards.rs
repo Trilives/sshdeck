@@ -5,7 +5,7 @@ use crate::model::{Forward, Host, HostView, TunnelStatus};
 use crate::ssh::process::{restart_forward, start_tunnel, stop_tunnel};
 use crate::state::AppState;
 use crate::store::write_json;
-use crate::util::{lock_error, now_millis};
+use crate::util::lock_error;
 use crate::validate::validate_forward;
 
 /// Record a just-opened port in the local history (with a browser URL for local/dynamic forwards so it can be
@@ -56,7 +56,6 @@ pub fn save_forward(
     } else {
         host.forwards.push(forward.clone());
     }
-    host.updated_at = now_millis();
     let host_name = host.name.clone();
     write_json(state.hosts_path(), &*hosts)?;
     drop(hosts);
@@ -98,7 +97,6 @@ pub fn delete_forward(
         .map(|item| item.name.clone())
         .unwrap_or_else(|| forward_id.clone());
     host.forwards.retain(|item| item.id != forward_id);
-    host.updated_at = now_millis();
     let host_name = host.name.clone();
     write_json(state.hosts_path(), &*hosts)?;
     drop(hosts);

@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.2-beta.1
+
+- Add an opt-in setting to launch SSHDeck when signing in to Windows.
+- Keep host order fixed by default. Hold and drag a host's handle to reorder it within its pin group in Remote Connections or Port Forwarding.
+- Add optional recent-edit sorting for host configurations. Saving or deleting a port forward leaves the host order unchanged.
+
 ## 0.4.1
 
 **Changed**

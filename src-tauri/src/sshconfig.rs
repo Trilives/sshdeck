@@ -65,6 +65,7 @@ pub fn parse_ssh_config(content: &str) -> Vec<Host> {
                 forwards: Vec::new(),
                 pinned: false,
                 updated_at: now_millis(),
+                manual_order: None,
             });
             continue;
         }

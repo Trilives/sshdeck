@@ -1,4 +1,5 @@
 import { Plus, Power } from "lucide-react";
+import type { ReactNode } from "react";
 import { Button } from "./ui/button";
 import { ForwardRow } from "./ForwardRow";
 import { HostCardHeader } from "./HostCardHeader";
@@ -10,6 +11,7 @@ export function HostCard(props: {
   language: Language;
   host: Host;
   expanded: boolean;
+  dragHandle?: ReactNode;
   onToggle: () => void;
   onNewForward: () => void;
   onDisconnectHost: () => void;
@@ -29,6 +31,7 @@ export function HostCard(props: {
         language={lang}
         host={props.host}
         expanded={props.expanded}
+        dragHandle={props.dragHandle}
         accentClassName="bg-blue-600/10 text-blue-600 dark:bg-blue-500/15 dark:text-blue-300"
         summary={(
           <>

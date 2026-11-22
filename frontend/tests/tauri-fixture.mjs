@@ -19,6 +19,16 @@ export function installTauriFixture() {
   const sessions = new Map();
   const keys = new Set();
   let sequence = 0;
+  let launchAtLogin = false;
+  let settings = {
+    theme: "light",
+    language: "zh-CN",
+    logLevel: "info",
+    closeBehavior: "ask",
+    autoSortHosts: false,
+    autoUpdate: false,
+    updateChannel: "preview",
+  };
   const fixture = (window.fixture = {
     requests: [],
     closed: [],
@@ -88,16 +98,24 @@ export function installTauriFixture() {
       fixture.requests.push({ command, ...args });
       switch (command) {
         case "list_hosts":
-          return hosts;
+          return [...hosts];
+        case "move_host": {
+          const from = hosts.findIndex((host) => host.id === args.id);
+          const to = hosts.findIndex((host) => host.id === args.targetId);
+          const [host] = hosts.splice(from, 1);
+          hosts.splice(to, 0, host);
+          return;
+        }
         case "get_settings":
-          return {
-            theme: "light",
-            language: "zh-CN",
-            logLevel: "info",
-            closeBehavior: "ask",
-            autoUpdate: false,
-            updateChannel: "preview",
-          };
+          return settings;
+        case "save_settings_cmd":
+          settings = args.settings;
+          return settings;
+        case "get_launch_at_login":
+          return launchAtLogin;
+        case "set_launch_at_login":
+          launchAtLogin = args.enabled;
+          return launchAtLogin;
         case "list_logs":
         case "list_history":
         case "list_file_transfers":
@@ -105,7 +123,7 @@ export function installTauriFixture() {
         case "check_ssh":
           return true;
         case "plugin:app|version":
-          return "0.4.1";
+          return "0.4.2-beta.1";
         case "plugin:event|listen": {
           const id = ++sequence;
           listeners.set(id, args);

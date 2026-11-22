@@ -1,11 +1,14 @@
 import { Card, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
 import { HostCard } from "../components/HostCard";
+import { SortableHostList } from "../components/SortableHostList";
 import { t } from "../i18n";
 import type { Forward, Host, Language } from "../types";
 
 export function PortForwardingPage(props: {
   language: Language;
   hosts: Host[];
+  autoSortHosts: boolean;
+  onMoveHost: (id: string, targetId: string) => Promise<void>;
   expandedIds: Set<string>;
   onToggle: (hostId: string) => void;
   onTogglePin: (host: Host) => void;
@@ -30,12 +33,12 @@ export function PortForwardingPage(props: {
             {t(lang, "noForwardingHosts")}
           </p>
         ) : (
-          <div className="grid gap-3">
-            {props.hosts.map((host) => (
+          <SortableHostList hosts={props.hosts} language={lang} autoSort={props.autoSortHosts} onMove={props.onMoveHost}>
+            {(host, dragHandle) => (
               <HostCard
-                key={host.id}
                 language={lang}
                 host={host}
+                dragHandle={dragHandle}
                 expanded={props.expandedIds.has(host.id)}
                 onToggle={() => props.onToggle(host.id)}
                 onNewForward={() => props.onNewForward(host)}
@@ -47,8 +50,8 @@ export function PortForwardingPage(props: {
                 onEditForward={(forward) => props.onEditForward(host, forward)}
                 onDeleteForward={(forward) => props.onDeleteForward(host, forward)}
               />
-            ))}
-          </div>
+            )}
+          </SortableHostList>
         )}
       </Card>
     </div>

@@ -48,6 +48,8 @@ const text = {
     pin: "置顶",
     unpin: "取消置顶",
     pinned: "已置顶",
+    reorderHost: "调整 {name} 的顺序",
+    reorderHostHint: "长按拖动，或按空格后用方向键移动",
 
     // Import / export
     import: "导入",
@@ -208,6 +210,10 @@ const text = {
     // Settings page
     settingsTitle: "设置",
     settingsDesc: "主题、语言和日志等级会保存在本地，下次启动自动恢复。",
+    launchAtLogin: "开机自启",
+    launchAtLoginDesc: "登录 Windows 后启动 SSHDeck。",
+    autoSortHosts: "自动排序主机",
+    autoSortHostsDesc: "开启后，刚编辑的主机会移动到同组顶部。关闭时，长按主机卡片左侧的手柄可拖动排序。",
     theme: "主题",
     language: "语言",
     logLevel: "日志等级",
@@ -302,6 +308,8 @@ const text = {
     pin: "Pin",
     unpin: "Unpin",
     pinned: "Pinned",
+    reorderHost: "Reorder {name}",
+    reorderHostHint: "Hold and drag, or press Space and use the arrow keys",
 
     import: "Import",
     export: "Export",
@@ -448,6 +456,10 @@ const text = {
 
     settingsTitle: "Settings",
     settingsDesc: "Theme, language, and log level are saved locally and restored on next launch.",
+    launchAtLogin: "Launch at login",
+    launchAtLoginDesc: "Start SSHDeck when you sign in to Windows.",
+    autoSortHosts: "Automatic host sorting",
+    autoSortHostsDesc: "Move recently edited hosts to the top of their group. When off, hold and drag the handle on a host card to reorder it.",
     theme: "Theme",
     language: "Language",
     logLevel: "Log Level",

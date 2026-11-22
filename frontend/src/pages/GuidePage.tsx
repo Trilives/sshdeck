@@ -94,7 +94,7 @@ export function GuidePage(props: { language: Language }) {
         ],
         [
           "设置",
-          "切换主题、语言和日志等级，设置关闭窗口行为、自动更新，以及稳定或预览更新通道。",
+          "设置开机自启、主机自动排序、界面外观和软件更新。默认可在远程连接和端口转发页长按主机卡片左侧的手柄，调整同组主机的顺序。",
         ],
       ]
     : [
@@ -120,7 +120,7 @@ export function GuidePage(props: { language: Language }) {
         ],
         [
           "Settings",
-          "Choose a theme, language, log level, window-close behavior, automatic updates, and the Stable or Preview update channel.",
+          "Manage launch at login, automatic host sorting, appearance, and software updates. By default, hold and drag the handle on a host card in Remote Connections or Port Forwarding to reorder it within its group.",
         ],
       ];
 

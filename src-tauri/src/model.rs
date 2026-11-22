@@ -85,9 +85,11 @@ pub struct Host {
     /// Whether pinned; pinned hosts sort to the front of the list.
     #[serde(default)]
     pub pinned: bool,
-    /// Last-modified time (Unix ms); the list sorts by this, newest first.
+    /// Last-modified time (Unix ms), used when automatic sorting is enabled.
     #[serde(default)]
     pub updated_at: i64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub manual_order: Option<usize>,
 }
 
 impl Default for Host {
@@ -104,6 +106,7 @@ impl Default for Host {
             forwards: Vec::new(),
             pinned: false,
             updated_at: 0,
+            manual_order: None,
         }
     }
 }
@@ -144,6 +147,8 @@ pub struct AppSettings {
     /// or `exit` (quit the app). When forwards are running, `exit` still prompts as a safety check.
     #[serde(default = "default_close_behavior")]
     pub close_behavior: String,
+    #[serde(default)]
+    pub auto_sort_hosts: bool,
     /// When true, a newer signed release found on startup is downloaded and installed automatically;
     /// when false, the app only surfaces an "update available" notice and lets the user install it.
     #[serde(default)]
@@ -168,6 +173,7 @@ impl Default for AppSettings {
             language: "zh-CN".to_string(),
             log_level: "info".to_string(),
             close_behavior: default_close_behavior(),
+            auto_sort_hosts: false,
             auto_update: false,
             update_channel: default_update_channel(),
         }

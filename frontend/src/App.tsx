@@ -17,7 +17,7 @@ import { FileTransferPage } from "./pages/FileTransferPage";
 import { FileTransferBoundary } from "./files/FileTransferBoundary";
 import type { AppSettings, CriticalErrorPayload, Forward, HistoryEntry, Host, LogEntry, LogLevel, UpdateChannel, UpdateState } from "./types";
 
-const defaultSettings: AppSettings = { theme: "light", language: "zh-CN", logLevel: "info", closeBehavior: "ask", autoUpdate: false, updateChannel: "stable" };
+const defaultSettings: AppSettings = { theme: "light", language: "zh-CN", logLevel: "info", closeBehavior: "ask", autoSortHosts: false, autoUpdate: false, updateChannel: "stable" };
 
 const newHost = (): Host => ({
   id: "",
@@ -47,6 +47,9 @@ export function App() {
   const [page, setPage] = useState<AppPage>("dashboard");
   const [hosts, setHosts] = useState<Host[]>([]);
   const [settings, setSettings] = useState<AppSettings>(defaultSettings);
+  const settingsSnapshot = useRef(defaultSettings);
+  const settingsSave = useRef(Promise.resolve());
+  const hostsRequest = useRef(0);
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
@@ -169,6 +172,9 @@ export function App() {
 
   useEffect(() => {
     void refreshAll();
+  }, []);
+
+  useEffect(() => {
     const timer = window.setInterval(() => {
       void refreshHosts();
       void refreshLogs(settings.logLevel);
@@ -179,9 +185,9 @@ export function App() {
 
   async function refreshAll() {
     try {
-      const [nextSettings, nextHosts] = await Promise.all([api.getSettings(), api.listHosts()]);
+      const [nextSettings] = await Promise.all([api.getSettings(), refreshHosts()]);
+      settingsSnapshot.current = nextSettings;
       setSettings(nextSettings);
-      setHosts(nextHosts);
       await refreshLogs(nextSettings.logLevel);
     } catch (err) {
       setError(String(err));
@@ -189,8 +195,10 @@ export function App() {
   }
 
   async function refreshHosts() {
+    const request = ++hostsRequest.current;
     try {
-      setHosts(await api.listHosts());
+      const next = await api.listHosts();
+      if (request === hostsRequest.current) setHosts(next);
     } catch (err) {
       setError(String(err));
     }
@@ -204,12 +212,20 @@ export function App() {
     }
   }
 
-  async function updateSettings(next: Partial<AppSettings>) {
-    try {
-      setSettings(await api.saveSettings({ ...settings, ...next }));
-    } catch (err) {
-      setError(String(err));
-    }
+  function updateSettings(next: Partial<AppSettings>) {
+    settingsSave.current = settingsSave.current.then(async () => {
+      try {
+        const saved = await api.saveSettings({ ...settingsSnapshot.current, ...next });
+        const orderChanged = settingsSnapshot.current.autoSortHosts !== saved.autoSortHosts;
+        settingsSnapshot.current = saved;
+        setSettings(saved);
+        if (orderChanged) await refreshHosts();
+        if (next.logLevel) await refreshLogs(saved.logLevel);
+      } catch (err) {
+        setError(String(err));
+      }
+    });
+    return settingsSave.current;
   }
 
   function toggleForwardingExpand(hostId: string) {
@@ -269,6 +285,15 @@ export function App() {
   async function toggleHostPin(host: Host) {
     try {
       await api.setHostPinned(host.id, !host.pinned);
+      await refreshHosts();
+    } catch (err) {
+      setError(String(err));
+    }
+  }
+
+  async function moveHost(id: string, targetId: string) {
+    try {
+      await api.moveHost(id, targetId);
       await refreshHosts();
     } catch (err) {
       setError(String(err));
@@ -805,6 +830,8 @@ export function App() {
               <RemoteConnectionsPage
                 language={language}
                 hosts={hosts}
+                autoSortHosts={settings.autoSortHosts}
+                onMoveHost={moveHost}
                 histories={remoteHistories}
                 expandedIds={remoteExpandedIds}
                 loadingIds={remoteLoadingIds}
@@ -830,6 +857,8 @@ export function App() {
               <PortForwardingPage
                 language={language}
                 hosts={hosts}
+                autoSortHosts={settings.autoSortHosts}
+                onMoveHost={moveHost}
                 expandedIds={forwardingExpandedIds}
                 onToggle={toggleForwardingExpand}
                 onTogglePin={toggleHostPin}

@@ -1,6 +1,7 @@
 use tauri::{AppHandle, State};
 use uuid::Uuid;
 
+use crate::host_order;
 use crate::model::{Host, HostView, TunnelStatus};
 use crate::ssh::process::{restart_forward, stop_tunnel};
 use crate::state::AppState;
@@ -10,10 +11,24 @@ use crate::validate::hostname_chars_ok;
 
 #[tauri::command]
 pub fn list_hosts(state: State<AppState>) -> Result<Vec<HostView>, String> {
+    let auto_sort = state.settings.lock().map_err(lock_error)?.auto_sort_hosts;
     let mut hosts = state.hosts.lock().map_err(lock_error)?.clone();
-    // Pinned first, then sorted by last-modified time newest-to-oldest; stable for equal order.
-    hosts.sort_by(|a, b| b.pinned.cmp(&a.pinned).then(b.updated_at.cmp(&a.updated_at)));
+    host_order::sort_for_display(&mut hosts, auto_sort);
     Ok(hosts.into_iter().map(|host| state.host_view(host)).collect())
+}
+
+#[tauri::command]
+pub fn move_host(id: String, target_id: String, state: State<AppState>) -> Result<(), String> {
+    let settings = state.settings.lock().map_err(lock_error)?;
+    if settings.auto_sort_hosts {
+        return Err("Turn off automatic host sorting to reorder hosts manually.".into());
+    }
+    let mut hosts = state.hosts.lock().map_err(lock_error)?;
+    let mut reordered = hosts.clone();
+    host_order::move_host(&mut reordered, &id, &target_id)?;
+    write_json(state.hosts_path(), &reordered)?;
+    *hosts = reordered;
+    Ok(())
 }
 
 #[tauri::command]
@@ -44,12 +59,13 @@ pub fn save_host(mut host: Host, state: State<AppState>, app: AppHandle) -> Resu
             || existing.identity_file.trim() != host.identity_file.trim()
             || existing.extra_options.trim() != host.extra_options.trim()
             || existing.proxy_jump.trim() != host.proxy_jump.trim();
-        // Keep the existing forward list and pinned state; only update connection parameters and modified time.
+        // Preserve the existing forwards, pin and manual position across host edits.
         host.forwards = existing.forwards.clone();
         host.pinned = existing.pinned;
+        host.manual_order = existing.manual_order;
         *existing = host.clone();
     } else {
-        hosts.push(host.clone());
+        host_order::append(&mut hosts, host.clone());
     }
     write_json(state.hosts_path(), &*hosts)?;
     drop(hosts);

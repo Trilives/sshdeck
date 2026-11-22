@@ -55,6 +55,7 @@ export interface AppSettings {
   language: Language;
   logLevel: LogLevel;
   closeBehavior: CloseBehavior;
+  autoSortHosts: boolean;
   /** When true, an update found on startup installs automatically; when false, only a notice is shown. */
   autoUpdate: boolean;
   /** Which release channel to check for updates: stable (default) or preview (pre-releases). */

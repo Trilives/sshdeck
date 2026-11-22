@@ -66,8 +66,11 @@ impl AppState {
             }
         }
 
+        let mut hosts: Vec<Host> = read_json(data_dir.join("hosts.json")).unwrap_or_default();
+        crate::host_order::initialize(&mut hosts);
+
         Self {
-            hosts: Mutex::new(read_json(data_dir.join("hosts.json")).unwrap_or_default()),
+            hosts: Mutex::new(hosts),
             settings: Mutex::new(read_json(data_dir.join("settings.json")).unwrap_or_default()),
             tunnels: Mutex::new(HashMap::new()),
             logs: Mutex::new(Vec::new()),

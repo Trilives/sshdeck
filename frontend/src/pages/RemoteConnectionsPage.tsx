@@ -10,10 +10,11 @@ import {
   Trash2,
   Zap,
 } from "lucide-react";
-import { useCallback, useState } from "react";
+import { useCallback, useState, type ReactNode } from "react";
 import { RemoteDirectoryPicker } from "../files/RemoteDirectoryPicker";
 import { ft } from "../files/i18n";
 import { HostCardHeader } from "../components/HostCardHeader";
+import { SortableHostList } from "../components/SortableHostList";
 import { HostTransferActions } from "../components/HostTransferActions";
 import { Button } from "../components/ui/button";
 import {
@@ -35,6 +36,7 @@ function formatOpenedAt(ms: number): string {
 function RemoteHostCard(props: {
   language: Language;
   host: Host;
+  dragHandle?: ReactNode;
   entries: HistoryEntry[];
   expanded: boolean;
   loading: boolean;
@@ -61,6 +63,7 @@ function RemoteHostCard(props: {
         language={lang}
         host={props.host}
         expanded={props.expanded}
+        dragHandle={props.dragHandle}
         accentClassName="bg-violet-600/10 text-violet-600 dark:bg-violet-500/15 dark:text-violet-300"
         summary={
           <span>
@@ -217,6 +220,8 @@ function RemoteHostCard(props: {
 export function RemoteConnectionsPage(props: {
   language: Language;
   hosts: Host[];
+  autoSortHosts: boolean;
+  onMoveHost: (id: string, targetId: string) => Promise<void>;
   histories: Record<string, HistoryEntry[]>;
   expandedIds: Set<string>;
   loadingIds: Set<string>;
@@ -259,12 +264,12 @@ export function RemoteConnectionsPage(props: {
           {t(lang, "noHosts")}
         </p>
       ) : (
-        <div className="grid gap-3">
-          {props.hosts.map((host) => (
+        <SortableHostList hosts={props.hosts} language={lang} autoSort={props.autoSortHosts} onMove={props.onMoveHost}>
+          {(host, dragHandle) => (
             <RemoteHostCard
-              key={host.id}
               language={lang}
               host={host}
+              dragHandle={dragHandle}
               entries={props.histories[host.id] ?? []}
               expanded={props.expandedIds.has(host.id)}
               loading={props.loadingIds.has(host.id)}
@@ -286,8 +291,8 @@ export function RemoteConnectionsPage(props: {
               }
               onOpenVscodePath={(path) => props.onOpenVscodePath(host, path)}
             />
-          ))}
-        </div>
+          )}
+        </SortableHostList>
       )}
     </Card>
   );
