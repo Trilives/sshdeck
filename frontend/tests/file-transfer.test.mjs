@@ -133,18 +133,30 @@ test("long-press reorders hosts in both pages and automatic mode hides the handl
     assert.equal(await handles.first().getAttribute("aria-label"), "调整 Remote refused 的顺序");
     assert.deepEqual(errors, []);
   }));
-test("guide modules fill the available width without stretching their cards", () =>
+test("the guide follows the same task order in both languages and adapts to the window", () =>
   withPage(async (page) => {
     await page.setViewportSize({ width: 1440, height: 800 });
     await page.getByRole("button", { name: "使用说明", exact: true }).click();
-    const cards = ["每个页面怎么用", "转发模式怎么选", "主机操作", "排错与注意事项"].map(
+    const headings = page.locator("main > div > section").getByRole("heading", { level: 2 });
+    const chineseOrder = [
+      "使用说明",
+      "主机配置与认证",
+      "远程连接",
+      "文件传输",
+      "端口转发",
+      "主页、日志与排错",
+      "设置与更新",
+    ];
+    await headings.first().waitFor();
+    assert.deepEqual(await headings.allTextContents(), chineseOrder);
+    const cards = chineseOrder.slice(1).map(
       (name) => page.getByRole("heading", { name, exact: true }).locator("xpath=../.."),
     );
-    await cards[0].waitFor();
     const cardBoxes = () => Promise.all(cards.map((card) => card.boundingBox()));
     const wide = await cardBoxes();
     assert.ok(wide.every(Boolean));
-    assert.equal(new Set(wide.map((box) => box.x)).size, 2);
+    assert.ok(wide[0].x < wide[1].x, "host setup and remote usage are side by side");
+    assert.ok(wide[2].width > wide[0].width, "the file transfer module spans the page");
     for (const card of cards) {
       const bottomSpace = await card.evaluate((element) =>
         element.getBoundingClientRect().bottom - element.lastElementChild.getBoundingClientRect().bottom,
@@ -157,6 +169,27 @@ test("guide modules fill the available width without stretching their cards", ()
     assert.ok(narrow.every(Boolean));
     assert.equal(new Set(narrow.map((box) => box.x)).size, 1);
     assert.ok(narrow.every((box, index) => index === 0 || box.y >= narrow[index - 1].y + narrow[index - 1].height));
+
+    await page.getByRole("button", { name: "设置", exact: true }).click();
+    await page.locator("select").filter({ has: page.locator('option[value="en-US"]') }).selectOption("en-US");
+    await page.getByRole("button", { name: "Guide", exact: true }).click();
+    await headings.first().waitFor();
+    assert.deepEqual(await headings.allTextContents(), [
+      "Guide",
+      "Hosts and authentication",
+      "Remote Connections",
+      "File Transfer",
+      "Port Forwarding",
+      "Home, logs, and troubleshooting",
+      "Settings and updates",
+    ]);
+    const example = page.getByRole("heading", { name: "Local forwarding example for a remote website" }).locator("..");
+    assert.deepEqual(await example.locator("dt").allTextContents(), [
+      "Mode", "Local Address", "Local Port", "Remote Address", "Remote Port",
+    ]);
+    assert.deepEqual(await example.locator("dd").allTextContents(), [
+      "local", "127.0.0.1", "18000", "127.0.0.1", "8000",
+    ]);
   }));
 
 async function rapidScroll(page) {

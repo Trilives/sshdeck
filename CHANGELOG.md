@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.4.2-beta.4
+
+- Rewrite the English and Chinese in-app guide in the order users set up hosts and complete common tasks.
+- Add step-by-step instructions for authentication, remote folders, file transfers, and troubleshooting, plus a Local forwarding example that matches the app’s form.
+
 ## 0.4.2-beta.3
 
 - Let guide modules flow into responsive columns at their natural heights.
