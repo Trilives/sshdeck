@@ -94,7 +94,7 @@ export function GuidePage(props: { language: Language }) {
         ],
         [
           "设置",
-          "设置开机自启、主机自动排序、界面外观和软件更新。默认可在远程连接和端口转发页长按主机卡片左侧的手柄，调整同组主机的顺序。",
+          "设置开机自启、主机自动排序、界面外观和软件更新。默认可在远程连接和端口转发页长按置顶按钮右侧的手柄，调整同组主机的顺序。",
         ],
       ]
     : [
@@ -120,7 +120,7 @@ export function GuidePage(props: { language: Language }) {
         ],
         [
           "Settings",
-          "Manage launch at login, automatic host sorting, appearance, and software updates. By default, hold and drag the handle on a host card in Remote Connections or Port Forwarding to reorder it within its group.",
+          "Manage launch at login, automatic host sorting, appearance, and software updates. By default, hold and drag the handle to the right of the pin button in Remote Connections or Port Forwarding to move a host within its group.",
         ],
       ];
 

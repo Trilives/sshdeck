@@ -19,8 +19,7 @@ export function HostCardHeader(props: {
 
   return (
     <div className="flex w-full items-center gap-2 pr-4 transition hover:bg-slate-50 dark:hover:bg-slate-900">
-      {props.dragHandle}
-      <button onClick={props.onToggle} className={`flex min-w-0 flex-1 items-center gap-3 py-4 pr-5 text-left ${props.dragHandle ? "pl-0" : "pl-5"}`}>
+      <button onClick={props.onToggle} className="flex min-w-0 flex-1 items-center gap-3 px-5 py-4 text-left">
         {props.expanded ? <ChevronDown size={18} className="text-slate-400" /> : <ChevronRight size={18} className="text-slate-400" />}
         <div className={`flex h-9 w-9 items-center justify-center rounded-xl ${props.accentClassName}`}>
           <Server size={18} />
@@ -51,6 +50,7 @@ export function HostCardHeader(props: {
           <Pin size={15} className="text-blue-600 dark:text-blue-300" />
         )}
       </Button>
+      {props.dragHandle}
     </div>
   );
 }

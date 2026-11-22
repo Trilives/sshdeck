@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.4.2-beta.2
+
+- Place file navigation immediately above the file list and the current-folder filter below it.
+- Move the host reorder handle to the right of the pin button in Remote Connections and Port Forwarding.
+
 ## 0.4.2-beta.1
 
 - Add an opt-in setting to launch SSHDeck when signing in to Windows.

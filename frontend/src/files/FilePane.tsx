@@ -347,8 +347,24 @@ export function FilePane(props: {
           </button>
         )}
       </div>
-      <div className="shrink-0 border-b border-slate-100 px-3 pb-3 pt-2 dark:border-slate-800">
-        <div className="mb-2 flex min-w-0 items-center gap-1">
+      <div className="shrink-0 border-b border-slate-100 px-3 py-2 dark:border-slate-800">
+        <button
+          className="flex h-9 w-full min-w-0 items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 text-left transition hover:border-blue-300 disabled:opacity-40 dark:border-slate-800 dark:bg-slate-900/70 dark:hover:border-blue-700"
+          title={b.listing?.path || ft(lang, "chooseDirectory")}
+          aria-label={ft(lang, "chooseDirectory")}
+          disabled={!b.listing || b.busy}
+          onClick={() => setDirectoryPickerOpen(true)}
+        >
+          <FolderOpen size={14} className="shrink-0 text-slate-400" />
+          <span
+            className="min-w-0 flex-1 truncate font-mono text-xs text-slate-600 dark:text-slate-300"
+            dir="rtl"
+          >
+            {b.listing?.path || ft(lang, "disconnected")}
+          </span>
+          <ChevronDown size={13} className="shrink-0 text-slate-400" />
+        </button>
+        <div className="mt-2 flex min-w-0 items-center gap-1">
           <button
             className={iconButton}
             title={ft(lang, "back")}
@@ -423,35 +439,6 @@ export function FilePane(props: {
             {hidden ? <Eye size={15} /> : <EyeOff size={15} />}
             <span>{ft(lang, "hiddenFiles")}</span>
           </button>
-        </div>
-        <button
-          className="flex h-9 w-full min-w-0 items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 text-left transition hover:border-blue-300 disabled:opacity-40 dark:border-slate-800 dark:bg-slate-900/70 dark:hover:border-blue-700"
-          title={b.listing?.path || ft(lang, "chooseDirectory")}
-          aria-label={ft(lang, "chooseDirectory")}
-          disabled={!b.listing || b.busy}
-          onClick={() => setDirectoryPickerOpen(true)}
-        >
-          <FolderOpen size={14} className="shrink-0 text-slate-400" />
-          <span
-            className="min-w-0 flex-1 truncate font-mono text-xs text-slate-600 dark:text-slate-300"
-            dir="rtl"
-          >
-            {b.listing?.path || ft(lang, "disconnected")}
-          </span>
-          <ChevronDown size={13} className="shrink-0 text-slate-400" />
-        </button>
-        <div className="mt-2 flex items-center gap-2 px-1 text-slate-400">
-          <Search size={13} />
-          <input
-            className="h-6 min-w-0 flex-1 bg-transparent text-xs outline-none placeholder:text-slate-400"
-            aria-label={ft(lang, "filter")}
-            placeholder={ft(lang, "filter")}
-            value={filter}
-            onChange={(e) => {
-              setFilter(e.target.value);
-              if (scroller.current) scroller.current.scrollTop = 0;
-            }}
-          />
         </div>
       </div>
       {b.error && (
@@ -710,6 +697,19 @@ export function FilePane(props: {
             </span>
           </div>
         )}
+      </div>
+      <div className="flex shrink-0 items-center gap-2 border-t border-slate-100 px-3 py-1.5 text-slate-400 focus-within:text-blue-500 dark:border-slate-800">
+        <Search size={13} className="shrink-0" />
+        <input
+          className="h-6 min-w-0 flex-1 bg-transparent text-xs text-slate-700 outline-none placeholder:text-slate-400 dark:text-slate-200"
+          aria-label={ft(lang, "filter")}
+          placeholder={ft(lang, "filter")}
+          value={filter}
+          onChange={(e) => {
+            setFilter(e.target.value);
+            if (scroller.current) scroller.current.scrollTop = 0;
+          }}
+        />
       </div>
       <div className="flex shrink-0 flex-wrap items-center justify-between gap-2 border-t border-slate-100 px-3 py-2 dark:border-slate-800">
         <span className="text-[11px] text-slate-400">

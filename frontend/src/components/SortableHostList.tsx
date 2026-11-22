@@ -31,7 +31,7 @@ function SortableHost(props: {
     <button
       ref={setActivatorNodeRef}
       type="button"
-      className="ml-2 grid h-9 w-8 shrink-0 touch-none cursor-grab place-items-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-500 active:cursor-grabbing disabled:cursor-wait dark:hover:bg-slate-800 dark:hover:text-slate-100"
+      className="grid h-9 w-8 shrink-0 touch-none cursor-grab place-items-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-500 active:cursor-grabbing disabled:cursor-wait dark:hover:bg-slate-800 dark:hover:text-slate-100"
       {...attributes}
       {...listeners}
       disabled={props.pending}

@@ -101,6 +101,7 @@ test("long-press reorders hosts in both pages and automatic mode hides the handl
     const remote = page.getByRole("button", { name: "远程连接", exact: true });
     await remote.click();
     const handles = page.getByRole("button", { name: /^调整 Remote/ });
+    assert.equal(await handles.first().evaluate((handle) => handle.previousElementSibling?.getAttribute("aria-label")), "置顶");
     const ready = await handles.nth(0).boundingBox();
     const password = await handles.nth(2).boundingBox();
     assert.ok(ready && password);
@@ -115,6 +116,7 @@ test("long-press reorders hosts in both pages and automatic mode hides the handl
     ]);
     await page.getByRole("button", { name: "端口转发", exact: true }).click();
     assert.equal(await handles.first().getAttribute("aria-label"), "调整 Remote refused 的顺序");
+    assert.equal(await handles.first().evaluate((handle) => handle.previousElementSibling?.getAttribute("aria-label")), "置顶");
 
     const settings = page.getByRole("button", { name: "设置", exact: true });
     await settings.click();
@@ -540,6 +542,32 @@ test("a late connection cannot replace the newly chosen host", () =>
     assert.deepEqual(errors, []);
   }));
 
+test("both file panes put navigation above the list and filtering below it", () =>
+  withPage(async (page) => {
+    await chooseHost(page, "ready");
+    await page.getByTitle("/srv/ready", { exact: true }).waitFor();
+    const filters = page.getByRole("textbox", { name: "筛选当前目录", exact: true });
+    assert.equal(await filters.count(), 2);
+    for (const [index, path] of ["/srv/ready", "C:\\Regression"].entries()) {
+      const filter = filters.nth(index);
+      const pane = filter.locator("xpath=../..");
+      const controls = [
+        pane.getByTitle(path, { exact: true }),
+        pane.getByTitle("后退", { exact: true }),
+        pane.getByRole("checkbox", { name: "全选当前目录", exact: true }),
+        pane.locator('div[tabindex="0"]'),
+        filter,
+        pane.getByRole("button", { name: index === 0 ? "发送到右侧" : "发送到左侧", exact: true }),
+      ];
+      let bottom = 0;
+      for (const control of controls) {
+        const box = await control.boundingBox();
+        assert.ok(box && box.y >= bottom, "file pane controls are in the expected vertical order");
+        bottom = box.y + box.height;
+      }
+    }
+  }));
+
 test("local and remote panes hide dotfiles by default and can show, select and browse them", () =>
   withPage(async (page, errors) => {
     for (const host of ["", "ready"]) {
@@ -553,7 +581,7 @@ test("local and remote panes hide dotfiles by default and can show, select and b
       const filter = page
         .getByRole("textbox", { name: "筛选当前目录", exact: true })
         .first();
-      const pane = filter.locator("xpath=../../..");
+      const pane = filter.locator("xpath=../..");
       assert.equal(await toggle.getAttribute("aria-pressed"), "false");
       await filter.fill(".env");
       const file = pane.getByTitle(`${root}${separator}.env`, { exact: true });
