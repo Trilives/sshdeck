@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.4.2
+
+- Add optional launch at Windows sign-in. It is off by default.
+- Keep a fixed host order by default in Remote Connections and Port Forwarding. Hold and drag the handle beside the pin button to reorder hosts within their group.
+- Add optional sorting by the most recent host configuration edit. Creating, editing, or deleting forwards preserves host order.
+- Place navigation above each file list and the current-folder filter below it.
+- Rewrite the English and Chinese in-app guide around common workflows, with a Local forwarding example that matches the form.
+
 ## 0.4.2-beta.4
 
 - Rewrite the English and Chinese in-app guide in the order users set up hosts and complete common tasks.
