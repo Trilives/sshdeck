@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.4.2-beta.3
+
+- Let guide modules flow into responsive columns at their natural heights.
+- Put key-file setup beside host actions and the Local example beside the forwarding modes. Update the file transfer guide for the new control layout.
+
 ## 0.4.2-beta.2
 
 - Place file navigation immediately above the file list and the current-folder filter below it.

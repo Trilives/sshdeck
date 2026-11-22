@@ -133,6 +133,32 @@ test("long-press reorders hosts in both pages and automatic mode hides the handl
     assert.equal(await handles.first().getAttribute("aria-label"), "调整 Remote refused 的顺序");
     assert.deepEqual(errors, []);
   }));
+test("guide modules fill the available width without stretching their cards", () =>
+  withPage(async (page) => {
+    await page.setViewportSize({ width: 1440, height: 800 });
+    await page.getByRole("button", { name: "使用说明", exact: true }).click();
+    const cards = ["每个页面怎么用", "转发模式怎么选", "主机操作", "排错与注意事项"].map(
+      (name) => page.getByRole("heading", { name, exact: true }).locator("xpath=../.."),
+    );
+    await cards[0].waitFor();
+    const cardBoxes = () => Promise.all(cards.map((card) => card.boundingBox()));
+    const wide = await cardBoxes();
+    assert.ok(wide.every(Boolean));
+    assert.equal(new Set(wide.map((box) => box.x)).size, 2);
+    for (const card of cards) {
+      const bottomSpace = await card.evaluate((element) =>
+        element.getBoundingClientRect().bottom - element.lastElementChild.getBoundingClientRect().bottom,
+      );
+      assert.ok(bottomSpace <= 22, `card should end below its content, got ${bottomSpace}px of space`);
+    }
+
+    await page.setViewportSize({ width: 980, height: 640 });
+    const narrow = await cardBoxes();
+    assert.ok(narrow.every(Boolean));
+    assert.equal(new Set(narrow.map((box) => box.x)).size, 1);
+    assert.ok(narrow.every((box, index) => index === 0 || box.y >= narrow[index - 1].y + narrow[index - 1].height));
+  }));
+
 async function rapidScroll(page) {
   await page
     .locator('[tabindex="0"]')

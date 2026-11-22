@@ -49,25 +49,14 @@ export function GuidePage(props: { language: Language }) {
 
   const exampleRows = isZh
     ? [
-        ["目标", "远程服务器上的 127.0.0.1:8000，本地浏览器也能打开"],
-        ["模式", "local"],
-        ["监听地址", "127.0.0.1"],
-        ["监听端口", "8000"],
-        ["目标地址", "127.0.0.1"],
-        ["目标端口", "8000"],
-        ["打开方式", "连接成功后访问 http://127.0.0.1:8000"],
+        ["模式", "Local"],
+        ["监听地址和端口", "127.0.0.1:8000"],
+        ["目标地址和端口", "127.0.0.1:8000"],
       ]
     : [
-        [
-          "Goal",
-          "Open 127.0.0.1:8000 on the remote server from your local browser",
-        ],
-        ["Mode", "local"],
-        ["Bind Host", "127.0.0.1"],
-        ["Bind Port", "8000"],
-        ["Target Host", "127.0.0.1"],
-        ["Target Port", "8000"],
-        ["Open", "Visit http://127.0.0.1:8000 after connecting"],
+        ["Mode", "Local"],
+        ["Bind host and port", "127.0.0.1:8000"],
+        ["Target host and port", "127.0.0.1:8000"],
       ];
 
   const pageCards = isZh
@@ -201,7 +190,7 @@ export function GuidePage(props: { language: Language }) {
         ],
         [
           "浏览与勾选",
-          "双击文件夹进入，点击小箭头展开目录树；点击路径栏可打开目录选择器，使用目录树或历史目录。默认不显示 . 开头的隐藏文件和文件夹，文件面板和目录选择弹窗均可点击「隐藏文件」按钮显示。勾选框、Ctrl / Shift 和全选可用于多选；双击普通文件不会进入目录。",
+          "双击文件夹进入，点击小箭头展开目录树，或点击路径栏使用目录选择器和历史目录。列表上方可后退或返回上一级，下方可筛选。勾选框、Ctrl / Shift 和全选可用于多选。文件面板和目录选择器均可用「隐藏文件」按钮显示以 . 开头的条目。",
         ],
         [
           "发送与同名文件",
@@ -231,7 +220,7 @@ export function GuidePage(props: { language: Language }) {
         ],
         [
           "Browse and select",
-          "Double-click folders to enter, or use the arrows to expand the tree. Click a path bar for the folder picker and history. Dotfiles and hidden folders are hidden by default; use Hidden files in either the file pane or folder picker to show them. Use checkboxes, Ctrl / Shift or Select all for multiple selection. Double-clicking a regular file does not open a folder.",
+          "Double-click folders to enter, expand them with the arrows, or open the folder picker and history from the path bar. Back and Parent folder sit above the list, with the current-folder filter below. Use checkboxes, Ctrl / Shift or Select all to select multiple items. The Hidden files toggle in the pane or picker shows entries that start with a dot.",
         ],
         [
           "Send and handle conflicts",
@@ -284,11 +273,11 @@ export function GuidePage(props: { language: Language }) {
               : "Start with a host, then learn remote folders, file transfers, distribution, direct SSH setup and port forwarding."}
           </CardDescription>
         </CardHeader>
-        <div className="grid grid-cols-3 gap-4">
+        <div className="flex flex-wrap gap-4">
           {quickSteps.map(([step, title, body]) => (
             <div
               key={step}
-              className="rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-900"
+              className="min-w-0 flex-[1_1_12rem] rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-900"
             >
               <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-600 text-sm font-semibold text-white">
                 {step}
@@ -304,56 +293,48 @@ export function GuidePage(props: { language: Language }) {
         </div>
       </Card>
 
-      <GuidePanel title={isZh ? "文件传输怎么用" : "Using File Transfer"}>
+      <GuidePanel title={isZh ? "文件传输怎么用" : "Using File Transfer"} contentClassName="flex flex-wrap gap-3">
         {fileSteps.map(([title, body]) => (
-          <GuideLine key={title} title={title} body={body} />
+          <GuideLine key={title} title={title} body={body} className="min-w-0 flex-[1_1_17rem]" />
         ))}
       </GuidePanel>
 
-      <GuideTable
-        title={
-          isZh
-            ? "常用样例：本地打开远程 127.0.0.1:8000"
-            : "Common Example: Open Remote 127.0.0.1:8000 Locally"
-        }
-        description={
-          isZh
-            ? "这是 Local 转发的典型场景。远程服务只监听服务器自己的 127.0.0.1，但你可以通过 SSH 隧道在本地浏览器访问。"
-            : "The typical Local forwarding case. The remote service only listens on the server's own 127.0.0.1, but your local browser can reach it through the SSH tunnel."
-        }
-        rows={exampleRows}
-      />
-
-      <div className="grid grid-cols-2 gap-5">
-        <GuidePanel title={isZh ? "每个页面怎么用" : "Pages"}>
+      <div className="[column-gap:1.25rem] [columns:24rem_2]">
+        <GuidePanel title={isZh ? "每个页面怎么用" : "Pages"} className="mb-5 break-inside-avoid">
           {pageCards.map(([title, body]) => (
             <GuideLine key={title} title={title} body={body} />
           ))}
         </GuidePanel>
-        <GuidePanel title={isZh ? "转发模式怎么选" : "Forwarding Modes"}>
+        <GuidePanel title={isZh ? "转发模式怎么选" : "Forwarding Modes"} className="mb-5 break-inside-avoid">
           {modeCards.map(([title, body]) => (
             <GuideLine key={title} title={title} body={body} />
           ))}
+          <div className="rounded-2xl bg-slate-50 p-4 dark:bg-slate-900">
+            <h3 className="text-sm font-semibold text-slate-950 dark:text-slate-50">
+              {isZh ? "示例：在本机打开远程服务" : "Example: Open a remote service locally"}
+            </h3>
+            <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+              {isZh
+                ? "用以下配置转发远程服务器上的 127.0.0.1:8000，连接后在本机浏览器打开 http://127.0.0.1:8000。"
+                : "Forward 127.0.0.1:8000 on the server with these settings, then open http://127.0.0.1:8000 in your local browser."}
+            </p>
+            <dl className="mt-3 flex flex-wrap gap-x-4 gap-y-2 text-sm">
+              {exampleRows.map(([label, value]) => (
+                <div key={label}>
+                  <dt className="text-xs text-slate-500 dark:text-slate-400">{label}</dt>
+                  <dd className="font-mono text-slate-800 dark:text-slate-200">{value}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
         </GuidePanel>
-      </div>
-
-      <div className="grid grid-cols-2 gap-5">
-        <GuidePanel title={isZh ? "主机操作" : "Host Actions"}>
+        <GuidePanel title={isZh ? "主机操作" : "Host Actions"} className="mb-5 break-inside-avoid">
           {hostOps.map(([title, body]) => (
             <GuideLine key={title} title={title} body={body} />
           ))}
+          <GuideLine title={isZh ? "密钥文件怎么填" : "How to Fill the Key File"} body={keyFileNote} />
         </GuidePanel>
-        <GuidePanel
-          title={isZh ? "密钥文件怎么填" : "How to Fill the Key File"}
-        >
-          <div className="rounded-2xl bg-slate-50 p-4 text-sm leading-6 text-slate-600 dark:bg-slate-900 dark:text-slate-300">
-            {keyFileNote}
-          </div>
-        </GuidePanel>
-      </div>
-
-      <GuidePanel title={isZh ? "排错与注意事项" : "Troubleshooting"}>
-        <div className="grid gap-3">
+        <GuidePanel title={isZh ? "排错与注意事项" : "Troubleshooting"} className="break-inside-avoid">
           {tips.map((tip) => (
             <div
               key={tip}
@@ -366,58 +347,31 @@ export function GuidePage(props: { language: Language }) {
               <span>{tip}</span>
             </div>
           ))}
-        </div>
-      </GuidePanel>
+        </GuidePanel>
+      </div>
     </div>
   );
 }
 
-function GuideTable(props: {
+function GuidePanel(props: {
   title: string;
-  description: string;
-  rows: string[][];
+  children: ReactNode;
+  className?: string;
+  contentClassName?: string;
 }) {
   return (
-    <Card>
-      <div className="text-base font-semibold text-slate-950 dark:text-slate-50">
-        {props.title}
-      </div>
-      <p className="mt-2 text-sm leading-6 text-slate-500 dark:text-slate-400">
-        {props.description}
-      </p>
-      <div className="mt-4 overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800">
-        {props.rows.map(([label, value]) => (
-          <div
-            key={`${label}-${value}`}
-            className="grid grid-cols-[120px_1fr] border-b border-slate-100 last:border-b-0 dark:border-slate-800"
-          >
-            <div className="bg-blue-50 px-3 py-2 text-sm font-medium text-blue-700 dark:bg-blue-950/40 dark:text-blue-300">
-              {label}
-            </div>
-            <div className="px-3 py-2 text-sm text-slate-600 dark:text-slate-300">
-              {value}
-            </div>
-          </div>
-        ))}
-      </div>
-    </Card>
-  );
-}
-
-function GuidePanel(props: { title: string; children: ReactNode }) {
-  return (
-    <Card>
+    <Card className={props.className}>
       <CardHeader>
         <CardTitle>{props.title}</CardTitle>
       </CardHeader>
-      <div className="grid gap-3">{props.children}</div>
+      <div className={props.contentClassName ?? "grid gap-3"}>{props.children}</div>
     </Card>
   );
 }
 
-function GuideLine(props: { title: string; body: string }) {
+function GuideLine(props: { title: string; body: string; className?: string }) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950">
+    <div className={`rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950 ${props.className ?? ""}`}>
       <div className="text-sm font-semibold text-slate-950 dark:text-slate-50">
         {props.title}
       </div>
