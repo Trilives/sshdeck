@@ -141,8 +141,8 @@ const text = {
     keepConnected: "保持连接并自动重连",
 
     // Host dialog
-    hostDialogTitle: "主机连接",
-    hostDialogDesc: "只填 SSH 连接参数。端口转发在主机展开后单独新建。",
+    hostDialogDesc: "配置此主机的 SSH 连接。",
+    hostAdvancedOptions: "高级 SSH 设置",
     // Forward dialog
     forwardDialogTitle: "端口转发",
     forwardDialogDesc: "Local 访问远端内网服务，Remote 反向暴露本地服务，Dynamic 创建 SOCKS 代理。",
@@ -396,8 +396,8 @@ const text = {
     targetPortHint: "The port the remote service actually listens on.",
     keepConnected: "Keep connected and reconnect automatically",
 
-    hostDialogTitle: "Host Connection",
-    hostDialogDesc: "Only SSH connection parameters. Port forwards are created after expanding the host.",
+    hostDialogDesc: "Configure the SSH connection for this host.",
+    hostAdvancedOptions: "Advanced SSH settings",
     forwardDialogTitle: "Port Forward",
     forwardDialogDesc: "Local reaches remote services, Remote exposes local services, Dynamic creates a SOCKS proxy.",
     save: "Save",

@@ -1,6 +1,6 @@
 import { ModalOverlay } from "./ui/ModalOverlay";
 import { type ReactNode, useState } from "react";
-import { X } from "lucide-react";
+import { ChevronDown, Server, X } from "lucide-react";
 import { Button } from "./ui/button";
 import { Card, CardDescription, CardHeader, CardTitle } from "./ui/card";
 import { Input } from "./ui/input";
@@ -20,11 +20,11 @@ function Modal(props: { children: ReactNode; maxWidth?: string }) {
   );
 }
 
-function Field(props: { label: string; value: string; onChange: (value: string) => void; placeholder?: string; hint?: string }) {
+function Field(props: { label: string; value: string; onChange: (value: string) => void; placeholder?: string; hint?: string; autoFocus?: boolean }) {
   return (
-    <label className="grid gap-2 text-sm font-medium text-slate-600 dark:text-slate-300">
+    <label className="grid min-w-0 gap-2 text-sm font-medium text-slate-600 dark:text-slate-300">
       {props.label}
-      <Input value={props.value} placeholder={props.placeholder} onChange={(event) => props.onChange(event.target.value)} />
+      <Input value={props.value} placeholder={props.placeholder} autoFocus={props.autoFocus} onChange={(event) => props.onChange(event.target.value)} />
       {props.hint && <span className="text-xs font-normal leading-5 text-slate-400 dark:text-slate-500">{props.hint}</span>}
     </label>
   );
@@ -52,51 +52,83 @@ export function HostDialog(props: {
   onSave: () => void;
 }) {
   const lang = props.language;
+  const [showAdvanced, setShowAdvanced] = useState(() => Boolean(props.draft.proxyJump || props.draft.extraOptions));
+
   const update = <K extends keyof Host>(key: K, value: Host[K]) => props.setDraft({ ...props.draft, [key]: value });
   return (
-    <Modal maxWidth="max-w-2xl">
-      <DialogHeader title={t(lang, "hostDialogTitle")} description={t(lang, "hostDialogDesc")} onClose={props.onClose} />
-      <div className="grid grid-cols-2 gap-4">
-        <Field label={t(lang, "name")} value={props.draft.name} onChange={(v) => update("name", v)} />
-        <Field
-          label={t(lang, "sshUser")}
-          value={props.draft.sshUser}
-          onChange={(v) => update("sshUser", v)}
-          hint={t(lang, "sshUserHint")}
-        />
-        <Field
-          label={t(lang, "sshHost")}
-          value={props.draft.sshHost}
-          // ssh can only resolve ASCII hosts: strip spaces and non-ASCII (e.g. Chinese) as they're typed.
-          onChange={(v) => update("sshHost", v.replace(/[^A-Za-z0-9.\-_:%]/g, ""))}
-          hint={t(lang, "sshHostHint")}
-        />
-        <Field label={t(lang, "sshPort")} value={props.draft.sshPort} onChange={(v) => update("sshPort", v)} />
-        <div className="col-span-2">
+    <ModalOverlay className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/55 p-4 backdrop-blur-sm [&>*]:max-h-[calc(100dvh-2rem)] [&>*]:overflow-y-hidden">
+      <Card
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="host-dialog-title"
+        aria-describedby="host-dialog-description"
+        onKeyDown={(event) => {
+          if (event.key === "Escape") props.onClose();
+        }}
+        className="flex w-full max-w-xl flex-col overflow-hidden border-slate-200 bg-white p-0 shadow-2xl dark:border-slate-700 dark:bg-slate-950"
+      >
+        <header className="flex items-start gap-3 border-b border-slate-200 px-4 py-4 sm:px-6 dark:border-slate-800">
+          <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-950 dark:text-blue-300">
+            <Server size={20} aria-hidden="true" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <CardTitle id="host-dialog-title">{t(lang, props.draft.id ? "editHost" : "newHost")}</CardTitle>
+            <CardDescription id="host-dialog-description">{t(lang, "hostDialogDesc")}</CardDescription>
+          </div>
+          <Button className="h-8 w-8 shrink-0 p-0" variant="ghost" onClick={props.onClose} aria-label={t(lang, "close")}>
+            <X size={18} aria-hidden="true" />
+          </Button>
+        </header>
+        <div className="grid gap-4 overflow-y-auto overscroll-contain px-4 py-5 sm:px-6">
+          <Field label={t(lang, "name")} value={props.draft.name} onChange={(v) => update("name", v)} autoFocus />
+          <div className="grid items-start gap-4 sm:grid-cols-[minmax(0,1fr)_6rem]">
+            <Field
+              label={t(lang, "sshHost")}
+              value={props.draft.sshHost}
+              // ssh can only resolve ASCII hosts: strip spaces and non-ASCII (e.g. Chinese) as they're typed.
+              onChange={(v) => update("sshHost", v.replace(/[^A-Za-z0-9.\-_:%]/g, ""))}
+              hint={t(lang, "sshHostHint")}
+            />
+            <Field label={t(lang, "sshPort")} value={props.draft.sshPort} onChange={(v) => update("sshPort", v)} />
+          </div>
+          <Field
+            label={t(lang, "sshUser")}
+            value={props.draft.sshUser}
+            onChange={(v) => update("sshUser", v)}
+            hint={t(lang, "sshUserHint")}
+          />
           <Field
             label={t(lang, "identityFile")}
             value={props.draft.identityFile}
             onChange={(v) => update("identityFile", v)}
             hint={t(lang, "identityFileHint")}
           />
+          <details
+            open={showAdvanced}
+            onToggle={(event) => setShowAdvanced(event.currentTarget.open)}
+            className="group rounded-xl border border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-900/60"
+          >
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-700 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-blue-500 dark:text-slate-200 [&::-webkit-details-marker]:hidden">
+              {t(lang, "hostAdvancedOptions")}
+              <ChevronDown size={16} aria-hidden="true" className="shrink-0 group-open:rotate-180" />
+            </summary>
+            <div className="grid gap-4 border-t border-slate-200 px-3 py-4 dark:border-slate-800">
+              <Field
+                label={t(lang, "proxyJump")}
+                value={props.draft.proxyJump}
+                onChange={(v) => update("proxyJump", v)}
+                hint={t(lang, "proxyJumpHint")}
+              />
+              <Field label={t(lang, "extraOptions")} value={props.draft.extraOptions} onChange={(v) => update("extraOptions", v)} />
+            </div>
+          </details>
         </div>
-        <div className="col-span-2">
-          <Field
-            label={t(lang, "proxyJump")}
-            value={props.draft.proxyJump}
-            onChange={(v) => update("proxyJump", v)}
-            hint={t(lang, "proxyJumpHint")}
-          />
-        </div>
-        <div className="col-span-2">
-          <Field label={t(lang, "extraOptions")} value={props.draft.extraOptions} onChange={(v) => update("extraOptions", v)} />
-        </div>
-      </div>
-      <div className="mt-5 flex justify-end gap-3">
-        <Button variant="secondary" onClick={props.onClose}>{t(lang, "cancel")}</Button>
-        <Button onClick={props.onSave}>{t(lang, "save")}</Button>
-      </div>
-    </Modal>
+        <footer className="flex justify-end gap-2 border-t border-slate-200 bg-slate-50 px-4 py-3 sm:px-6 dark:border-slate-800 dark:bg-slate-900/60">
+          <Button variant="secondary" onClick={props.onClose}>{t(lang, "cancel")}</Button>
+          <Button onClick={props.onSave}>{t(lang, "save")}</Button>
+        </footer>
+      </Card>
+    </ModalOverlay>
   );
 }
 
