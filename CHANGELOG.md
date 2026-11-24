@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.4.3
+
+- Redesign the New Host and Edit Host dialogs with clearer spacing and grouped SSH address and port fields. Save and Cancel stay visible while the form scrolls.
+- Place ProxyJump and extra SSH options in a collapsible section that opens automatically when a host already uses those settings.
+
 ## 0.4.3-beta.1
 
 - Redesign the New Host and Edit Host dialogs with clearer spacing, grouped address and port fields, and Save and Cancel buttons that stay visible while the form scrolls.
