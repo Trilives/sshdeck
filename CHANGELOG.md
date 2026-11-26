@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.4.4
+
+- Add a plus menu on Home. Open the New Host form in Remote Connections or choose and reveal a saved host in Port Forwarding.
+- Keep the dashboard within the window when key events contain long messages. Hover over an abbreviated message to read the full text.
+
 ## 0.4.4-beta.1
 
 - Add a plus menu on Home to open the New Host dialog in Remote Connections or find an existing host in Port Forwarding.

@@ -126,7 +126,7 @@ export function installTauriFixture() {
         case "check_ssh":
           return true;
         case "plugin:app|version":
-          return "0.4.4-beta.1";
+          return "0.4.4";
         case "plugin:event|listen": {
           const id = ++sequence;
           listeners.set(id, args);
