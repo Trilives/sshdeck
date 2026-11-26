@@ -26,7 +26,10 @@ export function HostCard(props: {
   const forwards = props.host.forwards ?? [];
   const runningCount = forwards.filter((item) => item.status === "running").length;
   return (
-    <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-soft dark:border-slate-800 dark:bg-slate-950/70">
+    <div
+      id={"forwarding-host-" + props.host.id}
+      className="scroll-mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-soft dark:border-slate-800 dark:bg-slate-950/70"
+    >
       <HostCardHeader
         language={lang}
         host={props.host}

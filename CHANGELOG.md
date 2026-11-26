@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.4.4-beta.1
+
+- Add a plus menu on Home to open the New Host dialog in Remote Connections or find an existing host in Port Forwarding.
+- Keep the dashboard within the window when key events contain long messages. Hover over an abbreviated event to see its full text.
+
 ## 0.4.3
 
 - Redesign the New Host and Edit Host dialogs with clearer spacing and grouped SSH address and port fields. Save and Cancel stay visible while the form scrolls.

@@ -1,4 +1,5 @@
-import { Activity, CircleSlash, Globe, Pin, Plug, Plus, PlugZap, Server } from "lucide-react";
+import { Activity, CircleSlash, Globe, Pin, Plug, PlugZap, Server } from "lucide-react";
+import { DashboardCreateMenu } from "../components/DashboardCreateMenu";
 import { Button } from "../components/ui/button";
 import { Card, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
 import { cn } from "../lib/utils";
@@ -16,7 +17,8 @@ export function DashboardPage(props: {
   language: Language;
   hosts: Host[];
   logs: LogEntry[];
-  onNew: () => void;
+  onNewHost: () => void;
+  onChooseForwardHost: () => void;
   onStopAll: () => void;
   onDisconnectForward: (host: Host, forward: Forward) => void;
   onOpenForwardWeb: (host: Host, forward: Forward) => void;
@@ -30,18 +32,15 @@ export function DashboardPage(props: {
   const keyEvents = props.logs.filter(isKeyEvent).slice(-8).reverse();
 
   return (
-    <div className="grid gap-5">
-      <Card>
+    <div className="grid grid-cols-1 gap-5">
+      <Card className="relative z-10">
         <CardHeader className="flex flex-row items-start justify-between gap-4">
           <div className="space-y-1">
             <CardTitle>{t(lang, "currentConnections")}</CardTitle>
             <CardDescription>{t(lang, "dashboardDesc")}</CardDescription>
           </div>
           <div className="flex shrink-0 gap-2">
-            <Button onClick={props.onNew}>
-              <Plus size={15} />
-              {t(lang, "new")}
-            </Button>
+            <DashboardCreateMenu language={lang} onNewHost={props.onNewHost} onForwarding={props.onChooseForwardHost} />
             {groups.length > 0 && (
               <Button variant="secondary" onClick={props.onStopAll}>
                 <CircleSlash size={15} />
@@ -65,12 +64,15 @@ export function DashboardPage(props: {
                   <span className="truncate text-sm font-semibold text-slate-900 dark:text-slate-100">{host.name}</span>
                 </div>
                 {/* Right column: list of this host's running ports */}
-                <div className="flex-1 divide-y divide-slate-100 dark:divide-slate-800">
+                <div className="min-w-0 flex-1 divide-y divide-slate-100 dark:divide-slate-800">
                   {running.map((forward) => (
                     <div key={forward.id} className="flex flex-wrap items-center gap-3 px-4 py-2.5">
                       <div className="min-w-[8rem] flex-1">
-                        <div className="text-sm font-medium text-slate-900 dark:text-slate-100">{forward.name}</div>
-                        <div className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+                        <div className="truncate text-sm font-medium text-slate-900 dark:text-slate-100" title={forward.name}>{forward.name}</div>
+                        <div
+                          className="mt-0.5 truncate text-xs text-slate-500 dark:text-slate-400"
+                          title={forward.bindDisplay + " → " + forward.targetDisplay}
+                        >
                           <span className="uppercase">{forward.mode}</span>
                           {" · "}
                           {forward.bindDisplay} → {forward.targetDisplay}
@@ -104,7 +106,7 @@ export function DashboardPage(props: {
             </CardTitle>
             <CardDescription>{t(lang, "pinnedHostsDesc")}</CardDescription>
           </CardHeader>
-          <div className="grid gap-2">
+          <div className="grid grid-cols-1 gap-2">
             {pinned.map((host) => (
               <div
                 key={host.id}
@@ -145,7 +147,7 @@ export function DashboardPage(props: {
         {keyEvents.length === 0 ? (
           <p className="px-1 py-4 text-sm text-slate-400 dark:text-slate-500">{t(lang, "noEvents")}</p>
         ) : (
-          <div className="grid gap-1.5">
+          <div className="grid grid-cols-1 gap-1.5">
             {keyEvents.map((log, index) => (
               <div key={`${log.timestamp}-${index}`} className="flex items-center gap-3 rounded-lg px-2 py-1.5 text-sm">
                 <span className="whitespace-nowrap text-xs text-slate-400">{log.timestamp}</span>
@@ -161,7 +163,9 @@ export function DashboardPage(props: {
                 >
                   {log.level}
                 </span>
-                <span className="truncate text-slate-700 dark:text-slate-200">{log.message}</span>
+                <span className="min-w-0 flex-1 truncate text-slate-700 dark:text-slate-200" title={log.message}>
+                  {log.message}
+                </span>
               </div>
             ))}
           </div>

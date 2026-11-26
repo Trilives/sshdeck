@@ -19,7 +19,7 @@ export function HostCardHeader(props: {
 
   return (
     <div className="flex w-full items-center gap-2 pr-4 transition hover:bg-slate-50 dark:hover:bg-slate-900">
-      <button onClick={props.onToggle} className="flex min-w-0 flex-1 items-center gap-3 px-5 py-4 text-left">
+      <button aria-expanded={props.expanded} onClick={props.onToggle} className="flex min-w-0 flex-1 items-center gap-3 px-5 py-4 text-left">
         {props.expanded ? <ChevronDown size={18} className="text-slate-400" /> : <ChevronRight size={18} className="text-slate-400" />}
         <div className={`flex h-9 w-9 items-center justify-center rounded-xl ${props.accentClassName}`}>
           <Server size={18} />

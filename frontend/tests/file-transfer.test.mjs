@@ -78,6 +78,115 @@ async function chooseHost(page, id) {
     .click();
 }
 
+test("long dashboard events keep the cards and connection actions within the window", () =>
+  withPage(async (page, errors) => {
+    await page.setViewportSize({ width: 980, height: 640 });
+    const message = "[Remote ready/Web] exited with code 255: " +
+      "channel 1: open failed: connect failed: ".repeat(20) +
+      "x".repeat(300);
+    await page.evaluate((message) => {
+      const { hosts, logs } = window.fixture;
+      hosts[0].pinned = true;
+      hosts[0].forwards = [{
+        id: "dashboard-forward",
+        name: "Web",
+        mode: "local",
+        status: "running",
+        bindDisplay: "127.0.0.1:18000",
+        targetDisplay: "127.0.0.1:8000",
+      }];
+      logs.push({ level: "warning", timestamp: "2026-11-26 15:41:52", message });
+    }, message);
+    await page.getByRole("button", { name: "主页", exact: true }).click();
+    const dashboard = page.locator("main > div > section");
+    const event = dashboard.getByText(message, { exact: true });
+    await event.waitFor();
+    const dimensions = await dashboard.evaluate((element) => ({
+      available: element.clientWidth,
+      content: element.scrollWidth,
+      right: element.getBoundingClientRect().left + element.clientWidth,
+    }));
+    assert.equal(dimensions.content, dimensions.available, "the dashboard must not scroll horizontally");
+    assert.equal(await event.getAttribute("title"), message, "the full log is available on hover");
+    for (const name of ["新建", "全部断开", "在浏览器打开", "断开", "远程连接"]) {
+      const action = await dashboard.getByRole("button", { name, exact: true }).boundingBox();
+      assert.ok(action && action.x + action.width <= dimensions.right, name + " must fit in the dashboard");
+    }
+    assert.deepEqual(errors, []);
+  }));
+
+test("the dashboard plus menu opens each workflow on its sidebar page", () =>
+  withPage(async (page, errors) => {
+    await page.setViewportSize({ width: 980, height: 640 });
+    const home = page.getByRole("button", { name: "主页", exact: true });
+    const plus = page.getByRole("button", { name: "新建", exact: true });
+    const menu = plus.locator("..");
+    await home.click();
+    assert.equal(await plus.textContent(), "", "the create button shows only its icon");
+    await plus.press("Enter");
+    assert.equal(await plus.getAttribute("aria-expanded"), "true");
+    await menu.getByRole("button", { name: "端口转发", exact: true }).press("Escape");
+    assert.equal(await plus.getAttribute("aria-expanded"), "false");
+    assert.ok(await plus.evaluate((button) => button === document.activeElement));
+
+    await plus.click();
+    await menu.getByRole("button", { name: "新建主机", exact: true }).click();
+    await page.getByRole("heading", { name: "远程连接", exact: true }).waitFor();
+    const hostDialog = page.getByRole("dialog", { name: "新建主机", exact: true });
+    await hostDialog.getByRole("button", { name: "取消", exact: true }).click();
+
+    await page.evaluate(() => {
+      const hosts = window.fixture.hosts;
+      const target = hosts.pop();
+      const fillers = Array.from({ length: 12 }, (_, index) => ({
+        ...hosts[0], id: "filler-" + index, name: "Filler " + index,
+      }));
+      target.forwards = [{
+        id: "saved-forward",
+        name: "已有转发",
+        mode: "local",
+        status: "stopped",
+        bindDisplay: "127.0.0.1:18000",
+        targetDisplay: "127.0.0.1:8000",
+      }];
+      hosts.push(...fillers, target);
+    });
+    await home.click();
+    await plus.click();
+    await menu.getByRole("button", { name: "端口转发", exact: true }).click();
+    await page.getByRole("heading", { name: "端口转发管理", exact: true }).waitFor();
+    const picker = page.getByRole("dialog", { name: "选择转发主机", exact: true });
+    await picker.getByRole("button", { name: /^Filler 11 / }).waitFor();
+    await picker.getByRole("textbox", { name: "搜索主机名称或地址" }).fill("Remote slow");
+    const choices = picker.getByRole("button", { name: /^Remote / });
+    assert.equal(await choices.count(), 1);
+    await choices.first().click();
+    await picker.waitFor({ state: "hidden" });
+    const card = page.locator("#forwarding-host-slow");
+    await card.getByText("已有转发", { exact: true }).waitFor();
+    await page.waitForFunction(() => document.activeElement?.closest("#forwarding-host-slow"));
+    const scrolled = await page.locator("main > div > section").evaluate((element) => element.scrollTop);
+    assert.ok(scrolled > 0, "the selected host is scrolled into view");
+    await card.getByRole("button", { name: "新建端口转发", exact: true }).click();
+    await page.getByRole("heading", { name: "端口转发", exact: true }).waitFor();
+    assert.deepEqual(errors, []);
+  }));
+
+test("the dashboard forwarding shortcut offers to add the first host", () =>
+  withPage(async (page, errors) => {
+    await page.evaluate(() => window.fixture.hosts.splice(0));
+    await page.getByRole("button", { name: "主页", exact: true }).click();
+    const plus = page.getByRole("button", { name: "新建", exact: true });
+    await plus.click();
+    await plus.locator("..").getByRole("button", { name: "端口转发", exact: true }).click();
+    const picker = page.getByRole("dialog", { name: "选择转发主机", exact: true });
+    await picker.getByRole("button", { name: "新建主机", exact: true }).click();
+    await page.getByRole("dialog", { name: "新建主机", exact: true }).waitFor();
+    await page.getByRole("heading", { name: "远程连接", exact: true }).waitFor();
+    assert.equal(await picker.count(), 0);
+    assert.deepEqual(errors, []);
+  }));
+
 test("launch at login is opt-in and the settings page reloads its state", () =>
   withPage(async (page) => {
     const settings = page.getByRole("button", { name: "设置", exact: true });
@@ -114,7 +223,10 @@ test("long-press reorders hosts in both pages and automatic mode hides the handl
     assert.deepEqual(await handles.evaluateAll((buttons) => buttons.map((button) => button.getAttribute("aria-label"))), [
       "调整 Remote refused 的顺序", "调整 Remote password 的顺序", "调整 Remote ready 的顺序", "调整 Remote slow 的顺序",
     ]);
+    // dnd-kit briefly suppresses document clicks after pointer release.
+    await page.waitForTimeout(100);
     await page.getByRole("button", { name: "端口转发", exact: true }).click();
+    await page.getByRole("heading", { name: "端口转发管理", exact: true }).waitFor();
     assert.equal(await handles.first().getAttribute("aria-label"), "调整 Remote refused 的顺序");
     assert.equal(await handles.first().evaluate((handle) => handle.previousElementSibling?.getAttribute("aria-label")), "置顶");
 

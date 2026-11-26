@@ -6,6 +6,7 @@ import { forwardWebUrl } from "./lib/utils";
 import { t } from "./i18n";
 import { AppSidebar, type AppPage } from "./components/AppSidebar";
 import { AppDialogs } from "./components/AppDialogs";
+import { ForwardHostPicker } from "./components/ForwardHostPicker";
 import { ToastNotifications } from "./components/ToastNotifications";
 import { DashboardPage } from "./pages/DashboardPage";
 import { PortForwardingPage } from "./pages/PortForwardingPage";
@@ -61,6 +62,7 @@ export function App() {
   // Dialogs
   const [hostDialog, setHostDialog] = useState<Host | null>(null);
   const [forwardDialog, setForwardDialog] = useState<{ hostId: string; draft: Forward } | null>(null);
+  const [forwardHostPickerOpen, setForwardHostPickerOpen] = useState(false);
   const [sendCmd, setSendCmd] = useState<{ hostId: string; hostName: string } | null>(null);
   const [command, setCommand] = useState("");
   const [commandOutput, setCommandOutput] = useState("");
@@ -266,6 +268,22 @@ export function App() {
 
   function expand(hostId: string) {
     setForwardingExpandedIds((prev) => new Set(prev).add(hostId));
+  }
+
+  function startNewHost() {
+    setForwardHostPickerOpen(false);
+    setPage("remote");
+    setHostDialog(newHost());
+  }
+
+  function revealForwardHost(hostId: string) {
+    setForwardHostPickerOpen(false);
+    expand(hostId);
+    window.requestAnimationFrame(() => {
+      const card = document.getElementById("forwarding-host-" + hostId);
+      card?.scrollIntoView({ block: "start" });
+      card?.querySelector("button")?.focus({ preventScroll: true });
+    });
   }
 
   // ---- Host CRUD ----
@@ -788,7 +806,10 @@ export function App() {
     <main className="h-screen overflow-hidden bg-slate-50/90 text-slate-950 backdrop-blur-xl transition duration-300 dark:bg-[#090d18]/90 dark:text-slate-50">
       <ToastNotifications language={language} error={error} notice={notice} setError={setError} setNotice={setNotice} />
       <div className="flex h-full min-h-0">
-        <AppSidebar language={language} page={page} onNavigate={setPage} />
+        <AppSidebar language={language} page={page} onNavigate={(nextPage) => {
+          setForwardHostPickerOpen(false);
+          setPage(nextPage);
+        }} />
 
         <section className="min-h-0 min-w-0 flex-1 overflow-y-auto p-6">
           {page === "dashboard" && update.status === "available" && !updateDismissed && (
@@ -813,9 +834,10 @@ export function App() {
                 language={language}
                 hosts={hosts}
                 logs={logs}
-                onNew={() => {
+                onNewHost={startNewHost}
+                onChooseForwardHost={() => {
                   setPage("forwarding");
-                  setHostDialog(newHost());
+                  setForwardHostPickerOpen(true);
                 }}
                 onStopAll={async () => {
                   await api.disconnectAll();
@@ -887,6 +909,15 @@ export function App() {
         </section>
       </div>
 
+      {page === "forwarding" && forwardHostPickerOpen && (
+        <ForwardHostPicker
+          hosts={hosts}
+          language={language}
+          onClose={() => setForwardHostPickerOpen(false)}
+          onSelect={revealForwardHost}
+          onNewHost={startNewHost}
+        />
+      )}
       <AppDialogs {...dialogProps} />
     </main>
   );

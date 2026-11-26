@@ -30,6 +30,8 @@ export function installTauriFixture() {
     updateChannel: "preview",
   };
   const fixture = (window.fixture = {
+    hosts,
+    logs: [],
     requests: [],
     closed: [],
     breakNextListing: false,
@@ -117,13 +119,14 @@ export function installTauriFixture() {
           launchAtLogin = args.enabled;
           return launchAtLogin;
         case "list_logs":
+          return fixture.logs;
         case "list_history":
         case "list_file_transfers":
           return [];
         case "check_ssh":
           return true;
         case "plugin:app|version":
-          return "0.4.3";
+          return "0.4.4-beta.1";
         case "plugin:event|listen": {
           const id = ++sequence;
           listeners.set(id, args);
