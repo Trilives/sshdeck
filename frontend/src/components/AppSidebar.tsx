@@ -27,7 +27,7 @@ export function AppSidebar(props: {
           <Terminal size={22} />
         </div>
         <h1 className="mt-4 text-2xl font-semibold tracking-normal">{t(props.language, "title")}</h1>
-        <p className="mt-2 text-sm leading-6 text-slate-500 dark:text-slate-400">{t(props.language, "subtitle")}</p>
+        <p className="mt-2 whitespace-pre-line text-sm leading-6 text-slate-500 dark:text-slate-400">{t(props.language, "subtitle")}</p>
       </div>
       <nav className="space-y-2">
         {nav.map((item) => (

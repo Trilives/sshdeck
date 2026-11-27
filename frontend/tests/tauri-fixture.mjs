@@ -35,6 +35,7 @@ export function installTauriFixture() {
     hosts,
     logs: [],
     history: {},
+    transferFolders: {},
     requests: [],
     closed: [],
     breakNextListing: false,
@@ -125,13 +126,15 @@ export function installTauriFixture() {
         case "list_logs":
           return fixture.logs;
         case "list_history":
-          return fixture.history[args.hostId] ?? [];
+          return [...(fixture.history[args.hostId] ?? [])].sort((a, b) => b.openedAt - a.openedAt);
+        case "list_transfer_folders":
+          return fixture.transferFolders[args.hostId] ?? [];
         case "list_file_transfers":
           return [];
         case "check_ssh":
           return true;
         case "plugin:app|version":
-          return "0.4.5-beta.3";
+          return "0.4.5-beta.4";
         case "plugin:event|listen": {
           const id = ++sequence;
           listeners.set(id, args);
@@ -185,6 +188,20 @@ export function installTauriFixture() {
             alias: "test",
             uri: "vscode-remote://test",
           };
+        case "open_terminal": {
+          if (!args.path) return;
+          const entries = (fixture.history[args.hostId] ??= []);
+          const current = entries.find((entry) => entry.label === args.path);
+          if (current) {
+            current.openedAt = Date.now();
+          } else {
+            entries.push({
+              id: `terminal-${++sequence}`, hostId: args.hostId, kind: "terminal-path",
+              label: args.path, uri: "", detail: "", openedAt: Date.now(),
+            });
+          }
+          return;
+        }
         case "vscode_status":
           return { installed: true, remoteSsh: true };
         case "list_files":

@@ -21,7 +21,7 @@ import { cn } from "../lib/utils";
 import { Button } from "../components/ui/button";
 import { filesApi } from "./api";
 import { ft } from "./i18n";
-import { recentFolders } from "./folderHistory";
+import { isDirectoryHistory } from "../lib/utils";
 import { pathCrumbs } from "./utils";
 import type { FileEntry, FileListing } from "./types";
 
@@ -66,9 +66,8 @@ export function DirectoryPicker({
   const [loading, setLoading] = useState<Set<string>>(new Set());
   const [error, setError] = useState("");
   const [historyError, setHistoryError] = useState("");
-  const [visits, setVisits] = useState<Visit[]>(() =>
-    recentFolders(hostId).map((v) => ({ path: v.path, remoteHistory: false })),
-  );
+  const [visits, setVisits] = useState<Visit[]>([]);
+  const forTransfer = !openActions;
   const [historyBusy, setHistoryBusy] = useState(false);
   const [query, setQuery] = useState("");
   const [hidden, setHidden] = useState(false);
@@ -81,7 +80,6 @@ export function DirectoryPicker({
   const alive = useRef(true);
   const selectionRun = useRef(0);
   const inFlight = useRef(new Map<string, Promise<FileListing>>());
-  const historyLoaded = useRef(false);
   const crumbs = useMemo(() => pathCrumbs(selected), [selected]);
   const roots = useMemo(
     () => [...new Set([...listing.roots, crumbs[0]?.path].filter(Boolean))],
@@ -188,32 +186,35 @@ export function DirectoryPicker({
     return () => node.removeEventListener("keydown", key);
   }, [onClose]);
   useEffect(() => {
-    if (tab !== "history" || historyLoaded.current || !hostId) return;
-    historyLoaded.current = true;
+    if (tab !== "history") return;
+    let current = true;
     setHistoryBusy(true);
-    void api
-      .listHistory(hostId)
-      .then((history) => {
-        if (!alive.current) return;
-        setVisits((current) => {
-          const seen = new Set(current.map((v) => v.path));
-          const imported: Visit[] = [];
-          for (const h of history) {
-            if (h.kind === "vscode" && h.label && !seen.has(h.label)) {
-              seen.add(h.label);
-              imported.push({ path: h.label, remoteHistory: true });
-            }
-          }
-          return [...current, ...imported];
-        });
-      })
-      .catch((e) => {
-        if (alive.current) setHistoryError(String(e));
-      })
-      .finally(() => {
-        if (alive.current) setHistoryBusy(false);
-      });
-  }, [tab, hostId]);
+    setHistoryError("");
+    void Promise.allSettled([
+      forTransfer ? filesApi.recentFolders(hostId) : Promise.resolve([]),
+      hostId ? api.listHistory(hostId) : Promise.resolve([]),
+    ]).then(([transfers, connections]) => {
+      if (!current) return;
+      const paths = transfers.status === "fulfilled" ? transfers.value : [];
+      const seen = new Set(paths);
+      const next = paths.map((path) => ({ path, remoteHistory: false }));
+      if (connections.status === "fulfilled") {
+        for (const entry of connections.value.filter(isDirectoryHistory)) {
+          if (seen.has(entry.label)) continue;
+          seen.add(entry.label);
+          next.push({ path: entry.label, remoteHistory: true });
+        }
+      }
+      setVisits(next);
+      setHistoryError(
+        transfers.status === "rejected" || connections.status === "rejected"
+          ? "historyUnavailable"
+          : "",
+      );
+      setHistoryBusy(false);
+    });
+    return () => { current = false; };
+  }, [tab, hostId, forTransfer]);
 
   async function select(path: string) {
     const run = ++selectionRun.current;

@@ -6,6 +6,7 @@ import {
   CardTitle,
 } from "../components/ui/card";
 import { t } from "../i18n";
+import { PageTitle } from "../components/PageTitle";
 import { cn } from "../lib/utils";
 import type { Language } from "../types";
 import { forwardExample, guideSections, quickStart, type GuideSection } from "./guideContent";
@@ -17,7 +18,7 @@ export function GuidePage({ language }: { language: Language }) {
     <div className="grid gap-5">
       <Card>
         <CardHeader>
-          <CardTitle>{t(language, "guide")}</CardTitle>
+          <PageTitle page="guide">{t(language, "guide")}</PageTitle>
           <CardDescription>{quickStart.title[locale]}</CardDescription>
         </CardHeader>
         <ol className="flex flex-wrap gap-4">

@@ -5,7 +5,6 @@ import {
   ArrowLeftRight,
   ArrowRight,
   Copy,
-  FolderSync,
   Info,
   LoaderCircle,
   Network,
@@ -15,6 +14,7 @@ import {
 import { listen } from "@tauri-apps/api/event";
 import type { Host, Language } from "../types";
 import { Button } from "../components/ui/button";
+import { PageTitle } from "../components/PageTitle";
 import { cn } from "../lib/utils";
 import { filesApi } from "../files/api";
 import { FilePane, type FileDrop } from "../files/FilePane";
@@ -250,6 +250,7 @@ export function FileTransferPage({
     setPending({
       requests: targets.map((t) => ({
         sourceSession: from.listing!.sessionId,
+        sourceDirectory: from.listing!.path,
         targetSession: t.sessionId,
         paths: chosen,
         destination: t.path,
@@ -339,17 +340,7 @@ export function FileTransferPage({
   return (
     <div className="flex h-[calc(100vh-48px)] min-h-[560px] min-w-0 flex-col gap-3">
       <header className="flex shrink-0 flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="flex items-center gap-2 text-xl font-semibold tracking-tight">
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-600/10 text-blue-600 dark:text-blue-300">
-              <FolderSync size={19} />
-            </span>
-            {ft(lang, "title")}
-          </h1>
-          <p className="mt-1.5 hidden text-xs text-slate-400 xl:block">
-            {ft(lang, "subtitle")}
-          </p>
-        </div>
+        <PageTitle page="files">{ft(lang, "title")}</PageTitle>
         <div className="flex items-center gap-2">
           <button
             aria-pressed={distribution}
@@ -551,7 +542,7 @@ export function FileTransferPage({
                   <Network size={14} />
                   {ft(lang, "direct")}
                 </button>
-                <p className="mt-2 flex items-start gap-1.5 text-[11px] leading-5 text-slate-400">
+                <p className="mt-2 flex items-start gap-1.5 whitespace-pre-line text-[11px] leading-5 text-slate-500 dark:text-slate-400">
                   <Info size={12} className="mt-1 shrink-0" />
                   {ft(lang, direct ? "directHint" : "relayHint")}
                 </p>

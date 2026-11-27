@@ -1,6 +1,6 @@
 [package]
 name = "sshdeck"
-version = "0.4.5-beta.3"
+version = "0.4.5-beta.4"
 description = "A modern visual SSH port forwarding manager for Windows."
 authors = ["Trlives"]
 edition = "2021"
@@ -28,3 +28,4 @@ uuid = { version = "1", features = ["v4", "serde"] }
 
 [target.'cfg(windows)'.dependencies]
 winreg = "0.55"
+windows-sys = { version = "0.61", features = ["Win32_Graphics_Dwm"] }

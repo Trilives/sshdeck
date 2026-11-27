@@ -151,7 +151,16 @@ pub fn start_file_transfer(request: Request, app: AppHandle) -> Result<Progress,
         // One payload transfer at a time; directory browsers and cancellation remain independent.
         let result = (|| {
             let _guard = transfers.queue.lock().map_err(lock_error)?;
-            jobs::run(&job, &request, &source, &target, &data_dir, Some(&app))
+            let result = jobs::run(&job, &request, &source, &target, &data_dir, Some(&app));
+            if jobs::snapshot(&job).is_ok_and(|p| p.files_done > p.skipped) {
+                let source_id = source.host.as_ref().map_or("", |host| host.id.as_str());
+                let target_id = target.host.as_ref().map_or("", |host| host.id.as_str());
+                app.state::<AppState>().record_transfer_folders([
+                    (source_id, &request.source_directory),
+                    (target_id, &request.destination),
+                ]);
+            }
+            result
         })();
         job.update(Some(&app), |p| match result {
             Ok(()) => {
@@ -185,6 +194,11 @@ pub fn start_file_transfer(request: Request, app: AppHandle) -> Result<Progress,
         }
     });
     Ok(initial)
+}
+#[tauri::command]
+pub fn list_transfer_folders(host_id: String, state: State<AppState>) -> Result<Vec<String>, String> {
+    let folders = state.transfer_folders.lock().map_err(lock_error)?;
+    Ok(folders.get(&host_id).cloned().unwrap_or_default())
 }
 #[tauri::command]
 pub fn list_file_transfers(state: State<FileTransfers>) -> Result<Vec<Progress>, String> {

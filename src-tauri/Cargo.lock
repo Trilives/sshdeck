@@ -3606,7 +3606,7 @@ dependencies = [
 
 [[package]]
 name = "sshdeck"
-version = "0.4.5-beta.3"
+version = "0.4.5-beta.4"
 dependencies = [
  "chrono",
  "directories",
@@ -3621,6 +3621,7 @@ dependencies = [
  "tauri-plugin-single-instance",
  "tauri-plugin-updater",
  "uuid",
+ "windows-sys 0.61.2",
  "winreg",
 ]
 

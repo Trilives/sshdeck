@@ -1,5 +1,10 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
+import type { HistoryEntry } from "../types";
+
+export function isDirectoryHistory(entry: HistoryEntry) {
+  return Boolean(entry.label) && (entry.kind === "vscode" || entry.kind === "terminal-path");
+}
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));

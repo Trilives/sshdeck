@@ -13,6 +13,8 @@ export const filesApi = {
   start: (request: TransferRequest) =>
     invoke<TransferProgress>("start_file_transfer", { request }),
   jobs: () => invoke<TransferProgress[]>("list_file_transfers"),
+  recentFolders: (hostId: string) =>
+    invoke<string[]>("list_transfer_folders", { hostId }),
   cancel: (id: string) => invoke<void>("cancel_file_transfer", { id }),
   setupDirect: (
     sourceSession: string,

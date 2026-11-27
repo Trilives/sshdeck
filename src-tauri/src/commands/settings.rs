@@ -31,9 +31,14 @@ pub fn save_settings_cmd(
         update_channel: normalize_choice(&settings.update_channel, &["stable", "preview"], "stable"),
     };
     let mut settings = state.settings.lock().map_err(lock_error)?;
+    let appearance_changed = settings.theme != normalized.theme
+        || settings.accent_color != normalized.accent_color;
     write_json(state.settings_path(), &normalized)?;
     *settings = normalized.clone();
     drop(settings);
+    if appearance_changed {
+        crate::window_appearance::apply(&app, &normalized);
+    }
     state.add_log(
         "info",
         format!(

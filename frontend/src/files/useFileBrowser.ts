@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { filesApi } from "./api";
 import type { FileListing } from "./types";
-import { recordFolderVisit } from "./folderHistory";
 
 function remembered(host: string) {
   try {
@@ -65,7 +64,6 @@ export function useFileBrowser(hostId: string, enabled: boolean) {
           return;
         }
         session.current = opened;
-        recordFolderVisit(hostId, result.path);
         currentPath.current = result.path;
         setListing(result);
         setRevision((v) => v + 1);
@@ -101,7 +99,6 @@ export function useFileBrowser(hostId: string, enabled: boolean) {
           history.current.push(currentPath.current);
         currentPath.current = result.path;
         remember(hostId, result.path);
-        recordFolderVisit(hostId, result.path);
         setListing(result);
         setRevision((v) => v + 1);
       } catch (e) {

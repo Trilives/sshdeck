@@ -88,7 +88,7 @@ export function DirectAccessSetup({
   }
   return (
     <div className="mt-3 border-t border-slate-100 pt-3 dark:border-slate-800">
-      <p className="mb-2 text-[11px] leading-5 text-slate-400">
+      <p className="mb-2 whitespace-pre-line text-[11px] leading-5 text-slate-500 dark:text-slate-400">
         {ft(lang, "setupDirectHint")}
       </p>
       {requests.map((request, index) => (

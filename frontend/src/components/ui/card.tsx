@@ -23,5 +23,5 @@ export function CardTitle({ className, ...props }: React.HTMLAttributes<HTMLHead
 }
 
 export function CardDescription({ className, ...props }: React.HTMLAttributes<HTMLParagraphElement>) {
-  return <p className={cn("text-sm leading-6 text-slate-500 dark:text-slate-400", className)} {...props} />;
+  return <p className={cn("whitespace-pre-line text-sm leading-6 text-slate-500 dark:text-slate-400", className)} {...props} />;
 }

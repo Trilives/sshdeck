@@ -63,7 +63,7 @@ export function FileAuthentication({
         <h2 className="font-semibold">
           {ft(lang, "authentication")} · {host.name || host.sshHost}
         </h2>
-        <p className="mt-2 text-xs leading-6 text-slate-500">
+        <p className="mt-2 whitespace-pre-line text-xs leading-6 text-slate-500 dark:text-slate-400">
           {ft(lang, "uploadKeyHint")}
         </p>
         <input

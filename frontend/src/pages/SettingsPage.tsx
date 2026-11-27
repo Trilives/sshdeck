@@ -2,7 +2,8 @@ import { useEffect, useId, useState, type ReactNode } from "react";
 import { Check, Monitor, Moon, Palette, Sun } from "lucide-react";
 import { api } from "../api";
 import { Button } from "../components/ui/button";
-import { Card, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
+import { Card, CardDescription, CardHeader } from "../components/ui/card";
+import { PageTitle } from "../components/PageTitle";
 import { Select } from "../components/ui/select";
 import { t } from "../i18n";
 import { languageLabels } from "../i18n";
@@ -251,7 +252,7 @@ export function SettingsPage(props: {
   return (
     <Card className="max-w-3xl">
       <CardHeader>
-        <CardTitle>{t(lang, "settingsTitle")}</CardTitle>
+        <PageTitle page="settings">{t(lang, "settingsTitle")}</PageTitle>
         <CardDescription>{t(lang, "settingsDesc")}</CardDescription>
       </CardHeader>
       <div className="grid gap-4">

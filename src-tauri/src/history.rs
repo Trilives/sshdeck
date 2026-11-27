@@ -7,9 +7,13 @@ use crate::model::HistoryEntry;
 const MAX_ENTRIES: usize = 500;
 
 /// Identity of an entry within a single host, used to avoid duplicates:
-/// one row per VS Code URI, one terminal row per host, one port row per bind/URL.
+/// One row per remote directory, one pathless terminal row per host, and one port row per bind/URL.
 pub fn dedup_key(entry: &HistoryEntry) -> String {
     match entry.kind.as_str() {
+        "vscode" | "terminal-path" if !entry.label.is_empty() => {
+            let path = entry.label.trim_end_matches('/');
+            format!("directory:{}", if path.is_empty() { "/" } else { path })
+        }
         "vscode" => format!("vscode:{}", entry.uri),
         "terminal" => "terminal".to_string(),
         "port" => format!("port:{}", if entry.detail.is_empty() { &entry.label } else { &entry.detail }),
@@ -17,12 +21,20 @@ pub fn dedup_key(entry: &HistoryEntry) -> String {
     }
 }
 
+fn same_entry(existing: &HistoryEntry, entry: &HistoryEntry) -> bool {
+    existing.host_id == entry.host_id
+        && (dedup_key(existing) == dedup_key(entry)
+            || (!entry.uri.is_empty()
+                && existing.kind == "vscode"
+                && entry.kind == "vscode"
+                && existing.uri == entry.uri))
+}
+
 /// Insert a new entry, or bump the timestamp/label of an existing one with the same identity (per host).
 pub fn upsert(list: &mut Vec<HistoryEntry>, entry: HistoryEntry) {
-    let key = dedup_key(&entry);
     if let Some(existing) = list
         .iter_mut()
-        .find(|item| item.host_id == entry.host_id && dedup_key(item) == key)
+        .find(|item| same_entry(item, &entry))
     {
         existing.opened_at = entry.opened_at;
         if !entry.label.is_empty() {
@@ -30,6 +42,7 @@ pub fn upsert(list: &mut Vec<HistoryEntry>, entry: HistoryEntry) {
         }
         if !entry.uri.is_empty() {
             existing.uri = entry.uri;
+            existing.kind = entry.kind;
         }
         if !entry.detail.is_empty() {
             existing.detail = entry.detail;
@@ -41,8 +54,8 @@ pub fn upsert(list: &mut Vec<HistoryEntry>, entry: HistoryEntry) {
 }
 
 /// Merge VS Code's own scanned history (uri, path) for a host: add any URI not already tracked locally.
-/// New entries get timestamps just below `now`, preserving VS Code's order among themselves while staying
-/// below anything the user opened through this app at `now`.
+/// Scanned paths have no exact launch time. Keep them below the most recent recorded directory
+/// for this host while preserving their order.
 pub fn merge_scanned(
     list: &mut Vec<HistoryEntry>,
     host_id: &str,
@@ -50,23 +63,33 @@ pub fn merge_scanned(
     now: i64,
     new_id: impl Fn() -> String,
 ) {
-    let mut stamp = now;
+    let mut stamp = list
+        .iter()
+        .filter(|entry| {
+            entry.host_id == host_id && matches!(entry.kind.as_str(), "vscode" | "terminal-path")
+        })
+        .map(|entry| entry.opened_at)
+        .max()
+        .map_or(now, |latest| latest.min(now));
     for (uri, path) in scanned {
-        let key = format!("vscode:{uri}");
-        let exists = list
-            .iter()
-            .any(|item| item.host_id == host_id && dedup_key(item) == key);
-        if !exists {
+        let mut entry = HistoryEntry {
+            id: String::new(),
+            host_id: host_id.to_string(),
+            kind: "vscode".to_string(),
+            label: path.clone(),
+            uri: uri.clone(),
+            detail: String::new(),
+            opened_at: stamp - 1,
+        };
+        if let Some(existing) = list.iter_mut().find(|item| same_entry(item, &entry)) {
+            if existing.uri.is_empty() {
+                existing.uri = entry.uri;
+                existing.kind = entry.kind;
+            }
+        } else {
             stamp -= 1;
-            list.push(HistoryEntry {
-                id: new_id(),
-                host_id: host_id.to_string(),
-                kind: "vscode".to_string(),
-                label: path.clone(),
-                uri: uri.clone(),
-                detail: String::new(),
-                opened_at: stamp,
-            });
+            entry.id = new_id();
+            list.push(entry);
         }
     }
     prune(list);
@@ -80,6 +103,9 @@ pub fn sorted_for_host(list: &[HistoryEntry], host_id: &str) -> Vec<HistoryEntry
         .cloned()
         .collect();
     entries.sort_by(|a, b| b.opened_at.cmp(&a.opened_at));
+    // Older builds could keep several VS Code aliases for a single directory.
+    let mut seen = std::collections::HashSet::new();
+    entries.retain(|entry| seen.insert(dedup_key(entry)));
     entries
 }
 
@@ -136,6 +162,27 @@ mod tests {
         assert_eq!(list.len(), 2);
         let added = list.iter().find(|e| e.uri == "uri-new").unwrap();
         assert!(added.opened_at < 1000);
+    }
+
+    #[test]
+    fn terminal_paths_move_to_the_top_without_losing_known_vscode_uris() {
+        let mut list = vec![
+            entry("h1", "vscode", "/work", "uri-work", 100),
+            entry("h1", "vscode", "/other", "uri-other", 200),
+        ];
+        upsert(&mut list, entry("h1", "terminal-path", "/work/", "", 300));
+        upsert(&mut list, entry("h1", "terminal-path", "/new", "", 250));
+        merge_scanned(
+            &mut list,
+            "h1",
+            &[("uri-new".into(), "/new".into()), ("uri-scanned".into(), "/scanned".into())],
+            1000,
+            || "gen".to_string(),
+        );
+        let recent = sorted_for_host(&list, "h1");
+        assert_eq!(recent.len(), 4);
+        assert_eq!((recent[0].opened_at, recent[0].uri.as_str()), (300, "uri-work"));
+        assert_eq!((recent[2].opened_at, recent[2].uri.as_str()), (250, "uri-new"));
     }
 
     #[test]

@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.4.5-beta.4
+
+- Unify page headings and shorten help text across the app.
+- Match the native Windows title bar to the display mode and tint it with the selected accent where Windows supports caption colors.
+- Show actual transfer destinations and source folders in file transfer history.
+- Record terminal launches alongside VS Code in recent remote folders.
+
 ## 0.4.5-beta.3
 
 - Add Appearance settings for light, dark, or system display mode and blue, violet, teal, or deep orange accents. Each choice is saved independently.

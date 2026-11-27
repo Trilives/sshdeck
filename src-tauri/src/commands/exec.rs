@@ -95,12 +95,14 @@ pub fn open_terminal(
     let path = path.as_deref().map(str::trim).filter(|p| !p.is_empty());
     open_terminal_window(&host, path)?;
     match path {
-        // A path terminal is already represented by the host's VS Code path list, so it isn't recorded again.
-        Some(path) => state.add_log(
-            "info",
-            format!("[{}] opened terminal at {path}", host.name),
-            Some(&app),
-        ),
+        Some(path) => {
+            state.record_open(&host.id, "terminal-path", path, "", "");
+            state.add_log(
+                "info",
+                format!("[{}] opened terminal at {path}", host.name),
+                Some(&app),
+            );
+        }
         None => {
             state.record_open(&host.id, "terminal", &host.name, "", "");
             state.add_log(

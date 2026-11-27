@@ -376,7 +376,7 @@ test("the guide follows the same task order in both languages and adapts to the 
   withPage(async (page) => {
     await page.setViewportSize({ width: 1440, height: 800 });
     await page.getByRole("button", { name: "使用说明", exact: true }).click();
-    const headings = page.locator("main > div > section").getByRole("heading", { level: 2 });
+    const headings = page.locator("main > div > section").locator("h1:visible, h2:visible");
     const chineseOrder = [
       "使用说明",
       "主机配置与认证",
@@ -627,6 +627,9 @@ test("remote folder picker launches Terminal and VS Code at the selected directo
           ),
         command,
       );
+      if (command === "open_terminal") {
+        await host.getByText("/srv/ready/Projects", { exact: true }).waitFor();
+      }
       assert.equal(
         await page.getByRole("dialog", { name: /选择目录/ }).count(),
         0,
@@ -920,10 +923,11 @@ test("directory pickers default to hiding dotfolders in the tree and history", (
       const visibleVisit = `${root}${separator}Projects`;
       await page.evaluate(
         ({ host, hiddenVisit, visibleVisit }) => {
+          window.fixture.transferFolders[host] = [hiddenVisit, visibleVisit];
           localStorage.setItem(
             `sshdeck.file.recent.${host || "local"}`,
             JSON.stringify(
-              [hiddenVisit, visibleVisit].map((path) => ({
+              [`${visibleVisit}-only-browsed`].map((path) => ({
                 path,
                 visitedAt: Date.now(),
               })),
@@ -950,6 +954,7 @@ test("directory pickers default to hiding dotfolders in the tree and history", (
       await folder.waitFor({ state: "hidden" });
       await dialog.getByRole("tab", { name: "历史目录", exact: true }).click();
       await dialog.getByTitle(visibleVisit, { exact: true }).waitFor();
+      assert.equal(await dialog.getByTitle(`${visibleVisit}-only-browsed`, { exact: true }).count(), 0);
       assert.equal(
         await dialog.getByTitle(hiddenVisit, { exact: true }).count(),
         0,

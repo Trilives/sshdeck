@@ -4,7 +4,6 @@ import type { Host, Language } from "../types";
 import { DirectoryPicker } from "./DirectoryPicker";
 import { FilePane } from "./FilePane";
 import { useFileBrowser } from "./useFileBrowser";
-import { recordFolderVisit } from "./folderHistory";
 import { ft } from "./i18n";
 
 /** Own a short-lived SFTP session; closing the picker also closes its connection. */
@@ -32,20 +31,8 @@ export function RemoteDirectoryPicker({
         hostName={host.name || host.sshHost}
         listing={browser.listing}
         onClose={onClose}
-        openActions={{
-          terminal: (path) => {
-            recordFolderVisit(host.id, path);
-            onOpenTerminal(path);
-          },
-          vscode: (path) => {
-            recordFolderVisit(host.id, path);
-            onOpenVscode(path);
-          },
-        }}
-        onChoose={(path) => {
-          recordFolderVisit(host.id, path);
-          onChoose(path);
-        }}
+        openActions={{ terminal: onOpenTerminal, vscode: onOpenVscode }}
+        onChoose={onChoose}
       />
     );
   return (

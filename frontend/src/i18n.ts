@@ -8,7 +8,7 @@ export const languageLabels: Record<Language, string> = {
 const text = {
   "zh-CN": {
     title: "SSHDeck",
-    subtitle: "以主机为中心，管理 SSH 连接、端口转发、终端与日志。",
+    subtitle: "集中管理 SSH 主机与端口转发",
 
     // Navigation
     dashboard: "主页",
@@ -88,9 +88,9 @@ const text = {
     vscodeFillPath: "填入下方目录框（可继续编辑）",
     vscodeAddedToConfig: "已将该主机以别名「{alias}」写入 ~/.ssh/config。",
     vscodeMissingTitle: "未检测到 VS Code",
-    vscodeMissingDesc: "未找到 VS Code（code 可执行文件）。请先安装 VS Code 后再使用此功能。",
+    vscodeMissingDesc: "请先安装 VS Code 并确保 code 命令可用。",
     vscodeRemoteSshMissingTitle: "未安装 Remote-SSH 扩展",
-    vscodeRemoteSshMissingDesc: "已检测到 VS Code，但未安装 Remote-SSH 扩展（ms-vscode-remote.remote-ssh）。请在 VS Code 中安装后再试。",
+    vscodeRemoteSshMissingDesc: "请在 VS Code 中安装 Remote-SSH 扩展后重试。",
     newForward: "新建端口转发",
     chooseForwardHost: "选择转发主机",
     searchForwardHost: "搜索主机名称或地址",
@@ -123,18 +123,18 @@ const text = {
     sshUserHint: "登录远程服务器的用户名，如 root、ubuntu。",
     identityFile: "私钥文件",
     identityFileHint:
-      "私钥文件路径。留空则使用默认 %USERPROFILE%\\.ssh\\id_ed25519；可填绝对路径（如 C:\\Users\\you\\.ssh\\id_rsa）或 ~/.ssh/id_ed25519。请指向私钥本身，不要填 .pub 公钥文件。",
+      "填写私钥路径（支持 ~/），请勿选用 .pub 文件。\n留空使用 %USERPROFILE%\\.ssh\\id_ed25519。",
     extraOptions: "额外 SSH 参数",
     proxyJump: "跳板机（ProxyJump）",
-    proxyJumpHint: "可不填。通过另一台主机跳转连接，形如 user@jump-host 或 user@jump-host:port；多级跳转用逗号分隔。",
+    proxyJumpHint: "可选，格式为 user@jump-host:port。\n多个跳板机用逗号分隔。",
 
     // Forward fields
     bindHost: "本机地址",
-    bindHostHint: "本机监听地址，一般填 127.0.0.1；填 0.0.0.0 可让局域网其他设备访问。",
+    bindHostHint: "默认 127.0.0.1。\n填 0.0.0.0 可允许局域网访问。",
     bindPort: "本机端口",
     bindPortHint: "在本机上访问所用的端口。",
     targetHost: "远端地址",
-    targetHostHint: "从远程服务器视角看到的目标地址，一般填 127.0.0.1。",
+    targetHostHint: "转发目标可访问的地址，如 127.0.0.1。",
     targetPort: "远程端口",
     targetPortHint: "远端服务实际监听的端口。",
     keepConnected: "保持连接并自动重连",
@@ -144,13 +144,13 @@ const text = {
     hostAdvancedOptions: "高级 SSH 设置",
     // Forward dialog
     forwardDialogTitle: "端口转发",
-    forwardDialogDesc: "Local 访问远端内网服务，Remote 反向暴露本地服务，Dynamic 创建 SOCKS 代理。",
+    forwardDialogDesc: "Local 访问远端服务，Remote 暴露本地服务。\nDynamic 创建 SOCKS 代理。",
     save: "保存",
     cancel: "取消",
 
     // Send command dialog
     sendCommandTitle: "发送指令",
-    sendCommandDesc: "通过 SSH 执行一条指令，最长等待 120 秒；长时间任务建议在终端中运行。",
+    sendCommandDesc: "SSH 指令最长等待 120 秒，长任务请用终端。",
     commandPlaceholder: "例如：uptime",
     run: "执行",
     commandRunning: "正在执行…网络较慢时可取消。关闭此窗口也会取消本次执行。",
@@ -162,19 +162,19 @@ const text = {
     passwordDialogTitle: "一次性密码连接",
     passwordDialogDescription: "请输入本次连接使用的 SSH 密码",
     passwordPlaceholder: "SSH 密码",
-    passwordOnceNote: "密码不会保存到配置文件。若开启保持连接，密码只会在本次应用运行期间用于自动重连。",
+    passwordOnceNote: "密码不会写入配置。\n自动重连仅在本次应用运行期间使用密码。",
 
     // Upload key dialog
     keyUploadTitle: "上传 SSH 公钥",
-    keyUploadDesc: "输入该主机的 SSH 密码，程序会把本机公钥写入远端 authorized_keys。",
-    keyUploadNote: "如果未指定私钥文件，程序会使用或生成 %USERPROFILE%\\.ssh\\id_ed25519。密码不会保存。",
+    keyUploadDesc: "输入 SSH 密码，在远端授权本机公钥。",
+    keyUploadNote: "未指定时使用或生成 %USERPROFILE%\\.ssh\\id_ed25519。\n密码不会保存。",
     keyUploadNotNeeded: "该主机已可免密直连，无需上传公钥。",
     detectingConnection: "正在检测连接方式…",
 
     // Host key changed dialog
     hostKeyChangedTitle: "远程主机指纹已改变",
     hostKeyChangedWarn:
-      "远程主机的密钥与本地记录不一致，连接已被拒绝。这可能是因为服务器被重装或更换，也可能是中间人攻击。请在确认指纹安全后再决定。",
+      "主机密钥已变更，连接已拒绝。\n请通过可信渠道核对新指纹后再继续。",
     hostKeyFingerprintLabel: "当前远程主机密钥指纹：",
     hostKeyFetching: "正在获取指纹…",
     hostKeyUnavailable: "无法获取远程指纹，请谨慎操作。",
@@ -191,13 +191,13 @@ const text = {
 
     // SSH not installed dialog
     sshMissingTitle: "未检测到 OpenSSH 客户端",
-    sshMissingDesc: "本程序依赖 Windows 自带的 OpenSSH 客户端（ssh.exe）。是否现在安装？安装需要管理员权限，会从 Windows Update 下载。",
+    sshMissingDesc: "SSHDeck 需要 Windows OpenSSH 客户端。\n安装需管理员权限，会从 Windows Update 下载。",
     install: "安装",
     sshInstallStarted: "已开始安装 OpenSSH 客户端。请在弹出的窗口中完成安装，然后重启本程序。",
 
     // Delete host confirmation
     confirmDeleteHostTitle: "删除主机",
-    confirmDeleteHostDesc: "该主机下的所有端口转发都会一并删除，运行中的连接会先断开。此操作不可撤销。",
+    confirmDeleteHostDesc: "该主机的转发会断开并删除。\n此操作不可撤销。",
 
     // Logs page
     logsTitle: "运行日志",
@@ -207,7 +207,7 @@ const text = {
 
     // Settings page
     settingsTitle: "设置",
-    settingsDesc: "主题、语言和日志等级会保存在本地，下次启动自动恢复。",
+    settingsDesc: "设置会自动保存到本机。",
     launchAtLogin: "开机自启",
     launchAtLoginDesc: "登录 Windows 后启动 SSHDeck。",
     autoSortHosts: "自动排序主机",
@@ -256,8 +256,8 @@ const text = {
 
     // Remote connection (terminal / VS Code, by remote path)
     historyTitle: "远程连接",
-    historyDesc: "该主机的远端路径历史（来自 VS Code Remote-SSH，按 IP 匹配）。点击记录用终端打开，或用右侧按钮在 VS Code 中打开。",
-    historyEmpty: "暂无历史路径。可在下方手动输入远端目录，用终端或 VS Code 打开。",
+    historyDesc: "点击最近目录用终端打开，或使用右侧 VS Code 图标。",
+    historyEmpty: "暂无历史目录，可在下方输入路径。",
     remoteOpenPathLabel: "打开远程目录",
     remoteOpenPathPlaceholder: "远端目录，如 /home/user/project（留空则用终端进入家目录 / VS Code 直连）",
     remoteOpenTerminal: "终端",
@@ -269,14 +269,14 @@ const text = {
     // Close-to-tray prompt
     closePromptTitle: "关闭窗口",
     closePromptDesc: "要退出程序，还是最小化到系统托盘继续在后台运行？",
-    closePromptActiveDesc: "仍有连接或后台任务正在运行。退出会断开连接并中止传输和指令；也可最小化到系统托盘继续运行。",
+    closePromptActiveDesc: "退出会停止连接、传输和指令。\n最小化到托盘可继续运行。",
     closePromptRemember: "记住我的选择作为默认行为",
     closePromptMinimize: "最小化到托盘",
     closePromptExit: "退出程序",
   },
   "en-US": {
     title: "SSHDeck",
-    subtitle: "Host-centric management of SSH connections, port forwards, terminals, and logs.",
+    subtitle: "Manage SSH hosts and port forwards",
 
     dashboard: "Home",
     config: "Port Forwarding",
@@ -352,9 +352,9 @@ const text = {
     vscodeFillPath: "Fill into the directory box below (then edit)",
     vscodeAddedToConfig: "Added this host to ~/.ssh/config as alias \"{alias}\".",
     vscodeMissingTitle: "VS Code Not Found",
-    vscodeMissingDesc: "Could not find VS Code (the code executable). Install VS Code first to use this feature.",
+    vscodeMissingDesc: "Install VS Code and make sure the code command is available.",
     vscodeRemoteSshMissingTitle: "Remote-SSH Extension Missing",
-    vscodeRemoteSshMissingDesc: "VS Code was found, but the Remote-SSH extension (ms-vscode-remote.remote-ssh) is not installed. Install it in VS Code, then try again.",
+    vscodeRemoteSshMissingDesc: "Install the Remote-SSH extension in VS Code and try again.",
     newForward: "New Forward",
     chooseForwardHost: "Choose a forwarding host",
     searchForwardHost: "Search by host name or address",
@@ -385,17 +385,17 @@ const text = {
     sshUserHint: "The username to log in to the remote server, e.g. root, ubuntu.",
     identityFile: "Key File",
     identityFileHint:
-      "Path to the private key. Leave empty to use the default %USERPROFILE%\\.ssh\\id_ed25519; or enter an absolute path (e.g. C:\\Users\\you\\.ssh\\id_rsa) or ~/.ssh/id_ed25519. Point to the private key itself, not the .pub file.",
+      "Use a private key path (~/ supported).\nDefault: %USERPROFILE%\\.ssh\\id_ed25519.",
     extraOptions: "Extra SSH Options",
     proxyJump: "Jump Host (ProxyJump)",
-    proxyJumpHint: "Optional. Connect via another host, e.g. user@jump-host or user@jump-host:port; chain multiple with commas.",
+    proxyJumpHint: "Optional: user@jump-host:port.\nSeparate multiple jump hosts with commas.",
 
     bindHost: "Local Address",
-    bindHostHint: "Local listening address, usually 127.0.0.1; use 0.0.0.0 to allow other devices on your LAN.",
+    bindHostHint: "Default: 127.0.0.1.\nUse 0.0.0.0 for LAN access.",
     bindPort: "Local Port",
     bindPortHint: "The port you use to reach it on this machine.",
     targetHost: "Remote Address",
-    targetHostHint: "Target address from the remote server's perspective, usually 127.0.0.1.",
+    targetHostHint: "Reachable target address, e.g. 127.0.0.1.",
     targetPort: "Remote Port",
     targetPortHint: "The port the remote service actually listens on.",
     keepConnected: "Keep connected and reconnect automatically",
@@ -403,12 +403,12 @@ const text = {
     hostDialogDesc: "Configure the SSH connection for this host.",
     hostAdvancedOptions: "Advanced SSH settings",
     forwardDialogTitle: "Port Forward",
-    forwardDialogDesc: "Local reaches remote services, Remote exposes local services, Dynamic creates a SOCKS proxy.",
+    forwardDialogDesc: "Local reaches remote services. Remote exposes local services.\nDynamic creates a SOCKS proxy.",
     save: "Save",
     cancel: "Cancel",
 
     sendCommandTitle: "Send Command",
-    sendCommandDesc: "Run a command over SSH with a 120-second timeout. Use a terminal for long-running tasks.",
+    sendCommandDesc: "SSH commands time out after 120 seconds.\nUse a terminal for longer tasks.",
     commandPlaceholder: "e.g. uptime",
     run: "Run",
     commandRunning: "Running… Cancel if the network is slow. Closing this window also cancels this run.",
@@ -420,18 +420,18 @@ const text = {
     passwordDialogDescription: "Enter the SSH password for this connection",
     passwordPlaceholder: "SSH password",
     passwordOnceNote:
-      "The password is not saved to the config file. If keep connected is enabled, it is kept only in memory for reconnects during this app session.",
+      "The password is never saved to settings.\nReconnects can use it until SSHDeck exits.",
 
     keyUploadTitle: "Upload SSH Public Key",
-    keyUploadDesc: "Enter the host's SSH password; the app appends your public key to remote authorized_keys.",
+    keyUploadDesc: "Enter the SSH password to authorize your public key.",
     keyUploadNote:
-      "If no key file is specified, the app uses or creates %USERPROFILE%\\.ssh\\id_ed25519. The password is not saved.",
+      "Default key: %USERPROFILE%\\.ssh\\id_ed25519.\nThe password is never saved.",
     keyUploadNotNeeded: "This host already supports passwordless login; no upload needed.",
     detectingConnection: "Checking connection…",
 
     hostKeyChangedTitle: "Remote Host Key Changed",
     hostKeyChangedWarn:
-      "The remote host key does not match the local record, so the connection was refused. This may happen if the server was rebuilt or replaced — but it can also indicate a man-in-the-middle attack. Verify the fingerprint before deciding.",
+      "The host key changed, so the connection was refused.\nVerify the new fingerprint through a trusted channel.",
     hostKeyFingerprintLabel: "Current remote host key fingerprint:",
     hostKeyFetching: "Fetching fingerprint…",
     hostKeyUnavailable: "Could not fetch the remote fingerprint; proceed with caution.",
@@ -445,12 +445,12 @@ const text = {
     connectFailedDesc: "Check the host connection settings based on the reason below, then retry.",
 
     sshMissingTitle: "OpenSSH Client Not Found",
-    sshMissingDesc: "This app requires the built-in Windows OpenSSH client (ssh.exe). Install it now? Administrator rights are required and it downloads from Windows Update.",
+    sshMissingDesc: "SSHDeck needs the Windows OpenSSH client.\nWindows Update installs it with administrator rights.",
     install: "Install",
     sshInstallStarted: "OpenSSH client installation started. Finish it in the elevated window, then restart this app.",
 
     confirmDeleteHostTitle: "Delete Host",
-    confirmDeleteHostDesc: "All its port forwards will be removed and any running connections disconnected. This cannot be undone.",
+    confirmDeleteHostDesc: "Its port forwards will be stopped and deleted.\nThis cannot be undone.",
 
     logsTitle: "Runtime Logs",
     message: "Message",
@@ -458,7 +458,7 @@ const text = {
     level: "Level",
 
     settingsTitle: "Settings",
-    settingsDesc: "Theme, language, and log level are saved locally and restored on next launch.",
+    settingsDesc: "Settings are saved on this computer.",
     launchAtLogin: "Launch at login",
     launchAtLoginDesc: "Start SSHDeck when you sign in to Windows.",
     autoSortHosts: "Automatic host sorting",
@@ -507,8 +507,8 @@ const text = {
 
     // Remote connection (terminal / VS Code, by remote path)
     historyTitle: "Remote Connection",
-    historyDesc: "Remote path history for this host (from VS Code Remote-SSH, matched by IP). Click a record to open a terminal there, or use the button to open it in VS Code.",
-    historyEmpty: "No path history yet. Enter a remote directory below to open it in a terminal or VS Code.",
+    historyDesc: "Click a recent folder for Terminal, or use its VS Code icon.",
+    historyEmpty: "No recent folders. Enter a path below.",
     remoteOpenPathLabel: "Open a remote directory",
     remoteOpenPathPlaceholder: "Remote path, e.g. /home/user/project (empty = terminal home / VS Code direct connect)",
     remoteOpenTerminal: "Terminal",
@@ -520,7 +520,7 @@ const text = {
     // Close-to-tray prompt
     closePromptTitle: "Close Window",
     closePromptDesc: "Quit the app, or minimize to the system tray and keep running in the background?",
-    closePromptActiveDesc: "Connections or background tasks are still running. Quitting disconnects them and stops transfers and commands; minimize to the tray to keep them running.",
+    closePromptActiveDesc: "Quitting stops connections, transfers, and commands.\nMinimize to the tray to keep them running.",
     closePromptRemember: "Remember my choice as the default",
     closePromptMinimize: "Minimize to tray",
     closePromptExit: "Quit",

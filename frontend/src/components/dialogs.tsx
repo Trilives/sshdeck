@@ -25,7 +25,7 @@ function Field(props: { label: string; value: string; onChange: (value: string) 
     <label className="grid min-w-0 gap-2 text-sm font-medium text-slate-600 dark:text-slate-300">
       {props.label}
       <Input value={props.value} placeholder={props.placeholder} autoFocus={props.autoFocus} onChange={(event) => props.onChange(event.target.value)} />
-      {props.hint && <span className="text-xs font-normal leading-5 text-slate-400 dark:text-slate-500">{props.hint}</span>}
+      {props.hint && <span className="whitespace-pre-line text-xs font-normal leading-5 text-slate-500 dark:text-slate-400">{props.hint}</span>}
     </label>
   );
 }
@@ -317,7 +317,7 @@ export function PasswordDialog(props: {
           }}
           autoFocus
         />
-        <p className="text-sm leading-6 text-slate-500 dark:text-slate-400">{t(lang, "passwordOnceNote")}</p>
+        <CardDescription>{t(lang, "passwordOnceNote")}</CardDescription>
         <div className="flex justify-end gap-3">
           <Button variant="secondary" onClick={props.onCancel}>{t(lang, "cancel")}</Button>
           <Button onClick={props.onSubmit} disabled={!props.password}>{t(lang, "connect")}</Button>
@@ -353,7 +353,7 @@ export function KeyUploadDialog(props: {
           }}
           autoFocus
         />
-        <p className="text-sm leading-6 text-slate-500 dark:text-slate-400">{t(lang, "keyUploadNote")}</p>
+        <CardDescription>{t(lang, "keyUploadNote")}</CardDescription>
         <div className="flex justify-end gap-3">
           <Button variant="secondary" onClick={props.onCancel}>{t(lang, "cancel")}</Button>
           <Button onClick={props.onSubmit} disabled={!props.password}>{t(lang, "uploadKey")}</Button>

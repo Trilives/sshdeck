@@ -30,6 +30,8 @@ use uuid::Uuid;
 #[serde(rename_all = "camelCase")]
 pub struct Request {
     pub source_session: String,
+    #[serde(default)]
+    pub source_directory: String,
     pub target_session: String,
     pub paths: Vec<String>,
     pub destination: String,
@@ -562,6 +564,7 @@ mod tests {
     }
     fn local_request(paths: Vec<String>, destination: &Path) -> Request {
         Request {
+            source_directory: String::new(),
             source_session: "test".into(),
             target_session: "test".into(),
             paths,

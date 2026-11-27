@@ -1,15 +1,14 @@
 import type { Language } from "../types";
 const zh = {
   title: "文件传输",
-  subtitle: "在本机与服务器之间，或两台服务器之间传输文件。",
   local: "本机",
   source: "来源",
   target: "接收端",
   distribution: "分发模式",
   direct: "不经过本机",
   directHint:
-    "文件不经过本机。源主机需安装 sftp，能免密登录目标主机，并已信任目标指纹；目标地址和端口需能从源主机访问。",
-  relayHint: "远程主机间的文件经本机流式中转，不保存完整临时副本。",
+    "源端须有 sftp，并能访问接收端的地址和端口。\n还需免密登录并信任接收端指纹。",
+  relayHint: "文件经本机流式中转，不保留完整副本。",
   directDisabled:
     "仅两端均为远程主机时可用；分发时所有接收端也必须是远程主机。",
   connect: "连接",
@@ -23,13 +22,13 @@ const zh = {
   uploadKey: "一键上传密钥",
   uploadAndConnect: "上传密钥并连接",
   uploadKeyHint:
-    "输入密码可直接连接；上传密钥前会先检测免密登录，已可用则跳过上传。需要上传时请填写服务器密码，未配置本机密钥时会自动生成。",
+    "可用密码直接连接，或输入密码上传本机公钥。\n已免密会跳过上传，缺少本机密钥时会生成。",
   openTerminal: "终端",
   openVscode: "VS Code",
   openFolderHint: "展开目录树，选择目录后用终端或 VS Code 打开。",
   setupDirect: "配置直传密钥",
   setupDirectHint:
-    "先检测直传免密连接，已可用则跳过配置。否则将源服务器公钥加入接收端；需要时在源服务器生成专用密钥，私钥留在那里。",
+    "已免密时跳过配置，否则为接收端授权源端公钥。\n需要时在源端生成专用密钥，私钥留在源端。",
   setupReady: "直传连接已验证",
   alreadyPasswordless: "已免密，跳过上传",
   setupWorking: "正在配置并验证…",
@@ -47,10 +46,10 @@ const zh = {
   browseDirectory: "浏览目录",
   browseHint: "展开目录树，选到需要的位置后点击“使用此目录”。",
   folderHistory: "历史目录",
-  recentFolders: "最近访问",
+  recentFolders: "最近传输",
   remoteFolders: "远程连接历史",
-  noFolderHistory: "暂无历史目录，访问过的目录会显示在这里。",
-  historyUnavailable: "远程连接历史暂不可用，仍可使用最近访问的目录。",
+  noFolderHistory: "暂无历史目录。",
+  historyUnavailable: "部分目录历史暂不可用。",
   filterFolders: "筛选目录",
   selectedFolder: "已选目录",
   typePath: "手动输入路径",
@@ -134,17 +133,15 @@ const zh = {
 type Key = keyof typeof zh;
 const en: Record<Key, string> = {
   title: "File Transfer",
-  subtitle:
-    "Move files between your computer and servers, or between two servers.",
   local: "This computer",
   source: "Source",
   target: "Destination",
   distribution: "Distribute",
   direct: "Bypass this computer",
   directHint:
-    "File contents bypass this computer. The source needs sftp, passwordless access to the destination, and a trusted destination host key. The address and port must be reachable from the source.",
+    "The source needs sftp and a reachable destination.\nIt also needs passwordless access and a trusted host key.",
   relayHint:
-    "Server-to-server files stream through this computer without a full temporary copy.",
+    "Stream through this computer without keeping a full copy.",
   directDisabled:
     "Available only when both ends (all recipients in distribution mode) are remote servers.",
   connect: "Connect",
@@ -158,14 +155,14 @@ const en: Record<Key, string> = {
   uploadKey: "Upload SSH key",
   uploadAndConnect: "Upload key and connect",
   uploadKeyHint:
-    "Connect with a password, or upload this computer's public key. Upload first checks passwordless access and skips changes if it already works. Enter the server password when upload is needed; a local key is generated if necessary.",
+    "Use the password to connect or authorize your public key.\nUpload skips working key access and creates a key if needed.",
   openTerminal: "Terminal",
   openVscode: "VS Code",
   openFolderHint:
     "Expand the tree, select a folder, then open it in Terminal or VS Code.",
   setupDirect: "Set up direct SSH access",
   setupDirectHint:
-    "Check direct passwordless access first and skip setup if it works. Otherwise, authorize the source's public key on the destination. A dedicated key is generated on the source if needed; its private key stays there.",
+    "Skip setup if key access works. Otherwise, authorize the source key.\nA new key, if needed, is generated and kept on the source.",
   setupReady: "Direct connection verified",
   alreadyPasswordless: "Already passwordless; upload skipped",
   setupWorking: "Setting up and verifying…",
@@ -186,11 +183,10 @@ const en: Record<Key, string> = {
   browseHint:
     "Expand the tree, select a folder, then choose “Use this folder”.",
   folderHistory: "Folder history",
-  recentFolders: "Recently visited",
+  recentFolders: "Recent transfer",
   remoteFolders: "Remote connection history",
-  noFolderHistory: "No folder history yet. Visited folders will appear here.",
-  historyUnavailable:
-    "Remote history is unavailable. Recently visited folders are still available.",
+  noFolderHistory: "No folder history yet.",
+  historyUnavailable: "Some folder history is unavailable.",
   filterFolders: "Filter folders",
   selectedFolder: "Selected folder",
   typePath: "Enter a path manually",

@@ -16,6 +16,7 @@ export interface FileListing {
 export type ConflictPolicy = "skip" | "overwrite" | "rename";
 export interface TransferRequest {
   sourceSession: string;
+  sourceDirectory: string;
   targetSession: string;
   paths: string[];
   destination: string;

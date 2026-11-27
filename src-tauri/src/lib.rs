@@ -14,6 +14,7 @@ mod util;
 mod validate;
 mod vscode;
 mod vscode_launcher;
+mod window_appearance;
 
 use tauri::menu::{Menu, MenuItem};
 use tauri::tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent};
@@ -61,6 +62,7 @@ pub fn run() {
             commands::files::close_file_session,
             commands::files::start_file_transfer,
             commands::files::list_file_transfers,
+            commands::files::list_transfer_folders,
             commands::files::cancel_file_transfer,
             commands::exec::send_command_with_password,
             commands::exec::open_terminal,
@@ -89,11 +91,19 @@ pub fn run() {
         .setup(|app| {
             let state = app.state::<AppState>();
             let handle = app.handle().clone();
+            if let Ok(settings) = state.settings.lock() {
+                window_appearance::apply(&handle, &settings);
+            }
             state.add_log("info", "application started", Some(&handle));
             build_tray(app)?;
             Ok(())
         })
         .on_window_event(|window, event| {
+            if let WindowEvent::ThemeChanged(theme) = event {
+                if let Ok(settings) = window.state::<AppState>().settings.lock() {
+                    window_appearance::paint(window.app_handle(), &settings, *theme);
+                }
+            }
             if let WindowEvent::CloseRequested { api, .. } = event {
                 handle_close_requested(window, api);
             }

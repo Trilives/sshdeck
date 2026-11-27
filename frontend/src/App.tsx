@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { listen } from "@tauri-apps/api/event";
 import { getVersion } from "@tauri-apps/api/app";
 import { api } from "./api";
-import { forwardWebUrl } from "./lib/utils";
+import { forwardWebUrl, isDirectoryHistory } from "./lib/utils";
 import { t } from "./i18n";
 import { AppSidebar, type AppPage } from "./components/AppSidebar";
 import { AppDialogs } from "./components/AppDialogs";
@@ -255,7 +255,7 @@ export function App() {
   async function refreshRemoteHistory(host: Host) {
     setRemoteLoadingIds((prev) => new Set(prev).add(host.id));
     try {
-      const entries = (await api.listHistory(host.id)).filter((entry) => entry.kind === "vscode");
+      const entries = (await api.listHistory(host.id)).filter(isDirectoryHistory);
       setRemoteHistories((prev) => ({ ...prev, [host.id]: entries }));
     } catch (err) {
       setError(String(err));
@@ -670,7 +670,7 @@ export function App() {
     setError("");
     try {
       // Loading history also rescans VS Code's own history and merges anything new (backend side).
-      const entries = (await api.listHistory(host.id)).filter((entry) => entry.kind === "vscode");
+      const entries = (await api.listHistory(host.id)).filter(isDirectoryHistory);
       setHistoryDialog({ host, entries });
     } catch (err) {
       setError(String(err));
@@ -696,6 +696,7 @@ export function App() {
     setHistoryDialog(null);
     try {
       await api.openTerminal(host.id, path.trim() || undefined);
+      if (path.trim()) void refreshRemoteHistory(host);
     } catch (err) {
       setError(String(err));
     }
@@ -707,6 +708,7 @@ export function App() {
       if (!(await ensureVscode())) return;
       const result = await api.vscodeOpenPath(host.id, path.trim());
       setHistoryDialog(null);
+      if (path.trim()) void refreshRemoteHistory(host);
       if (result.addedToConfig) {
         setNotice(t(language, "vscodeAddedToConfig").replace("{alias}", result.alias));
       }
@@ -726,6 +728,7 @@ export function App() {
       if (!(await ensureVscode())) return;
       await api.vscodeOpen(entry.uri, host.id, entry.label);
       setHistoryDialog(null);
+      void refreshRemoteHistory(host);
     } catch (err) {
       setHistoryDialog(null);
       setError(String(err));

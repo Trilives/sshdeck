@@ -110,7 +110,7 @@ export interface VscodeOpenRootResult {
 }
 
 /** One entry in the local open-history (a port opened, a VS Code folder launched, or a terminal opened). */
-export type HistoryKind = "vscode" | "terminal" | "port";
+export type HistoryKind = "vscode" | "terminal" | "terminal-path" | "port";
 export interface HistoryEntry {
   id: string;
   hostId: string;

@@ -47,6 +47,7 @@ pub struct AppState {
     pub logs: Mutex<Vec<LogEntry>>,
     /// Local open-history (ports/VS Code/terminal), persisted to history.json.
     pub history: Mutex<Vec<HistoryEntry>>,
+    pub transfer_folders: Mutex<HashMap<String, Vec<String>>>,
     pub data_dir: PathBuf,
     /// Monotonic source of `ManagedTunnel::generation` values.
     tunnel_generation: AtomicU64,
@@ -75,6 +76,9 @@ impl AppState {
             tunnels: Mutex::new(HashMap::new()),
             logs: Mutex::new(Vec::new()),
             history: Mutex::new(read_json(data_dir.join("history.json")).unwrap_or_default()),
+            transfer_folders: Mutex::new(
+                read_json(data_dir.join("transfer-folders.json")).unwrap_or_default(),
+            ),
             data_dir,
             tunnel_generation: AtomicU64::new(1),
         }
@@ -99,6 +103,21 @@ impl AppState {
 
     pub fn history_path(&self) -> PathBuf {
         self.data_dir.join("history.json")
+    }
+
+    pub fn record_transfer_folders(&self, endpoints: [(&str, &str); 2]) {
+        if let Ok(mut folders) = self.transfer_folders.lock() {
+            for (host_id, path) in endpoints {
+                if path.is_empty() {
+                    continue;
+                }
+                let paths = folders.entry(host_id.to_string()).or_default();
+                paths.retain(|existing| existing != path);
+                paths.insert(0, path.to_string());
+                paths.truncate(30);
+            }
+            let _ = write_json(self.data_dir.join("transfer-folders.json"), &*folders);
+        }
     }
 
     /// Upsert one open-history entry (dedup/bump handled by `history::upsert`) and persist.
