@@ -30,7 +30,7 @@ function Dropdown(props: {
         <ChevronDown size={14} />
       </Button>
       {open && (
-        <div className="absolute right-0 z-20 mt-2 w-56 overflow-hidden rounded-xl border border-slate-200 bg-white py-1 shadow-soft dark:border-slate-800 dark:bg-slate-950">
+        <div className="absolute right-0 z-20 mt-2 w-56 overflow-hidden rounded-xl border border-slate-200 bg-white py-1 shadow-float dark:border-slate-800 dark:bg-slate-950">
           {props.items.map((item) => (
             <button
               key={item.label}

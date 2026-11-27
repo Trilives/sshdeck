@@ -3606,7 +3606,7 @@ dependencies = [
 
 [[package]]
 name = "sshdeck"
-version = "0.4.5-beta.4"
+version = "0.4.5-beta.5"
 dependencies = [
  "chrono",
  "directories",

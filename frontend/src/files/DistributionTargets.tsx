@@ -103,7 +103,7 @@ export function DistributionTargets({
   ];
   return (
     <div className="flex h-full min-h-0 flex-col gap-3">
-      <div className="relative shrink-0 rounded-2xl border border-slate-200 bg-white p-3 dark:border-slate-800 dark:bg-slate-950/80">
+      <div className="relative shrink-0 rounded-xl border border-slate-200 bg-white p-3 shadow-panel dark:border-slate-800 dark:bg-slate-950/80">
         <div className="flex items-center gap-2">
           <button
             onClick={() => setOpen((v) => !v)}
@@ -139,7 +139,7 @@ export function DistributionTargets({
               aria-label={ft(lang, "close")}
               onClick={() => setOpen(false)}
             />
-            <div className="absolute inset-x-0 top-12 z-40 rounded-xl border border-slate-200 bg-white p-2 shadow-xl dark:border-slate-700 dark:bg-slate-900">
+            <div className="absolute inset-x-0 top-12 z-40 rounded-xl border border-slate-200 bg-white p-2 shadow-float dark:border-slate-700 dark:bg-slate-900">
               <div className="mb-2 flex items-center gap-2 rounded-lg bg-slate-50 px-2 text-slate-400 dark:bg-slate-800">
                 <Search size={12} />
                 <input

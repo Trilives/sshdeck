@@ -46,7 +46,7 @@ export function RemoteDirectoryPicker({
         role="dialog"
         aria-modal="true"
         aria-label={ft(language, "chooseDirectory")}
-        className="w-full max-w-2xl rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl dark:border-slate-700 dark:bg-slate-950"
+        className="w-full max-w-2xl rounded-2xl border border-slate-200 bg-white p-5 shadow-float dark:border-slate-700 dark:bg-slate-950"
       >
         <header className="mb-4 flex items-center justify-between gap-3">
           <h2 className="font-semibold">

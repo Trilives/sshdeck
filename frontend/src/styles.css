@@ -7,12 +7,18 @@
   color-scheme: light;
   color: #0f172a;
   background: transparent;
+  --shadow-accent: var(--accent-600);
+  --shadow-neutral: 15 23 42;
+  --shadow-neutral-opacity: 0.17;
 }
 
 html.dark {
   color-scheme: dark;
   color: #f8fafc;
   background: transparent;
+  --shadow-accent: var(--accent-400);
+  --shadow-neutral: 0 0 0;
+  --shadow-neutral-opacity: 0.42;
 }
 
 html,

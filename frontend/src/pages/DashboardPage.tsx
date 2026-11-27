@@ -1,6 +1,6 @@
 import { Activity, CircleSlash, Globe, Pin, Plug, PlugZap, Server } from "lucide-react";
 import { DashboardCreateMenu } from "../components/DashboardCreateMenu";
-import { PageTitle } from "../components/PageTitle";
+import { PageHeader } from "../components/PageHeader";
 import { Button } from "../components/ui/button";
 import { Card, CardHeader, CardTitle } from "../components/ui/card";
 import { cn } from "../lib/utils";
@@ -33,8 +33,8 @@ export function DashboardPage(props: {
   const keyEvents = props.logs.filter(isKeyEvent).slice(-8).reverse();
 
   return (
-    <div className="grid grid-cols-1 gap-5">
-      <PageTitle page="dashboard">{t(lang, "dashboard")}</PageTitle>
+    <div className="grid grid-cols-1 gap-4">
+      <PageHeader page="dashboard">{t(lang, "dashboard")}</PageHeader>
       <Card className="relative z-10">
         <CardHeader className="flex flex-row items-center justify-between gap-4 space-y-0">
           <CardTitle>{t(lang, "currentConnections")}</CardTitle>

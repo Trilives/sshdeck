@@ -6,7 +6,7 @@ import {
   CardTitle,
 } from "../components/ui/card";
 import { t } from "../i18n";
-import { PageTitle } from "../components/PageTitle";
+import { PageHeader } from "../components/PageHeader";
 import { cn } from "../lib/utils";
 import type { Language } from "../types";
 import { forwardExample, guideSections, quickStart, type GuideSection } from "./guideContent";
@@ -15,10 +15,10 @@ export function GuidePage({ language }: { language: Language }) {
   const locale = language === "zh-CN" ? 0 : 1;
 
   return (
-    <div className="grid gap-5">
+    <div className="grid gap-4">
+      <PageHeader page="guide">{t(language, "guide")}</PageHeader>
       <Card>
         <CardHeader>
-          <PageTitle page="guide">{t(language, "guide")}</PageTitle>
           <CardDescription>{quickStart.title[locale]}</CardDescription>
         </CardHeader>
         <ol className="flex flex-wrap gap-4">

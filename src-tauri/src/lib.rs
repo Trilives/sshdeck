@@ -99,13 +99,24 @@ pub fn run() {
             Ok(())
         })
         .on_window_event(|window, event| {
-            if let WindowEvent::ThemeChanged(theme) = event {
-                if let Ok(settings) = window.state::<AppState>().settings.lock() {
-                    window_appearance::paint(window.app_handle(), &settings, *theme);
+            match event {
+                WindowEvent::ThemeChanged(theme) if window.label() == "main" => {
+                    if let Ok(settings) = window.state::<AppState>().settings.lock() {
+                        window_appearance::paint(window.app_handle(), &settings, *theme, None);
+                    }
                 }
-            }
-            if let WindowEvent::CloseRequested { api, .. } = event {
-                handle_close_requested(window, api);
+                WindowEvent::Focused(focused) if cfg!(windows) && window.label() == "main" => {
+                    if let Ok(settings) = window.state::<AppState>().settings.lock() {
+                        window_appearance::paint(
+                            window.app_handle(),
+                            &settings,
+                            window.theme().unwrap_or(tauri::Theme::Light),
+                            Some(*focused),
+                        );
+                    }
+                }
+                WindowEvent::CloseRequested { api, .. } => handle_close_requested(window, api),
+                _ => {}
             }
         })
         .build(tauri::generate_context!())

@@ -56,7 +56,7 @@ export function DashboardCreateMenu(props: {
       {open && (
         <div
           id={menuId}
-          className="absolute right-0 top-full z-20 mt-2 w-44 rounded-xl border border-slate-200 bg-white p-1 shadow-soft dark:border-slate-800 dark:bg-slate-950"
+          className="absolute right-0 top-full z-20 mt-2 w-44 rounded-xl border border-slate-200 bg-white p-1 shadow-float dark:border-slate-800 dark:bg-slate-950"
         >
           {items.map(({ label, icon: Icon, action }) => (
             <Button

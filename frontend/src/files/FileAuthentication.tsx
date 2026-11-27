@@ -48,7 +48,7 @@ export function FileAuthentication({
         role="dialog"
         aria-modal="true"
         aria-label={ft(lang, "authentication")}
-        className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-xl dark:border-slate-700 dark:bg-slate-950"
+        className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-float dark:border-slate-700 dark:bg-slate-950"
         onSubmit={(e) => {
           e.preventDefault();
           if (password && !busy) onConnect(password);

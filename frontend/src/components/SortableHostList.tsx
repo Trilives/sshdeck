@@ -45,7 +45,7 @@ function SortableHost(props: {
   return (
     <div
       ref={setNodeRef}
-      className={cn("relative rounded-2xl", isDragging && "z-10 shadow-lg ring-2 ring-blue-500")}
+      className={cn("relative rounded-2xl", isDragging && "z-10 shadow-float ring-2 ring-blue-500")}
       style={{ transform: CSS.Translate.toString(transform && { ...transform, x: 0 }), transition }}
     >
       {props.renderHost(host, handle)}

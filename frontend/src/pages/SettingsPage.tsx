@@ -3,7 +3,7 @@ import { Check, Monitor, Moon, Palette, Sun } from "lucide-react";
 import { api } from "../api";
 import { Button } from "../components/ui/button";
 import { Card, CardDescription, CardHeader } from "../components/ui/card";
-import { PageTitle } from "../components/PageTitle";
+import { PageHeader } from "../components/PageHeader";
 import { Select } from "../components/ui/select";
 import { t } from "../i18n";
 import { languageLabels } from "../i18n";
@@ -250,50 +250,52 @@ export function SettingsPage(props: {
   const setChannel = (value: UpdateChannel) => props.setSettings({ updateChannel: value });
   const lang = props.settings.language;
   return (
-    <Card className="max-w-3xl">
-      <CardHeader>
-        <PageTitle page="settings">{t(lang, "settingsTitle")}</PageTitle>
-        <CardDescription>{t(lang, "settingsDesc")}</CardDescription>
-      </CardHeader>
-      <div className="grid gap-4">
-        <AppearanceSettings settings={props.settings} onChange={props.setSettings} />
-        <SettingSelect label={t(lang, "language")} value={props.settings.language} onChange={(v) => props.setSettings({ language: v as Language })}>
-          {Object.entries(languageLabels).map(([value, label]) => (
-            <option key={value} value={value}>
-              {label}
-            </option>
-          ))}
-        </SettingSelect>
-        <SettingSelect label={t(lang, "logLevel")} value={props.settings.logLevel} onChange={(v) => props.setSettings({ logLevel: v as LogLevel })}>
-          <option value="debug">{t(lang, "logDebug")}</option>
-          <option value="info">{t(lang, "logInfo")}</option>
-          <option value="warning">{t(lang, "logWarning")}</option>
-          <option value="error">{t(lang, "logError")}</option>
-        </SettingSelect>
-        <SettingSelect label={t(lang, "closeBehavior")} value={props.settings.closeBehavior} onChange={(v) => props.setSettings({ closeBehavior: v as CloseBehavior })}>
-          <option value="ask">{t(lang, "closeBehaviorAsk")}</option>
-          <option value="minimize">{t(lang, "closeBehaviorMinimize")}</option>
-          <option value="exit">{t(lang, "closeBehaviorExit")}</option>
-        </SettingSelect>
-        <LaunchAtLoginSetting lang={lang} />
-        <SettingToggle
-          label={t(lang, "autoSortHosts")}
-          description={t(lang, "autoSortHostsDesc")}
-          checked={props.settings.autoSortHosts}
-          onChange={(autoSortHosts) => props.setSettings({ autoSortHosts })}
-        />
-        <UpdateSection
-          lang={lang}
-          appVersion={props.appVersion}
-          update={props.update}
-          autoUpdate={props.settings.autoUpdate}
-          updateChannel={props.settings.updateChannel}
-          onSetAutoUpdate={setAutoUpdate}
-          onSetChannel={setChannel}
-          onCheck={props.onCheckUpdate}
-          onInstall={props.onInstallUpdate}
-        />
-      </div>
-    </Card>
+    <div className="grid min-w-0 max-w-3xl gap-4">
+      <PageHeader page="settings">{t(lang, "settingsTitle")}</PageHeader>
+      <Card>
+        <CardHeader>
+          <CardDescription>{t(lang, "settingsDesc")}</CardDescription>
+        </CardHeader>
+        <div className="grid gap-4">
+          <AppearanceSettings settings={props.settings} onChange={props.setSettings} />
+          <SettingSelect label={t(lang, "language")} value={props.settings.language} onChange={(v) => props.setSettings({ language: v as Language })}>
+            {Object.entries(languageLabels).map(([value, label]) => (
+              <option key={value} value={value}>
+                {label}
+              </option>
+            ))}
+          </SettingSelect>
+          <SettingSelect label={t(lang, "logLevel")} value={props.settings.logLevel} onChange={(v) => props.setSettings({ logLevel: v as LogLevel })}>
+            <option value="debug">{t(lang, "logDebug")}</option>
+            <option value="info">{t(lang, "logInfo")}</option>
+            <option value="warning">{t(lang, "logWarning")}</option>
+            <option value="error">{t(lang, "logError")}</option>
+          </SettingSelect>
+          <SettingSelect label={t(lang, "closeBehavior")} value={props.settings.closeBehavior} onChange={(v) => props.setSettings({ closeBehavior: v as CloseBehavior })}>
+            <option value="ask">{t(lang, "closeBehaviorAsk")}</option>
+            <option value="minimize">{t(lang, "closeBehaviorMinimize")}</option>
+            <option value="exit">{t(lang, "closeBehaviorExit")}</option>
+          </SettingSelect>
+          <LaunchAtLoginSetting lang={lang} />
+          <SettingToggle
+            label={t(lang, "autoSortHosts")}
+            description={t(lang, "autoSortHostsDesc")}
+            checked={props.settings.autoSortHosts}
+            onChange={(autoSortHosts) => props.setSettings({ autoSortHosts })}
+          />
+          <UpdateSection
+            lang={lang}
+            appVersion={props.appVersion}
+            update={props.update}
+            autoUpdate={props.settings.autoUpdate}
+            updateChannel={props.settings.updateChannel}
+            onSetAutoUpdate={setAutoUpdate}
+            onSetChannel={setChannel}
+            onCheck={props.onCheckUpdate}
+            onInstall={props.onInstallUpdate}
+          />
+        </div>
+      </Card>
+    </div>
   );
 }

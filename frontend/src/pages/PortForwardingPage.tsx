@@ -1,5 +1,5 @@
-import { Card, CardHeader } from "../components/ui/card";
-import { PageTitle } from "../components/PageTitle";
+import { Card } from "../components/ui/card";
+import { PageHeader } from "../components/PageHeader";
 import { HostCard } from "../components/HostCard";
 import { SortableHostList } from "../components/SortableHostList";
 import { t } from "../i18n";
@@ -23,37 +23,33 @@ export function PortForwardingPage(props: {
 }) {
   const lang = props.language;
   return (
-    <div className="grid gap-5">
-      <Card>
-        <CardHeader>
-          <PageTitle page="forwarding">{t(lang, "configTitle")}</PageTitle>
-        </CardHeader>
-        {props.hosts.length === 0 ? (
-          <p className="rounded-xl border border-dashed border-slate-200 px-4 py-10 text-center text-sm text-slate-400 dark:border-slate-800 dark:text-slate-500">
-            {t(lang, "noForwardingHosts")}
-          </p>
-        ) : (
-          <SortableHostList hosts={props.hosts} language={lang} autoSort={props.autoSortHosts} onMove={props.onMoveHost}>
-            {(host, dragHandle) => (
-              <HostCard
-                language={lang}
-                host={host}
-                dragHandle={dragHandle}
-                expanded={props.expandedIds.has(host.id)}
-                onToggle={() => props.onToggle(host.id)}
-                onNewForward={() => props.onNewForward(host)}
-                onDisconnectHost={() => props.onDisconnectHost(host)}
-                onTogglePin={() => props.onTogglePin(host)}
-                onConnectForward={(forward) => props.onConnectForward(host, forward)}
-                onDisconnectForward={(forward) => props.onDisconnectForward(host, forward)}
-                onOpenForwardWeb={(forward) => props.onOpenForwardWeb(host, forward)}
-                onEditForward={(forward) => props.onEditForward(host, forward)}
-                onDeleteForward={(forward) => props.onDeleteForward(host, forward)}
-              />
-            )}
-          </SortableHostList>
-        )}
-      </Card>
+    <div className="grid min-w-0 gap-4">
+      <PageHeader page="forwarding">{t(lang, "configTitle")}</PageHeader>
+      {props.hosts.length === 0 ? (
+        <Card className="py-10 text-center text-sm text-slate-500 dark:text-slate-400">
+          {t(lang, "noForwardingHosts")}
+        </Card>
+      ) : (
+        <SortableHostList hosts={props.hosts} language={lang} autoSort={props.autoSortHosts} onMove={props.onMoveHost}>
+          {(host, dragHandle) => (
+            <HostCard
+              language={lang}
+              host={host}
+              dragHandle={dragHandle}
+              expanded={props.expandedIds.has(host.id)}
+              onToggle={() => props.onToggle(host.id)}
+              onNewForward={() => props.onNewForward(host)}
+              onDisconnectHost={() => props.onDisconnectHost(host)}
+              onTogglePin={() => props.onTogglePin(host)}
+              onConnectForward={(forward) => props.onConnectForward(host, forward)}
+              onDisconnectForward={(forward) => props.onDisconnectForward(host, forward)}
+              onOpenForwardWeb={(forward) => props.onOpenForwardWeb(host, forward)}
+              onEditForward={(forward) => props.onEditForward(host, forward)}
+              onDeleteForward={(forward) => props.onDeleteForward(host, forward)}
+            />
+          )}
+        </SortableHostList>
+      )}
     </div>
   );
 }

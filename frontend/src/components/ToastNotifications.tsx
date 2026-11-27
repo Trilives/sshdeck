@@ -36,7 +36,7 @@ function ToastItem({ language, message, tone, dismiss }: ToastItemProps) {
     <div
       role={isError ? "alert" : "status"}
       className={[
-        "pointer-events-auto flex items-start gap-3 rounded-2xl border px-4 py-3 text-sm shadow-2xl backdrop-blur-xl",
+        "pointer-events-auto flex items-start gap-3 rounded-2xl border px-4 py-3 text-sm shadow-float backdrop-blur-xl",
         "animate-[fadeIn_180ms_ease-out]",
         isError
           ? "border-rose-200/80 bg-rose-50/95 text-rose-700 dark:border-rose-900 dark:bg-rose-950/90 dark:text-rose-200"

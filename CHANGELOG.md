@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.5-beta.5
+
+- Move page headings and their actions above the content. Remote Connections and Port Forwarding give each host its own card, and File Transfer groups both panes with the queue.
+- Tint shadows with the selected accent and give page cards, inner panels, and dialogs distinct depths.
+- Match the active Windows 11 window border to the app accent and restore the system border when the window loses focus.
+
 ## 0.4.5-beta.4
 
 - Unify page headings and shorten help text across the app.

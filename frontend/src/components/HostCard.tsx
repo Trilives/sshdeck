@@ -28,7 +28,7 @@ export function HostCard(props: {
   return (
     <div
       id={"forwarding-host-" + props.host.id}
-      className="scroll-mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-soft dark:border-slate-800 dark:bg-slate-950/70"
+      className="scroll-mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-panel dark:border-slate-800 dark:bg-slate-950/70"
     >
       <HostCardHeader
         language={lang}

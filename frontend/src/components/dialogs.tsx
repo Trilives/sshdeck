@@ -12,7 +12,7 @@ function Modal(props: { children: ReactNode; maxWidth?: string }) {
   return (
     <ModalOverlay className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/55 p-6 backdrop-blur-sm">
       <Card
-        className={`max-h-[calc(100vh-3rem)] w-full ${props.maxWidth ?? "max-w-xl"} overflow-auto border-blue-200 bg-white dark:border-blue-900 dark:bg-slate-950`}
+        className={`max-h-[calc(100vh-3rem)] w-full ${props.maxWidth ?? "max-w-xl"} overflow-auto border-blue-200 bg-white shadow-float dark:border-blue-900 dark:bg-slate-950`}
       >
         {props.children}
       </Card>
@@ -65,7 +65,7 @@ export function HostDialog(props: {
         onKeyDown={(event) => {
           if (event.key === "Escape") props.onClose();
         }}
-        className="flex w-full max-w-xl flex-col overflow-hidden border-slate-200 bg-white p-0 shadow-2xl dark:border-slate-700 dark:bg-slate-950"
+        className="flex w-full max-w-xl flex-col overflow-hidden border-slate-200 bg-white p-0 shadow-float dark:border-slate-700 dark:bg-slate-950"
       >
         <header className="flex items-start gap-3 border-b border-slate-200 px-4 py-4 sm:px-6 dark:border-slate-800">
           <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-950 dark:text-blue-300">
@@ -265,7 +265,7 @@ export function InputPasswordDialog(props: {
   const lang = props.language;
   return (
     <ModalOverlay className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-950/55 p-6 backdrop-blur-sm">
-      <Card className="w-full max-w-md border-blue-200 bg-white dark:border-blue-900 dark:bg-slate-950">
+      <Card className="w-full shadow-float max-w-md border-blue-200 bg-white dark:border-blue-900 dark:bg-slate-950">
         <CardHeader>
           <CardTitle>{props.title}</CardTitle>
           {props.description && <CardDescription>{props.description}</CardDescription>}
@@ -374,7 +374,7 @@ export function HostKeyChangedDialog(props: {
   const lang = props.language;
   return (
     <ModalOverlay className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/55 p-6 backdrop-blur-sm">
-      <Card className="w-full max-w-lg border-amber-300 bg-white dark:border-amber-800 dark:bg-slate-950">
+      <Card className="w-full shadow-float max-w-lg border-amber-300 bg-white dark:border-amber-800 dark:bg-slate-950">
         <CardHeader>
           <CardTitle>⚠️ {t(lang, "hostKeyChangedTitle")}</CardTitle>
           <CardDescription>{props.hostName} — {t(lang, "hostKeyChangedWarn")}</CardDescription>
@@ -405,7 +405,7 @@ export function ConfirmDialog(props: {
   const lang = props.language;
   return (
     <ModalOverlay className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-950/55 p-6 backdrop-blur-sm">
-      <Card className="w-full max-w-md border-rose-200 bg-white dark:border-rose-900 dark:bg-slate-950">
+      <Card className="w-full shadow-float max-w-md border-rose-200 bg-white dark:border-rose-900 dark:bg-slate-950">
         <CardHeader>
           <CardTitle>{props.title}</CardTitle>
           <CardDescription>{props.description}</CardDescription>
@@ -427,7 +427,7 @@ export function SshMissingDialog(props: {
   const lang = props.language;
   return (
     <ModalOverlay className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/55 p-6 backdrop-blur-sm">
-      <Card className="w-full max-w-md border-amber-300 bg-white dark:border-amber-800 dark:bg-slate-950">
+      <Card className="w-full shadow-float max-w-md border-amber-300 bg-white dark:border-amber-800 dark:bg-slate-950">
         <CardHeader>
           <CardTitle>⚠️ {t(lang, "sshMissingTitle")}</CardTitle>
           <CardDescription>{t(lang, "sshMissingDesc")}</CardDescription>
@@ -457,7 +457,7 @@ export function SelectHostsDialog(props: {
   const empty = props.items.length === 0;
   return (
     <ModalOverlay className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-950/55 p-6 backdrop-blur-sm">
-      <Card className="w-full max-w-lg border-blue-200 bg-white dark:border-blue-900 dark:bg-slate-950">
+      <Card className="w-full shadow-float max-w-lg border-blue-200 bg-white dark:border-blue-900 dark:bg-slate-950">
         <DialogHeader title={props.title} onClose={props.onCancel} />
         {empty ? (
           <p className="rounded-xl border border-dashed border-slate-200 px-4 py-8 text-center text-sm text-slate-400 dark:border-slate-800 dark:text-slate-500">
@@ -510,7 +510,7 @@ export function ImportConflictDialog(props: {
   const lang = props.language;
   return (
     <ModalOverlay className="fixed inset-0 z-[70] flex items-center justify-center bg-slate-950/55 p-6 backdrop-blur-sm">
-      <Card className="w-full max-w-md border-amber-300 bg-white dark:border-amber-800 dark:bg-slate-950">
+      <Card className="w-full shadow-float max-w-md border-amber-300 bg-white dark:border-amber-800 dark:bg-slate-950">
         <CardHeader>
           <CardTitle>⚠️ {t(lang, "importConflictTitle")}</CardTitle>
           <CardDescription>{props.description ?? t(lang, "importConflictDesc")}</CardDescription>
@@ -536,7 +536,7 @@ export function ConnectionErrorDialog(props: {
   const lang = props.language;
   return (
     <ModalOverlay className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/55 p-6 backdrop-blur-sm">
-      <Card className="w-full max-w-lg border-rose-200 bg-white dark:border-rose-900 dark:bg-slate-950">
+      <Card className="w-full shadow-float max-w-lg border-rose-200 bg-white dark:border-rose-900 dark:bg-slate-950">
         <CardHeader>
           <CardTitle>{t(lang, "connectFailedTitle")}</CardTitle>
           <CardDescription>{t(lang, "connectFailedDesc")}</CardDescription>
@@ -567,7 +567,7 @@ export function CloseBehaviorDialog(props: {
   const [remember, setRemember] = useState(false);
   return (
     <ModalOverlay className="fixed inset-0 z-[80] flex items-center justify-center bg-slate-950/55 p-6 backdrop-blur-sm">
-      <Card className="w-full max-w-md border-blue-200 bg-white dark:border-blue-900 dark:bg-slate-950">
+      <Card className="w-full shadow-float max-w-md border-blue-200 bg-white dark:border-blue-900 dark:bg-slate-950">
         <CardHeader>
           <CardTitle>{t(lang, "closePromptTitle")}</CardTitle>
           <CardDescription>{props.active ? t(lang, "closePromptActiveDesc") : t(lang, "closePromptDesc")}</CardDescription>
@@ -601,7 +601,7 @@ export function VscodeMissingDialog(props: {
   const desc = props.kind === "vscode" ? t(lang, "vscodeMissingDesc") : t(lang, "vscodeRemoteSshMissingDesc");
   return (
     <ModalOverlay className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-950/55 p-6 backdrop-blur-sm">
-      <Card className="w-full max-w-md border-amber-300 bg-white dark:border-amber-800 dark:bg-slate-950">
+      <Card className="w-full shadow-float max-w-md border-amber-300 bg-white dark:border-amber-800 dark:bg-slate-950">
         <CardHeader>
           <CardTitle>⚠️ {title}</CardTitle>
           <CardDescription>{desc}</CardDescription>
@@ -622,7 +622,7 @@ export function CriticalErrorDialog(props: {
   const lang = props.language;
   return (
     <ModalOverlay className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/55 p-6 backdrop-blur-sm">
-      <Card className="w-full max-w-lg border-rose-200 bg-white dark:border-rose-900 dark:bg-slate-950">
+      <Card className="w-full shadow-float max-w-lg border-rose-200 bg-white dark:border-rose-900 dark:bg-slate-950">
         <CardHeader>
           <CardTitle>{t(lang, "criticalTitle")}</CardTitle>
           <CardDescription>{props.error.name} — {t(lang, "criticalDesc")}</CardDescription>

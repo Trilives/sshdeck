@@ -305,7 +305,7 @@ export function DirectoryPicker({
         role="dialog"
         aria-modal="true"
         aria-labelledby="directory-picker-title"
-        className="flex max-h-[calc(100vh-48px)] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-950"
+        className="flex max-h-[calc(100vh-48px)] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-float dark:border-slate-700 dark:bg-slate-950"
       >
         <header className="flex items-start justify-between gap-3 px-5 pb-3 pt-5">
           <div>

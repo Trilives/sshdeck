@@ -32,7 +32,7 @@ export function ForwardHostPicker(props: {
         if (event.key === "Escape") onClose();
       }}
     >
-      <Card role="dialog" aria-modal="true" aria-labelledby={titleId} className="flex w-full max-w-lg flex-col !overflow-hidden">
+      <Card role="dialog" aria-modal="true" aria-labelledby={titleId} className="flex w-full max-w-lg flex-col !overflow-hidden shadow-float">
         <div className="mb-4 flex shrink-0 items-center justify-between gap-3">
           <CardTitle id={titleId}>{t(language, "chooseForwardHost")}</CardTitle>
           <Button type="button" variant="ghost" className="h-8 w-8 px-0" onClick={onClose} aria-label={t(language, "close")}>

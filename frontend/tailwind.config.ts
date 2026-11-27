@@ -31,7 +31,9 @@ const config: Config = {
         "2xl": "1.25rem",
       },
       boxShadow: {
-        soft: "0 18px 50px rgba(15, 23, 42, 0.12)",
+        soft: "0 16px 42px -10px rgb(var(--shadow-accent) / 0.20), 0 5px 12px -6px rgb(var(--shadow-neutral) / var(--shadow-neutral-opacity))",
+        panel: "0 6px 18px -5px rgb(var(--shadow-accent) / 0.22), 0 2px 5px -2px rgb(var(--shadow-neutral) / var(--shadow-neutral-opacity))",
+        float: "0 22px 52px -10px rgb(var(--shadow-accent) / 0.26), 0 9px 24px -6px rgb(var(--shadow-neutral) / var(--shadow-neutral-opacity))",
       },
     },
   },

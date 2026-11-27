@@ -42,7 +42,7 @@ export function TransferQueue({
   const collapsed = height === 44;
   return (
     <section
-      className="relative flex shrink-0 flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950/80"
+      className="relative flex shrink-0 flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-panel dark:border-slate-800 dark:bg-slate-950/80"
       style={{ height }}
     >
       <div

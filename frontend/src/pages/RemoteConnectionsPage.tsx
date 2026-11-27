@@ -17,8 +17,8 @@ import { HostCardHeader } from "../components/HostCardHeader";
 import { SortableHostList } from "../components/SortableHostList";
 import { HostTransferActions } from "../components/HostTransferActions";
 import { Button } from "../components/ui/button";
-import { Card, CardHeader } from "../components/ui/card";
-import { PageTitle } from "../components/PageTitle";
+import { Card } from "../components/ui/card";
+import { PageHeader } from "../components/PageHeader";
 import { Input } from "../components/ui/input";
 import { t } from "../i18n";
 import type { HistoryEntry, Host, Language } from "../types";
@@ -54,7 +54,7 @@ function RemoteHostCard(props: {
   const closePicker = useCallback(() => setPickerOpen(false), []);
   const path = customPath.trim();
   return (
-    <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-soft dark:border-slate-800 dark:bg-slate-950/70">
+    <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-panel dark:border-slate-800 dark:bg-slate-950/70">
       <HostCardHeader
         language={lang}
         host={props.host}
@@ -240,22 +240,26 @@ export function RemoteConnectionsPage(props: {
 }) {
   const lang = props.language;
   return (
-    <Card>
-      <CardHeader className="flex flex-wrap items-center justify-between gap-4 space-y-0">
-        <PageTitle page="remote">{t(lang, "remoteConnectionsTitle")}</PageTitle>
-        <HostTransferActions
-          language={lang}
-          onNewHost={props.onNewHost}
-          onImportFromFile={props.onImportFromFile}
-          onImportFromConfig={props.onImportFromConfig}
-          onExportToFile={props.onExportToFile}
-          onExportToConfig={props.onExportToConfig}
-        />
-      </CardHeader>
+    <div className="grid min-w-0 gap-4">
+      <PageHeader
+        page="remote"
+        actions={
+          <HostTransferActions
+            language={lang}
+            onNewHost={props.onNewHost}
+            onImportFromFile={props.onImportFromFile}
+            onImportFromConfig={props.onImportFromConfig}
+            onExportToFile={props.onExportToFile}
+            onExportToConfig={props.onExportToConfig}
+          />
+        }
+      >
+        {t(lang, "remoteConnectionsTitle")}
+      </PageHeader>
       {props.hosts.length === 0 ? (
-        <p className="rounded-xl border border-dashed border-slate-200 px-4 py-10 text-center text-sm text-slate-400 dark:border-slate-800 dark:text-slate-500">
+        <Card className="py-10 text-center text-sm text-slate-500 dark:text-slate-400">
           {t(lang, "noHosts")}
-        </p>
+        </Card>
       ) : (
         <SortableHostList hosts={props.hosts} language={lang} autoSort={props.autoSortHosts} onMove={props.onMoveHost}>
           {(host, dragHandle) => (
@@ -287,6 +291,6 @@ export function RemoteConnectionsPage(props: {
           )}
         </SortableHostList>
       )}
-    </Card>
+    </div>
   );
 }

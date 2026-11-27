@@ -67,7 +67,7 @@ export function HostPicker({
             className="fixed inset-0 z-30 cursor-default"
             onClick={() => setOpen(false)}
           />
-          <div className="absolute left-0 top-full z-40 mt-2 w-full min-w-64 overflow-hidden rounded-2xl border border-slate-200 bg-white p-2 shadow-xl dark:border-slate-700 dark:bg-slate-900">
+          <div className="absolute left-0 top-full z-40 mt-2 w-full min-w-64 overflow-hidden rounded-2xl border border-slate-200 bg-white p-2 shadow-float dark:border-slate-700 dark:bg-slate-900">
             <div className="mb-2 flex items-center gap-2 rounded-lg bg-slate-100 px-2 dark:bg-slate-800">
               <Search size={14} className="text-slate-400" />
               <input
