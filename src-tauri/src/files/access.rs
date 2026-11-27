@@ -335,6 +335,7 @@ mod tests {
             std::env::var_os("ProgramFiles").unwrap_or_else(|| "C:\\Program Files".into()),
         )
         .join("Git/bin/bash.exe");
+        let bash = if bash.is_file() { bash } else { "bash".into() };
         let execute = |home: &Path, script: &str| {
             let mut command = Command::new(&bash);
             command

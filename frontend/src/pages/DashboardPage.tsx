@@ -104,13 +104,13 @@ export function DashboardPage(props: {
               {t(lang, "pinnedHosts")}
             </CardTitle>
           </CardHeader>
-          <div className="grid grid-cols-1 gap-2">
+          <div className={pinned.length > 1 ? "pinned-host-grid grid gap-2" : "grid gap-2"}>
             {pinned.map((host) => (
               <div
                 key={host.id}
-                className="flex flex-wrap items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 dark:border-slate-800 dark:bg-slate-950"
+                className="flex min-w-0 items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-2.5 dark:border-slate-800 dark:bg-slate-950"
               >
-                <div className="flex min-w-[10rem] flex-1 items-center gap-2">
+                <div className="flex min-w-0 flex-1 items-center gap-2">
                   <Server size={16} className="shrink-0 text-blue-600 dark:text-blue-300" />
                   <div className="min-w-0">
                     <div className="truncate text-sm font-semibold text-slate-900 dark:text-slate-100">{host.name}</div>

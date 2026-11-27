@@ -30,6 +30,8 @@ pub struct Forward {
     pub target_host: String,
     pub target_port: String,
     pub keep_connected: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub last_activity_at: Option<i64>,
 }
 
 impl Default for Forward {
@@ -43,6 +45,7 @@ impl Default for Forward {
             target_host: "127.0.0.1".to_string(),
             target_port: String::new(),
             keep_connected: true,
+            last_activity_at: None,
         }
     }
 }
@@ -63,6 +66,10 @@ impl Forward {
     /// Only local / dynamic listen on a local port; remote listens on the remote side.
     pub fn binds_local_port(&self) -> bool {
         matches!(self.mode, TunnelMode::Local | TunnelMode::Dynamic)
+    }
+
+    pub fn history_label(&self) -> String {
+        format!("{} · {}", self.name, self.bind_display())
     }
 }
 
@@ -151,6 +158,8 @@ pub struct AppSettings {
     pub close_behavior: String,
     #[serde(default)]
     pub auto_sort_hosts: bool,
+    #[serde(default)]
+    pub two_column_hosts: bool,
     /// When true, a newer signed release found on startup is downloaded and installed automatically;
     /// when false, the app only surfaces an "update available" notice and lets the user install it.
     #[serde(default)]
@@ -181,6 +190,7 @@ impl Default for AppSettings {
             log_level: "info".to_string(),
             close_behavior: default_close_behavior(),
             auto_sort_hosts: false,
+            two_column_hosts: false,
             auto_update: false,
             update_channel: default_update_channel(),
         }

@@ -2,6 +2,62 @@
 @tailwind components;
 @tailwind utilities;
 
+.host-layout {
+  container: host-layout / inline-size;
+}
+
+.host-slot {
+  display: none;
+}
+
+@container host-layout (min-width: 52rem) {
+  .host-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    reading-flow: grid-rows;
+  }
+
+  .host-grid > * {
+    grid-column: var(--host-column);
+    order: var(--host-order);
+  }
+
+  .host-slot {
+    display: block;
+  }
+}
+
+@container host-layout (min-width: 46rem) {
+  .pinned-host-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.forward-rules {
+  container: forward-rules / inline-size;
+}
+
+@container forward-rules (max-width: 32rem) {
+  .forward-rule-actions {
+    flex-basis: 100%;
+    justify-content: space-between;
+  }
+
+  .forward-rule-actions > button {
+    padding-inline: 0.75rem;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .host-details {
+    animation: host-details-in 100ms ease-out;
+  }
+}
+
+@keyframes host-details-in {
+  from { opacity: 0.65; }
+  to { opacity: 1; }
+}
+
 :root {
   font-family: Inter, "Segoe UI", system-ui, sans-serif;
   color-scheme: light;

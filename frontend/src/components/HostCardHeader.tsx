@@ -1,6 +1,7 @@
 import { ChevronDown, ChevronRight, Pin, PinOff, Server } from "lucide-react";
 import type { ReactNode } from "react";
 import { t } from "../i18n";
+import { cn } from "../lib/utils";
 import type { Host, Language } from "../types";
 import { Button } from "./ui/button";
 
@@ -8,6 +9,7 @@ export function HostCardHeader(props: {
   language: Language;
   host: Host;
   expanded: boolean;
+  compact: boolean;
   accentClassName: string;
   summary: ReactNode;
   dragHandle?: ReactNode;
@@ -18,15 +20,23 @@ export function HostCardHeader(props: {
   const endpoint = `${props.host.sshUser ? `${props.host.sshUser}@` : ""}${props.host.sshHost || "?"}:${props.host.sshPort || "22"}`;
 
   return (
-    <div className="flex w-full items-center gap-2 pr-4 transition hover:bg-slate-50 dark:hover:bg-slate-900">
-      <button aria-expanded={props.expanded} onClick={props.onToggle} className="flex min-w-0 flex-1 items-center gap-3 px-5 py-4 text-left">
-        {props.expanded ? <ChevronDown size={18} className="text-slate-400" /> : <ChevronRight size={18} className="text-slate-400" />}
-        <div className={`flex h-9 w-9 items-center justify-center rounded-xl ${props.accentClassName}`}>
+    <div className={cn(
+      "flex w-full items-center gap-2 pr-4 transition hover:bg-slate-50 dark:hover:bg-slate-900",
+      props.compact && "gap-1 pr-2",
+      props.compact && props.expanded && "bg-blue-50 hover:bg-blue-50 dark:bg-slate-900",
+    )}>
+      <button
+        aria-expanded={props.expanded}
+        onClick={props.onToggle}
+        className={cn("flex min-w-0 flex-1 items-center gap-3 px-5 py-4 text-left", props.compact && "gap-2 px-3 py-2.5")}
+      >
+        {props.expanded ? <ChevronDown size={18} className="shrink-0 text-slate-400" /> : <ChevronRight size={18} className="shrink-0 text-slate-400" />}
+        <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${props.accentClassName}`}>
           <Server size={18} />
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <span className="truncate text-sm font-semibold text-slate-900 dark:text-slate-100">{props.host.name}</span>
+            <span title={props.host.name} className="truncate text-sm font-semibold text-slate-900 dark:text-slate-100">{props.host.name}</span>
             {props.host.pinned && (
               <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-blue-100 px-2 py-0.5 text-[11px] font-medium text-blue-700 dark:bg-blue-950 dark:text-blue-300">
                 <Pin size={11} className="fill-current" />
@@ -34,9 +44,9 @@ export function HostCardHeader(props: {
               </span>
             )}
           </div>
-          <div className="truncate text-xs text-slate-500 dark:text-slate-400">{endpoint}</div>
+          <div title={endpoint} className="truncate text-xs text-slate-500 dark:text-slate-400">{endpoint}</div>
         </div>
-        <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">{props.summary}</div>
+        <div className="flex shrink-0 items-center gap-2 whitespace-nowrap text-xs text-slate-500 empty:hidden dark:text-slate-400">{props.summary}</div>
       </button>
       <Button
         variant="ghost"

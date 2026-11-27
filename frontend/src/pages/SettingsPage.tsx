@@ -281,6 +281,12 @@ export function SettingsPage(props: {
             checked={props.settings.autoSortHosts}
             onChange={(autoSortHosts) => props.setSettings({ autoSortHosts })}
           />
+          <SettingToggle
+            label={t(lang, "twoColumnHosts")}
+            description={t(lang, "twoColumnHostsDesc")}
+            checked={props.settings.twoColumnHosts}
+            onChange={(twoColumnHosts) => props.setSettings({ twoColumnHosts })}
+          />
           <UpdateSection
             lang={lang}
             appVersion={props.appVersion}

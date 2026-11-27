@@ -27,6 +27,7 @@ pub fn save_settings_cmd(
         log_level: normalize_choice(&settings.log_level, &["debug", "info", "warning", "error"], "info"),
         close_behavior: normalize_choice(&settings.close_behavior, &["ask", "minimize", "exit"], "ask"),
         auto_sort_hosts: settings.auto_sort_hosts,
+        two_column_hosts: settings.two_column_hosts,
         auto_update: settings.auto_update,
         update_channel: normalize_choice(&settings.update_channel, &["stable", "preview"], "stable"),
     };

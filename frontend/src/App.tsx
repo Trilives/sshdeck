@@ -18,7 +18,7 @@ import { FileTransferPage } from "./pages/FileTransferPage";
 import { FileTransferBoundary } from "./files/FileTransferBoundary";
 import type { AppSettings, CriticalErrorPayload, Forward, HistoryEntry, Host, LogEntry, LogLevel, UpdateChannel, UpdateState } from "./types";
 
-const defaultSettings: AppSettings = { theme: "light", accentColor: "blue", language: "zh-CN", logLevel: "info", closeBehavior: "ask", autoSortHosts: false, autoUpdate: false, updateChannel: "stable" };
+const defaultSettings: AppSettings = { theme: "light", accentColor: "blue", language: "zh-CN", logLevel: "info", closeBehavior: "ask", autoSortHosts: false, twoColumnHosts: false, autoUpdate: false, updateChannel: "stable" };
 
 const newHost = (): Host => ({
   id: "",
@@ -326,8 +326,10 @@ export function App() {
     try {
       await api.moveHost(id, targetId);
       await refreshHosts();
+      return true;
     } catch (err) {
       setError(String(err));
+      return false;
     }
   }
 
@@ -827,7 +829,7 @@ export function App() {
           setPage(nextPage);
         }} />
 
-        <section className="min-h-0 min-w-0 flex-1 overflow-y-auto p-6">
+        <section className="host-layout min-h-0 min-w-0 flex-1 overflow-y-auto p-6">
           {page === "dashboard" && update.status === "available" && !updateDismissed && (
             <div className="mb-4 flex items-center justify-between gap-3 rounded-2xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-700 dark:border-blue-950 dark:bg-blue-950/40 dark:text-blue-200">
               <span className="whitespace-pre-wrap">{t(language, "updateBannerText").replace("{version}", update.version ?? "")}</span>
@@ -869,6 +871,7 @@ export function App() {
                 language={language}
                 hosts={hosts}
                 autoSortHosts={settings.autoSortHosts}
+                twoColumnHosts={settings.twoColumnHosts}
                 onMoveHost={moveHost}
                 histories={remoteHistories}
                 expandedIds={remoteExpandedIds}
@@ -896,6 +899,7 @@ export function App() {
                 language={language}
                 hosts={hosts}
                 autoSortHosts={settings.autoSortHosts}
+                twoColumnHosts={settings.twoColumnHosts}
                 onMoveHost={moveHost}
                 expandedIds={forwardingExpandedIds}
                 onToggle={toggleForwardingExpand}

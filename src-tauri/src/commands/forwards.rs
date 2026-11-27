@@ -5,12 +5,12 @@ use crate::model::{Forward, Host, HostView, TunnelStatus};
 use crate::ssh::process::{restart_forward, start_tunnel, stop_tunnel};
 use crate::state::AppState;
 use crate::store::write_json;
-use crate::util::lock_error;
+use crate::util::{lock_error, now_millis};
 use crate::validate::validate_forward;
 
 /// Record a just-opened port in the local history (with a browser URL for local/dynamic forwards so it can be
 /// reopened), then rescan VS Code's history — opening a port is one of the moments we refresh it.
-fn record_port_open(state: &AppState, host: &Host, forward: &Forward) {
+fn record_port_open(state: &AppState, host: &Host, forward: &Forward, app: &AppHandle) {
     let view = state.forward_view(forward.clone());
     let port = view.forward.bind_port.trim().to_string();
     let detail = if forward.binds_local_port() && !port.is_empty() {
@@ -20,9 +20,26 @@ fn record_port_open(state: &AppState, host: &Host, forward: &Forward) {
     } else {
         String::new()
     };
-    let label = format!("{} · {}", forward.name, view.bind_display);
+    let label = view.forward.history_label();
     state.record_open(&host.id, "port", &label, "", &detail);
+    if let Err(error) = save_forward_activity(state, &host.id, &forward.id) {
+        state.add_log("warning", format!("Could not save forward activity: {error}"), Some(app));
+    }
     state.merge_vscode_history(&host.id, &host.ssh_host);
+}
+
+fn save_forward_activity(state: &AppState, host_id: &str, forward_id: &str) -> Result<(), String> {
+    let mut hosts = state.hosts.lock().map_err(lock_error)?;
+    let Some(host) = hosts.iter_mut().find(|host| host.id == host_id) else {
+        return Ok(());
+    };
+    let Some(index) = host.forwards.iter().position(|forward| forward.id == forward_id) else {
+        return Ok(());
+    };
+    // Preserve the last action's place even if two events share a timestamp.
+    host.forwards[..=index].rotate_right(1);
+    host.forwards[0].last_activity_at = Some(now_millis());
+    write_json(state.hosts_path(), &*hosts)
 }
 
 #[tauri::command]
@@ -52,9 +69,11 @@ pub fn save_forward(
             || existing.target_port.trim() != forward.target_port.trim()
             // keepConnected is captured in the running tunnel's snapshot, so restart to pick up the new value.
             || existing.keep_connected != forward.keep_connected;
+        forward.last_activity_at = existing.last_activity_at;
         *existing = forward.clone();
     } else {
-        host.forwards.push(forward.clone());
+        forward.last_activity_at = Some(now_millis());
+        host.forwards.insert(0, forward.clone());
     }
     let host_name = host.name.clone();
     write_json(state.hosts_path(), &*hosts)?;
@@ -116,8 +135,8 @@ pub fn connect_forward(
         return Ok(state.host_view(host));
     }
     validate_forward(&forward)?;
-    start_tunnel(host.clone(), forward.clone(), state.inner(), app, None)?;
-    record_port_open(state.inner(), &host, &forward);
+    start_tunnel(host.clone(), forward.clone(), state.inner(), app.clone(), None)?;
+    record_port_open(state.inner(), &host, &forward, &app);
     Ok(state.host_view(state.find_host(&host_id)?))
 }
 
@@ -137,8 +156,8 @@ pub fn connect_forward_with_password(
         return Ok(state.host_view(host));
     }
     validate_forward(&forward)?;
-    start_tunnel(host.clone(), forward.clone(), state.inner(), app, Some(password))?;
-    record_port_open(state.inner(), &host, &forward);
+    start_tunnel(host.clone(), forward.clone(), state.inner(), app.clone(), Some(password))?;
+    record_port_open(state.inner(), &host, &forward, &app);
     Ok(state.host_view(state.find_host(&host_id)?))
 }
 

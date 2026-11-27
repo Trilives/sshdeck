@@ -51,7 +51,7 @@ after(async () => {
   server?.kill();
 });
 
-async function withPage(run) {
+async function withPage(run, { connectLocal = true } = {}) {
   const context = await browser.newContext({
     viewport: { width: 1280, height: 800 },
   });
@@ -62,7 +62,13 @@ async function withPage(run) {
   try {
     await page.goto(baseUrl);
     await page.getByRole("button", { name: "文件传输", exact: true }).click();
-    await page.getByTitle("C:\\Regression", { exact: true }).first().waitFor();
+    if (connectLocal) {
+      const connect = page.getByRole("button", { name: "连接", exact: true });
+      await connect.first().click();
+      await page.getByTitle("C:\\Regression", { exact: true }).first().waitFor();
+      await connect.first().click();
+      await page.getByTitle("C:\\Regression", { exact: true }).nth(1).waitFor();
+    }
     await run(page, errors);
   } finally {
     await context.close();
@@ -136,6 +142,10 @@ test("long dashboard events keep the cards and connection actions within the win
     const dashboard = page.locator("main > div > section");
     const event = dashboard.getByText(message, { exact: true });
     await event.waitFor();
+    const card = (name) => dashboard.getByRole("heading", { name, exact: true }).locator("xpath=../..");
+    const connections = await card("当前连接").boundingBox();
+    const pinned = await card("置顶主机").boundingBox();
+    assert.equal(pinned.width, connections.width, "one pinned host keeps the full card width");
     const dimensions = await dashboard.evaluate((element) => ({
       available: element.clientWidth,
       content: element.scrollWidth,
@@ -419,6 +429,82 @@ test("long-press reorders hosts in both pages and automatic mode hides the handl
     assert.equal(await handles.first().getAttribute("aria-label"), "调整 Remote refused 的顺序");
     assert.deepEqual(errors, []);
   }));
+test("paired host details align and stay usable with long paths and many rules", () =>
+  withPage(async (page, errors) => {
+    await page.setViewportSize({ width: 1120, height: 940 });
+    const path = "/srv/" + "long-directory/".repeat(25) + "assets/";
+    await page.evaluate((path) => {
+      const { history, hosts } = window.fixture;
+      for (const [index, host] of hosts.slice(0, 2).entries()) {
+        const count = index === 0 ? 9 : 1;
+        history[host.id] = Array.from({ length: count }, (_, n) => ({
+          id: `${host.id}-${n}`,
+          hostId: host.id,
+          kind: "vscode",
+          label: n === 0 && index === 0 ? path : `/home/test/${n}`,
+          uri: "",
+          detail: "",
+          openedAt: count - n,
+        }));
+        host.forwards = Array.from({ length: count }, (_, n) => ({
+          id: `${host.id}-${n}`,
+          name: n === 0 && index === 0 ? "long-forward-".repeat(40) : `Rule ${n + 1}`,
+          mode: "local",
+          status: "running",
+          bindDisplay: `127.0.0.1:${8000 + n}`,
+          targetDisplay: "127.0.0.1:80",
+        }));
+      }
+    }, path);
+    const nav = (name) => page.getByRole("navigation").getByRole("button", { name, exact: true }).click();
+    await nav("设置");
+    await page.getByRole("switch", { name: "双栏主机列表", exact: true }).press("Space");
+    await page.waitForFunction(() => document.querySelector('[aria-label="双栏主机列表"]').checked);
+
+    const left = page.getByRole("region", { name: "Remote ready", exact: true });
+    const right = page.getByRole("region", { name: "Remote refused", exact: true });
+    const expandPair = async (name) => {
+      await nav(name);
+      await page.getByRole("button", { name: /^Remote ready test@/ }).click();
+      await page.getByRole("button", { name: /^Remote refused test@/ }).click();
+    };
+    const assertEqualPanels = async () => {
+      const [a, b] = await Promise.all([left.boundingBox(), right.boundingBox()]);
+      assert.ok(a && b && a.x + a.width < b.x, "details are side by side");
+      assert.equal(a.height, b.height);
+    };
+    await expandPair("远程连接");
+    await right.getByText("/home/test/0", { exact: true }).waitFor();
+    const history = left.getByTitle(path, { exact: true });
+    assert.ok(await history.evaluate((entry) => {
+      const [prefix, suffix] = entry.children;
+      return prefix.scrollWidth > prefix.clientWidth && suffix.scrollWidth <= suffix.clientWidth && suffix.textContent === "/assets/";
+    }));
+    await history.locator("xpath=ancestor::button[1]/..").getByRole("button", { name: "填入下方目录框（可继续编辑）" }).click();
+    assert.equal(await left.getByRole("textbox", { name: "打开远程目录" }).inputValue(), path);
+    await assertEqualPanels();
+    assert.ok(await left.getByRole("button", { name: "VS Code", exact: true }).evaluate((button) => {
+      const box = button.getBoundingClientRect();
+      const panel = button.closest("section").getBoundingClientRect();
+      return panel.right - box.right <= 22 && box.right < panel.right;
+    }));
+
+    await expandPair("端口转发");
+    await right.getByText("Rule 1", { exact: true }).waitFor();
+    await assertEqualPanels();
+    const rules = left.locator(".forward-rules");
+    assert.ok(await rules.evaluate((list) => list.clientHeight === 256 && list.scrollHeight > list.clientHeight && list.scrollWidth === list.clientWidth));
+    assert.ok(await rules.locator(".forward-rule-actions").first().evaluate((group) => {
+      const { left, right, top } = group.getBoundingClientRect();
+      const buttons = [...group.children].map((button) => button.getBoundingClientRect());
+      return buttons.length === 4 && buttons.every((button) => button.top === top) &&
+        buttons[0].left === left && Math.abs(buttons.at(-1).right - right) < 1;
+    }));
+    await rules.getByText("Rule 9", { exact: true }).scrollIntoViewIfNeeded();
+    assert.ok(await rules.evaluate((list) => list.scrollTop > 0));
+    assert.deepEqual(errors, []);
+  }, { connectLocal: false }));
+
 test("the guide follows the same task order in both languages and adapts to the window", () =>
   withPage(async (page) => {
     await page.setViewportSize({ width: 1440, height: 800 });
@@ -621,10 +707,32 @@ test("connection failures stay inside the pane and allow changing host", () =>
   withPage(async (page, errors) => {
     await chooseHost(page, "refused");
     await page.getByText("Connection refused", { exact: true }).waitFor();
+    await page.getByRole("button", { name: "重试", exact: true }).click();
+    await page.waitForFunction(() => window.fixture.requests.filter(
+      (request) => request.command === "open_file_session" && request.hostId === "refused",
+    ).length === 2);
+    await page.getByText("Connection refused", { exact: true }).waitFor();
     await chooseHost(page, "ready");
     await page.getByTitle("/srv/ready", { exact: true }).waitFor();
     assert.deepEqual(errors, []);
   }));
+
+test("file transfer remembers the selected host without reconnecting on startup", () =>
+  withPage(async (page, errors) => {
+    await chooseHost(page, "ready");
+    await page.getByTitle("/srv/ready", { exact: true }).waitFor();
+    await page.reload();
+    await page.getByRole("button", { name: "文件传输", exact: true }).click();
+    await page.getByRole("button", { name: "Remote ready test@127.0.0.1:1", exact: true }).waitFor();
+    assert.equal(await page.getByTitle("未连接", { exact: true }).count(), 2);
+    assert.equal(await page.getByText("选择主机并连接，开始浏览文件。", { exact: true }).count(), 0);
+    assert.equal(await page.evaluate(() => window.fixture.requests.some(
+      (request) => request.command === "open_file_session",
+    )), false);
+    await page.getByRole("button", { name: "连接", exact: true }).first().click();
+    await page.getByTitle("/srv/ready", { exact: true }).waitFor();
+    assert.deepEqual(errors, []);
+  }, { connectLocal: false }));
 
 test("password login failure shows a usable dialog", () =>
   withPage(async (page, errors) => {
@@ -1077,6 +1185,7 @@ test("a rendering failure preserves navigation and the close dialog", () =>
     await page
       .getByRole("button", { name: "重新打开文件传输", exact: true })
       .click();
+    await page.getByRole("button", { name: "连接", exact: true }).first().click();
     await page.getByTitle("C:\\Regression", { exact: true }).first().waitFor();
     await page.getByRole("button", { name: "主页", exact: true }).click();
     await page

@@ -17,7 +17,7 @@ function remember(host: string, path: string) {
   }
 }
 
-export function useFileBrowser(hostId: string, enabled: boolean) {
+export function useFileBrowser(hostId: string, autoConnect: boolean) {
   const [listing, setListing] = useState<FileListing | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -78,10 +78,9 @@ export function useFileBrowser(hostId: string, enabled: boolean) {
   );
 
   useEffect(() => {
-    if (!enabled) return;
-    void connect();
+    if (autoConnect) void connect();
     return disconnect;
-  }, [enabled, connect, disconnect]);
+  }, [autoConnect, connect, disconnect]);
 
   const navigate = useCallback(
     async (path: string, back = false) => {

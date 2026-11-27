@@ -59,15 +59,21 @@ export function FileTransferPage({
   active: boolean;
 }) {
   const [visited, setVisited] = useState(false);
-  const [leftId, setLeftId] = useState(() => stored("sshdeck.file.left") || "");
-  const [rightId, setRightId] = useState(
-    () => stored("sshdeck.file.right") || "",
-  );
+  const [leftHost, setLeftHost] = useState(() => ({
+    id: stored("sshdeck.file.left") || "",
+    autoConnect: false,
+  }));
+  const [rightHost, setRightHost] = useState(() => ({
+    id: stored("sshdeck.file.right") || "",
+    autoConnect: false,
+  }));
+  const leftId = leftHost.id;
+  const rightId = rightHost.id;
   const rightInitialised = useRef(stored("sshdeck.file.right") !== null);
   const [leftSelection, setLeftSelection] = useState<FileEntry[]>([]);
   const [rightSelection, setRightSelection] = useState<FileEntry[]>([]);
-  const left = useFileBrowser(leftId, visited);
-  const right = useFileBrowser(rightId, visited);
+  const left = useFileBrowser(leftId, leftHost.autoConnect);
+  const right = useFileBrowser(rightId, rightHost.autoConnect);
   const [distribution, setDistribution] = useState(false);
   const [direct, setDirect] = useState(false);
   const [selectedRecipients, setSelectedRecipients] = useState<string[]>([]);
@@ -101,7 +107,7 @@ export function FileTransferPage({
   useEffect(() => {
     if (visited && !rightInitialised.current && hosts.length) {
       rightInitialised.current = true;
-      setRightId(hosts[0].id);
+      setRightHost({ id: hosts[0].id, autoConnect: false });
     }
   }, [visited, hosts]);
   useEffect(() => {
@@ -381,7 +387,7 @@ export function FileTransferPage({
             language={lang}
             hosts={hosts}
             hostId={leftId}
-            onHostChange={setLeftId}
+            onHostChange={(id) => setLeftHost({ id, autoConnect: true })}
             browser={left}
             onSelection={setLeftSelection}
             onDropFiles={
@@ -424,8 +430,10 @@ export function FileTransferPage({
               className="absolute top-4 rounded-full border border-slate-200 bg-white p-1 text-slate-400 shadow-sm hover:text-blue-500 dark:border-slate-700 dark:bg-slate-900"
               title={ft(lang, "swap")}
               onClick={() => {
-                setLeftId(rightId);
-                setRightId(leftId);
+                if (leftId === rightId) return;
+                rightInitialised.current = true;
+                setLeftHost({ id: rightId, autoConnect: Boolean(right.listing) || right.busy });
+                setRightHost({ id: leftId, autoConnect: Boolean(left.listing) || left.busy });
               }}
             >
               <ArrowLeftRight size={11} />
@@ -438,7 +446,10 @@ export function FileTransferPage({
               language={lang}
               hosts={hosts}
               hostId={rightId}
-              onHostChange={setRightId}
+              onHostChange={(id) => {
+                rightInitialised.current = true;
+                setRightHost({ id, autoConnect: true });
+              }}
               browser={right}
               onSelection={setRightSelection}
               onDropFiles={(drop, path) => dropped("right", drop, path)}

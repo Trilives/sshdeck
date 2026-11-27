@@ -443,9 +443,18 @@ export function FilePane(props: {
       </div>
       {b.error && (
         <div className="shrink-0 border-b border-rose-100 bg-rose-50 px-3 py-2 text-xs text-rose-700 dark:border-rose-900/30 dark:bg-rose-950/20 dark:text-rose-300">
-          <p className="max-h-24 overflow-auto whitespace-pre-wrap break-words">
+          <p role="alert" className="max-h-24 overflow-auto whitespace-pre-wrap break-words">
             {b.error}
           </p>
+          {!b.listing && !b.busy && (
+            <Button
+              variant="secondary"
+              className="mt-2 h-7 px-2.5 text-xs"
+              onClick={() => void b.connect()}
+            >
+              {ft(lang, "retry")}
+            </Button>
+          )}
           {!!props.hostId && !b.busy && (
             <button
               onClick={() => setPasswordOpen(true)}
@@ -675,9 +684,7 @@ export function FilePane(props: {
             ) : (
               <FolderOpen size={36} strokeWidth={1} />
             )}
-            <p className="text-xs leading-6">
-              {ft(lang, b.busy ? "connecting" : "ready")}
-            </p>
+            {b.busy && <p className="text-xs leading-6">{ft(lang, "connecting")}</p>}
             {!b.busy && (
               <Button
                 variant="secondary"

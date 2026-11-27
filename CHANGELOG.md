@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.4.5-beta.10
+
+- Add an optional two-column host list for Remote Connections and Port Forwarding. Hosts keep their columns as details expand. Paired details have equal height and one open detail uses the full row.
+- Align host actions, cap and scroll the forwarding rule list, and keep the final directory visible when a history path is too long.
+- Sort each host's forwarding rules by their most recent successful connection or creation.
+- Keep the pinned hosts panel full width on Home and show two host tiles per row when there is room.
+- Restore the selected File Transfer hosts with both panes disconnected on startup. Connection failures now offer a Retry button.
+
 ## 0.4.5-beta.9
 
 - Match the Windows title bar icon, running window icon, and system tray icon to the selected accent. The default SSHDeck desktop shortcut can follow the accent too.

@@ -9,7 +9,8 @@ export function PortForwardingPage(props: {
   language: Language;
   hosts: Host[];
   autoSortHosts: boolean;
-  onMoveHost: (id: string, targetId: string) => Promise<void>;
+  twoColumnHosts: boolean;
+  onMoveHost: (id: string, targetId: string) => Promise<boolean>;
   expandedIds: Set<string>;
   onToggle: (hostId: string) => void;
   onTogglePin: (host: Host) => void;
@@ -30,12 +31,22 @@ export function PortForwardingPage(props: {
           {t(lang, "noForwardingHosts")}
         </Card>
       ) : (
-        <SortableHostList hosts={props.hosts} language={lang} autoSort={props.autoSortHosts} onMove={props.onMoveHost}>
-          {(host, dragHandle) => (
+        <SortableHostList
+          hosts={props.hosts}
+          language={lang}
+          autoSort={props.autoSortHosts}
+          twoColumn={props.twoColumnHosts}
+          expandedIds={props.expandedIds}
+          anchorPrefix="forwarding-host-"
+          onMove={props.onMoveHost}
+        >
+          {(host, renderCard, dragHandle) => (
             <HostCard
               language={lang}
               host={host}
               dragHandle={dragHandle}
+              compact={props.twoColumnHosts}
+              renderCard={renderCard}
               expanded={props.expandedIds.has(host.id)}
               onToggle={() => props.onToggle(host.id)}
               onNewForward={() => props.onNewForward(host)}

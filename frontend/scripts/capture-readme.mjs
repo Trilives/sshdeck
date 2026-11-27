@@ -158,6 +158,7 @@ function installDemo({ language, version }) {
             logLevel: "info",
             closeBehavior: "ask",
             autoSortHosts: false,
+            twoColumnHosts: false,
             autoUpdate: false,
             updateChannel: "stable",
           };
@@ -315,6 +316,9 @@ try {
       .getByRole("button", { name: zh ? "取消" : "Cancel", exact: true })
       .click();
     await button(zh ? "文件传输" : "File Transfer").click();
+    await button(zh ? "连接" : "Connect").click();
+    await page.getByTitle("C:\\Projects\\sshdeck", { exact: true }).waitFor();
+    await button(zh ? "连接" : "Connect").click();
     await page.getByTitle("/srv/sshdeck", { exact: true }).waitFor();
     await page
       .getByRole("checkbox", {

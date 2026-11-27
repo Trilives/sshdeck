@@ -10,11 +10,12 @@ import {
   Trash2,
   Zap,
 } from "lucide-react";
-import { useCallback, useState, type ReactNode } from "react";
+import { useCallback, useId, useState, type ReactNode } from "react";
 import { RemoteDirectoryPicker } from "../files/RemoteDirectoryPicker";
 import { ft } from "../files/i18n";
+import { HistoryPath } from "../components/HistoryPath";
 import { HostCardHeader } from "../components/HostCardHeader";
-import { SortableHostList } from "../components/SortableHostList";
+import { SortableHostList, type RenderHostCard } from "../components/SortableHostList";
 import { HostTransferActions } from "../components/HostTransferActions";
 import { Button } from "../components/ui/button";
 import { Card } from "../components/ui/card";
@@ -35,6 +36,8 @@ function RemoteHostCard(props: {
   dragHandle?: ReactNode;
   entries: HistoryEntry[];
   expanded: boolean;
+  compact: boolean;
+  renderCard: RenderHostCard;
   loading: boolean;
   onToggle: () => void;
   onTogglePin: () => void;
@@ -49,63 +52,60 @@ function RemoteHostCard(props: {
   onOpenVscodePath: (path: string) => void;
 }) {
   const lang = props.language;
+  const pathInputId = useId();
   const [customPath, setCustomPath] = useState("");
   const [pickerOpen, setPickerOpen] = useState(false);
   const closePicker = useCallback(() => setPickerOpen(false), []);
   const path = customPath.trim();
-  return (
-    <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-panel dark:border-slate-800 dark:bg-slate-950/70">
+  const header = (
       <HostCardHeader
         language={lang}
         host={props.host}
         expanded={props.expanded}
+        compact={props.compact}
         dragHandle={props.dragHandle}
         accentClassName="bg-violet-600/10 text-violet-600 dark:bg-violet-500/15 dark:text-violet-300"
         summary={
-          <span>
-            {props.loading
-              ? t(lang, "loading")
-              : `${props.entries.length} ${t(lang, "remotePathsCount")}`}
-          </span>
+          !props.compact && (
+            <span>
+              {props.loading
+                ? t(lang, "loading")
+                : `${props.entries.length} ${t(lang, "remotePathsCount")}`}
+            </span>
+          )
         }
         onToggle={props.onToggle}
         onTogglePin={props.onTogglePin}
       />
+  );
 
-      {props.expanded && (
-        <div className="border-t border-slate-200 px-5 py-4 dark:border-slate-800">
-          <div className="mb-4 flex flex-wrap items-center gap-2">
-            <Button variant="secondary" onClick={props.onSendCommand}>
-              <Zap size={15} />
-              {t(lang, "sendCommand")}
-            </Button>
-            <Button variant="secondary" onClick={props.onUploadKey}>
-              <KeyRound size={15} />
-              {t(lang, "uploadKey")}
-            </Button>
-            <Button
-              variant="secondary"
-              onClick={props.onRefresh}
-              disabled={props.loading}
-            >
-              <RefreshCw
-                size={15}
-                className={props.loading ? "animate-spin" : ""}
-              />
-              {t(lang, "refreshHistory")}
-            </Button>
-            <Button
-              variant="ghost"
-              className="ml-auto"
-              onClick={props.onEditHost}
-            >
-              <Pencil size={15} />
-              {t(lang, "editHost")}
-            </Button>
-            <Button variant="danger" onClick={props.onDeleteHost}>
-              <Trash2 size={15} />
-              {t(lang, "deleteHost")}
-            </Button>
+  const details = props.expanded && (
+        <div className="flex min-w-0 flex-1 flex-col gap-4 border-t border-slate-200 px-5 py-4 dark:border-slate-800">
+          <div className="flex flex-wrap items-center gap-2 whitespace-nowrap">
+            <div className="flex max-w-full flex-wrap gap-2">
+              <Button variant="secondary" onClick={props.onSendCommand}>
+                <Zap size={15} />
+                {t(lang, "sendCommand")}
+              </Button>
+              <Button variant="secondary" onClick={props.onUploadKey}>
+                <KeyRound size={15} />
+                {t(lang, "uploadKey")}
+              </Button>
+              <Button variant="secondary" onClick={props.onRefresh} disabled={props.loading}>
+                <RefreshCw size={15} className={props.loading ? "animate-spin" : ""} />
+                {t(lang, "refreshHistory")}
+              </Button>
+            </div>
+            <div className="ml-auto flex max-w-full flex-wrap justify-end gap-2">
+              <Button variant="ghost" onClick={props.onEditHost}>
+                <Pencil size={15} />
+                {t(lang, "editHost")}
+              </Button>
+              <Button variant="danger" onClick={props.onDeleteHost}>
+                <Trash2 size={15} />
+                {t(lang, "deleteHost")}
+              </Button>
+            </div>
           </div>
 
           {props.loading ? (
@@ -118,11 +118,11 @@ function RemoteHostCard(props: {
               {t(lang, "historyEmpty")}
             </p>
           ) : (
-            <div className="grid max-h-64 gap-1 overflow-auto rounded-xl border border-slate-100 p-1 dark:border-slate-800">
+            <div className="grid max-h-64 min-w-0 auto-rows-max grid-cols-1 gap-1 overflow-x-hidden overflow-y-auto rounded-xl border border-slate-100 p-1 dark:border-slate-800">
               {props.entries.map((entry) => (
                 <div
                   key={entry.id}
-                  className="flex items-center rounded-lg text-sm text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-900"
+                  className="flex min-w-0 items-center rounded-lg text-sm text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-900"
                 >
                   <button
                     onClick={() => props.onOpenTerminalEntry(entry)}
@@ -132,8 +132,8 @@ function RemoteHostCard(props: {
                       size={16}
                       className="shrink-0 text-violet-500"
                     />
-                    <span className="min-w-0 flex-1 truncate">
-                      <span className="block truncate">{entry.label}</span>
+                    <span className="min-w-0 flex-1">
+                      <HistoryPath path={entry.label} />
                       <span className="block text-xs text-slate-400">
                         {formatOpenedAt(entry.openedAt)}
                       </span>
@@ -141,14 +141,14 @@ function RemoteHostCard(props: {
                   </button>
                   <button
                     onClick={() => props.onOpenVscodeEntry(entry)}
-                    className="mr-1 rounded-lg p-2 text-slate-400 hover:bg-slate-200 hover:text-slate-700 dark:hover:bg-slate-800"
+                    className="mr-1 shrink-0 rounded-lg p-2 text-slate-400 hover:bg-slate-200 hover:text-slate-700 dark:hover:bg-slate-800"
                     title={t(lang, "openInVscode")}
                   >
                     <Code2 size={15} />
                   </button>
                   <button
                     onClick={() => setCustomPath(entry.label)}
-                    className="mr-1 rounded-lg p-2 text-slate-400 hover:bg-slate-200 hover:text-slate-700 dark:hover:bg-slate-800"
+                    className="mr-1 shrink-0 rounded-lg p-2 text-slate-400 hover:bg-slate-200 hover:text-slate-700 dark:hover:bg-slate-800"
                     title={t(lang, "vscodeFillPath")}
                   >
                     <PenLine size={15} />
@@ -158,36 +158,43 @@ function RemoteHostCard(props: {
             </div>
           )}
 
-          <div className="mt-4 grid gap-2 border-t border-slate-200 pt-4 dark:border-slate-800">
-            <label className="text-xs font-medium text-slate-500 dark:text-slate-400">
+          <div className="mt-auto grid min-w-0 grid-cols-1 gap-2 border-t border-slate-200 pt-4 dark:border-slate-800">
+            <label htmlFor={pathInputId} className="text-xs font-medium text-slate-500 dark:text-slate-400">
               {t(lang, "remoteOpenPathLabel")}
             </label>
             <div className="flex flex-wrap gap-2">
-              <Input
-                className="min-w-[16rem] flex-1"
-                value={customPath}
-                placeholder={t(lang, "remoteOpenPathPlaceholder")}
-                onChange={(event) => setCustomPath(event.target.value)}
-              />
-              <Button variant="secondary" onClick={() => setPickerOpen(true)}>
-                <FolderOpen size={16} />
-                {ft(lang, "chooseDirectory")}
-              </Button>
-              <Button
-                variant="secondary"
-                onClick={() => props.onOpenTerminalPath(path)}
-              >
-                <Terminal size={16} />
-                {t(lang, "remoteOpenTerminal")}
-              </Button>
-              <Button onClick={() => props.onOpenVscodePath(path)}>
-                <Code2 size={16} />
-                {t(lang, "remoteOpenVscode")}
-              </Button>
+              <div className="flex min-w-0 flex-[1_1_23rem] flex-wrap gap-2">
+                <Input
+                  id={pathInputId}
+                  className="min-w-0 flex-[1_1_10rem]"
+                  value={customPath}
+                  title={customPath || undefined}
+                  placeholder={t(lang, "remoteOpenPathPlaceholder")}
+                  onChange={(event) => setCustomPath(event.target.value)}
+                />
+                <Button variant="secondary" className="ml-auto whitespace-nowrap" onClick={() => setPickerOpen(true)}>
+                  <FolderOpen size={16} />
+                  {ft(lang, "chooseDirectory")}
+                </Button>
+              </div>
+              <div className="ml-auto flex max-w-full flex-wrap justify-end gap-2 whitespace-nowrap">
+                <Button variant="secondary" onClick={() => props.onOpenTerminalPath(path)}>
+                  <Terminal size={16} />
+                  {t(lang, "remoteOpenTerminal")}
+                </Button>
+                <Button onClick={() => props.onOpenVscodePath(path)}>
+                  <Code2 size={16} />
+                  {t(lang, "remoteOpenVscode")}
+                </Button>
+              </div>
             </div>
           </div>
         </div>
-      )}
+  );
+
+  return (
+    <>
+      {props.renderCard(header, details)}
       {pickerOpen && (
         <RemoteDirectoryPicker
           host={props.host}
@@ -209,7 +216,7 @@ function RemoteHostCard(props: {
           }}
         />
       )}
-    </div>
+    </>
   );
 }
 
@@ -217,7 +224,8 @@ export function RemoteConnectionsPage(props: {
   language: Language;
   hosts: Host[];
   autoSortHosts: boolean;
-  onMoveHost: (id: string, targetId: string) => Promise<void>;
+  twoColumnHosts: boolean;
+  onMoveHost: (id: string, targetId: string) => Promise<boolean>;
   histories: Record<string, HistoryEntry[]>;
   expandedIds: Set<string>;
   loadingIds: Set<string>;
@@ -261,12 +269,21 @@ export function RemoteConnectionsPage(props: {
           {t(lang, "noHosts")}
         </Card>
       ) : (
-        <SortableHostList hosts={props.hosts} language={lang} autoSort={props.autoSortHosts} onMove={props.onMoveHost}>
-          {(host, dragHandle) => (
+        <SortableHostList
+          hosts={props.hosts}
+          language={lang}
+          autoSort={props.autoSortHosts}
+          twoColumn={props.twoColumnHosts}
+          expandedIds={props.expandedIds}
+          onMove={props.onMoveHost}
+        >
+          {(host, renderCard, dragHandle) => (
             <RemoteHostCard
               language={lang}
               host={host}
               dragHandle={dragHandle}
+              compact={props.twoColumnHosts}
+              renderCard={renderCard}
               entries={props.histories[host.id] ?? []}
               expanded={props.expandedIds.has(host.id)}
               loading={props.loadingIds.has(host.id)}

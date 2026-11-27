@@ -3,6 +3,7 @@ import { useEffect, useId, useState } from "react";
 import { Code2, FolderOpen, PenLine, Terminal, X } from "lucide-react";
 import { t } from "../../i18n";
 import type { HistoryEntry, Language } from "../../types";
+import { HistoryPath } from "../HistoryPath";
 import { Button } from "../ui/button";
 import { Card, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import { Input } from "../ui/input";
@@ -11,19 +12,6 @@ function formatOpenedAt(ms: number): string {
   const date = new Date(ms);
   const pad = (value: number) => String(value).padStart(2, "0");
   return `${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
-}
-
-function HistoryPath({ path }: { path: string }) {
-  // Keep the final directory and any trailing separators together.
-  const lastDirectory = Math.max(0, path.search(/[/\\][^/\\]+[/\\]*$/));
-  return (
-    <span className="flex min-w-0">
-      <span className="min-w-0 truncate">{path.slice(0, lastDirectory)}</span>
-      <span className="max-w-full shrink-0 truncate [direction:rtl]">
-        <bdi dir="ltr">{path.slice(lastDirectory)}</bdi>
-      </span>
-    </span>
-  );
 }
 
 export function RemoteConnectionDialog(props: {

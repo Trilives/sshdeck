@@ -1,5 +1,6 @@
 use chrono::Local;
 use std::{
+    cmp::Reverse,
     collections::HashMap,
     fs,
     path::PathBuf,
@@ -68,14 +69,16 @@ impl AppState {
         }
 
         let mut hosts: Vec<Host> = read_json(data_dir.join("hosts.json")).unwrap_or_default();
+        let history: Vec<HistoryEntry> = read_json(data_dir.join("history.json")).unwrap_or_default();
         crate::host_order::initialize(&mut hosts);
+        restore_forward_activity(&mut hosts, &history);
 
         Self {
             hosts: Mutex::new(hosts),
             settings: Mutex::new(read_json(data_dir.join("settings.json")).unwrap_or_default()),
             tunnels: Mutex::new(HashMap::new()),
             logs: Mutex::new(Vec::new()),
-            history: Mutex::new(read_json(data_dir.join("history.json")).unwrap_or_default()),
+            history: Mutex::new(history),
             transfer_folders: Mutex::new(
                 read_json(data_dir.join("transfer-folders.json")).unwrap_or_default(),
             ),
@@ -264,7 +267,8 @@ impl AppState {
         }
     }
 
-    pub fn host_view(&self, host: Host) -> HostView {
+    pub fn host_view(&self, mut host: Host) -> HostView {
+        host.forwards.sort_by_key(|forward| Reverse(forward.last_activity_at));
         let forwards = host
             .forwards
             .into_iter()
@@ -305,5 +309,53 @@ impl AppState {
             .cloned()
             .ok_or_else(|| "Forward not found.".to_string())?;
         Ok((host, forward))
+    }
+}
+
+fn restore_forward_activity(hosts: &mut [Host], history: &[HistoryEntry]) {
+    for host in hosts {
+        for forward in &mut host.forwards {
+            if forward.last_activity_at.is_some() {
+                continue;
+            }
+            let label = forward.history_label();
+            forward.last_activity_at = history
+                .iter()
+                .filter(|entry| entry.kind == "port" && entry.host_id == host.id && entry.label == label)
+                .map(|entry| entry.opened_at)
+                .max();
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn legacy_port_history_restores_activity_without_overwriting_saved_activity() {
+        let mut host = Host {
+            forwards: vec![
+                Forward { name: "legacy".into(), ..Forward::default() },
+                Forward { name: "created".into(), last_activity_at: Some(30), ..Forward::default() },
+                Forward { name: "unused".into(), ..Forward::default() },
+            ],
+            ..Host::default()
+        };
+        let entry = |index: usize, opened_at| HistoryEntry {
+            id: String::new(),
+            host_id: host.id.clone(),
+            kind: "port".into(),
+            label: host.forwards[index].history_label(),
+            uri: String::new(),
+            detail: String::new(),
+            opened_at,
+        };
+        let history = [entry(0, 10), entry(0, 20), entry(1, 25)];
+        restore_forward_activity(std::slice::from_mut(&mut host), &history);
+
+        assert_eq!(host.forwards[0].last_activity_at, Some(20));
+        assert_eq!(host.forwards[1].last_activity_at, Some(30));
+        assert_eq!(host.forwards[2].last_activity_at, None);
     }
 }

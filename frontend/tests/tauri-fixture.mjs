@@ -26,6 +26,7 @@ export function installTauriFixture() {
     logLevel: "info",
     closeBehavior: "ask",
     autoSortHosts: false,
+    twoColumnHosts: false,
     autoUpdate: false,
     updateChannel: "preview",
     ...JSON.parse(sessionStorage.getItem("sshdeck.fixture.settings") ?? "{}"),
@@ -133,7 +134,7 @@ export function installTauriFixture() {
         case "check_ssh":
           return true;
         case "plugin:app|version":
-          return "0.4.5-beta.9";
+          return "0.4.5-beta.10";
         case "plugin:event|listen": {
           const id = ++sequence;
           listeners.set(id, args);
