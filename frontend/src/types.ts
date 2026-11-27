@@ -1,7 +1,7 @@
 export type TunnelMode = "local" | "remote" | "dynamic";
 export type TunnelStatus = "running" | "stopped";
 export type ThemeName = "dark" | "light" | "system";
-export type AccentColor = "blue" | "violet" | "teal" | "orange";
+export type AccentColor = "blue" | "violet" | "teal" | "orange" | "monochrome";
 export type Language = "zh-CN" | "en-US";
 export type LogLevel = "debug" | "info" | "warning" | "error";
 /** What the window's close button does: prompt each time, minimize to tray, or quit. */

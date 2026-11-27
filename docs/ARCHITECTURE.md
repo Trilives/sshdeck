@@ -22,6 +22,8 @@ flowchart TB
     Remote --> RemoteHostCard --> RemoteActions[Send command / Upload key / Open path / Edit host / Delete host]
     Forwarding[Port Forwarding page] --> HostCard --> ForwardRow
     HostCard --> ForwardActions[New forward / Disconnect host]
+    Files[File Transfer page] --> FilePane[File panes and folder picker]
+    Files --> TransferQueue
     FE --> Dlg[Dialogs: Host/Forward/SendCmd/Password/KeyUpload/HostKey]
     LogsPage[Logs page]
     SetPage[Settings page]
@@ -33,6 +35,7 @@ flowchart TB
     cmds --> ssh[ssh: command/process/probe/keys]
     cmds --> port[portcheck]
     cmds --> term[terminal: external PowerShell]
+    cmds --> transfers[File sessions and transfer jobs]
     ssh --> sshexe[(ssh.exe forward child process)]
     term --> ps[(powershell -NoExit ssh ...)]
   end
@@ -55,9 +58,9 @@ add `%USERPROFILE%\.cargo\bin` to PATH.
 
 ```powershell
 npm.cmd --prefix frontend install   # install deps (from project root)
-npm.cmd run tauri:dev               # run the dev build
+.\frontend\node_modules\.bin\tauri.cmd dev   # run the dev build
 cargo check --manifest-path src-tauri\Cargo.toml   # rust check
-npm.cmd run build                   # build the frontend only
+npm.cmd --prefix frontend run build # build the frontend only
 ```
 
 Packaging must run from the **project root** (so the Tauri CLI finds `src-tauri/tauri.conf.json`); it builds the frontend
@@ -78,7 +81,7 @@ Host  (level 1 = SSH server)
 ├─ extraOptions     // extra args applied to every ssh operation for this host
 ├─ proxyJump        // jump host (ProxyJump), optional; adds -J on connect
 ├─ pinned           // pinned hosts sort first
-├─ updatedAt        // Unix ms; list sorts by this, newest first
+├─ updatedAt        // Unix ms; used when automatic host sorting is enabled
 └─ forwards: Vec<Forward>
 
 Forward (level 2 = a single port forward)
@@ -88,13 +91,14 @@ Forward (level 2 = a single port forward)
 └─ keepConnected    // default true; auto-reconnect after disconnect
 ```
 
-- Persistence files (all in the system app-data directory): `hosts.json` (forwards nested inside), `settings.json`,
-  and `history.json` (the open-history log).
+- Persistence files include `hosts.json` (forwards nested inside), `settings.json`, `history.json` (open history),
+  and `transfer-folders.json` (recent source and destination directories by host).
 - `AppSettings` also carries `closeBehavior` (`ask｜minimize｜exit`) — what the window close button does —
   `autoUpdate` (bool) — whether an update found on startup installs automatically — and `updateChannel`
-  (`stable｜preview`) — which release channel the updater checks.
-- `HistoryEntry` (one open-history row): `id, hostId, kind (vscode｜terminal｜port), label, uri, detail, openedAt`.
-  Ports/terminals/VS Code opens are upserted (deduped per host, bumped to now), sorted most-recent-first.
+  (`stable｜preview`) — which release channel the updater checks. It also stores `theme`, `accentColor`, and
+  `autoSortHosts`. By default, manual order persists within pinned and unpinned groups. Editing forwards preserves host order.
+- `HistoryEntry` carries `id`, `hostId`, `kind` (`vscode`, `terminal`, `terminal-path`, or `port`), `label`, `uri`, `detail`,
+  and `openedAt`. Remote folders launched in Terminal or VS Code share one recent entry per host and path.
 - The v0.1.x `profiles.json` **is not migrated**; if present, it's backed up to `profiles.json.v0.1.bak` on startup.
 - Runtime state: `hosts: Mutex<Vec<Host>>`, `tunnels: Mutex<HashMap<ForwardId, ManagedTunnel>>` (one child process per running
   forward, with a snapshot of the parent host for auto-reconnect), plus `settings`, `logs`, and `history`.
@@ -107,7 +111,11 @@ Forward (level 2 = a single port forward)
 main.rs            entry point + askpass helper
 lib.rs             run(), Tauri Builder, single-instance / updater / process plugins, tray icon/menu, window-close handler, command registration, AppState wiring
 model.rs           Host / Forward / enums / AppSettings / LogEntry / HistoryEntry / View / Default
-store.rs           read_json / write_json, data directory path, AppState persistence and log writes
+app_data.rs        Windows data directory
+store.rs           JSON reads and atomic writes
+state.rs           AppState, persistence paths, logs, and folder history
+host_order.rs      pinned grouping and manual/automatic host order
+window_appearance.rs  Windows title bar colors and border visibility
 validate.rs        validate_host / validate_forward / hostname_chars_ok (ASCII-only SSH host check)
 portcheck.rs       local port-in-use detection + owning process name/PID (netstat + tasklist)
 sshconfig.rs       parse/write ~/.ssh/config (import/export, find a VS Code alias by full connection profile)
@@ -117,14 +125,17 @@ history.rs         open-history pure logic: upsert/dedup, merge scanned VS Code 
 terminal.rs        open_terminal: launches an external PowerShell window running ssh (optionally `cd`'d into a remote path)
 ssh/
   command.rs       build_ssh / build_probe / build_key_upload / build_send command construction
-  exec.rs          blocking one-off SSH execution + stdout/stderr merge (called via spawn_blocking)
+  exec.rs          blocking one-off SSH execution and output capture
+  worker.rs        cancellable command execution
+  sftp.rs          SFTP session handling
   diagnose.rs      classify_ssh_failure: classify unreachable/auth/etc. failures from stderr, with localized reasons
   process.rs       start/stop/watch/cleanup tunnel, CREATE_NO_WINDOW, askpass helper
   readiness.rs     wait for a spawned tunnel to listen / reject immediate SSH startup failures
   probe.rs         probe_connection / get_host_fingerprint / remove_known_host
   keys.rs          ensure_public_key / resolve_identity_file / upload_key_to_remote
+files/             file sessions, filesystem operations, direct access setup, and jobs
 commands/          thin #[tauri::command] wrappers, one file per domain:
-  hosts.rs forwards.rs exec.rs keys.rs settings.rs transfer.rs vscode.rs system.rs history.rs update.rs window.rs
+  hosts.rs forwards.rs exec.rs files.rs keys.rs settings.rs startup.rs transfer.rs vscode.rs system.rs history.rs update.rs window.rs
 ```
 
 `window.rs` also exposes `show_main_window`, used by the tray and the single-instance callback to raise the running window.
@@ -134,33 +145,38 @@ commands/          thin #[tauri::command] wrappers, one file per domain:
 ```text
 App.tsx              shell: page routing, data load/refresh, all action/dialog orchestration, theme
 types.ts  api.ts  i18n.ts    shared types, IPC calls, UI copy (zh-CN/en-US)
-pages/               DashboardPage RemoteConnectionsPage PortForwardingPage LogsPage SettingsPage GuidePage
-components/          AppSidebar AppDialogs HostTransferActions HostCard ForwardRow StatusBadge LogTable dialogs.tsx ui/*
+pages/               DashboardPage RemoteConnectionsPage FileTransferPage PortForwardingPage LogsPage SettingsPage GuidePage
+components/          AppSidebar PageHeader AppDialogs HostTransferActions HostCard ForwardRow StatusBadge LogTable dialogs.tsx ui/*
+files/               file panes, folder picker, host selection, authentication, IPC, and queue
 ```
 
 Dialogs of note in `components/dialogs/remote.tsx`: `RemoteConnectionDialog` (the per-host "Remote Connection" window — a list of
-remote paths from VS Code Remote-SSH history, each openable in a terminal `cd`'d into it or in VS Code, plus a
+recent remote paths from Terminal and VS Code Remote-SSH, each openable in a terminal `cd`'d into it or in VS Code, plus a
 retained manual path field with Terminal / VS Code buttons), and `CloseBehaviorDialog` (the minimize-to-tray vs
 quit prompt).
 
 Data loading, polling, and all dialog state are orchestrated centrally in `App.tsx`; pages and components stay purely
 presentational (receiving data and callbacks via props). See [MODULARITY.md](MODULARITY.md) for the layering rules behind this split.
-The application shell owns viewport height: `AppSidebar` stays fixed while the right-hand page section is the only primary
-scroll container.
+The shell owns viewport height. `AppSidebar` stays visible while the right-hand page scrolls. Its navigation entries form
+a vertically centered group below the logo and name. The sidebar owns its
+width preference, with a default of 232 CSS pixels and a 192–320 pixel range. Dragging the divider or using its
+keyboard controls persists the value locally in WebView storage. Page headers sit above their content, and card
+shadows use the active accent palette.
 
 ## 6. Tauri Commands
 
 | Domain | Commands | Notes |
 | --- | --- | --- |
-| Host | `list_hosts` `save_host` `set_host_pinned` `delete_host` | `save_host` rejects non-ASCII/space `sshHost`; other usability is checked at connect time; `delete_host` disconnects its forwards first |
+| Host | `list_hosts` `save_host` `move_host` `set_host_pinned` `delete_host` | `move_host` reorders within a pin group. Deleting a host disconnects its forwards first. |
+| Files | `open_file_session` `list_files` `close_file_session` `start_file_transfer` `list_file_transfers` `list_transfer_folders` `cancel_file_transfer` `setup_direct_access` | Browser sessions and cancellable transfers, with actual transfer folders tracked per endpoint |
 | Import/export | `read_import_file` `read_import_ssh_config` `import_hosts` `export_hosts_to_file` `export_hosts_to_ssh_config` | dedup by sshHost/IP; strategy `""` detects conflicts, `overwrite`, or `skip` |
 | Forward | `save_forward` `delete_forward` `connect_forward[_with_password]` `disconnect_forward` `disconnect_host` `disconnect_all` | connect probes first; port-in-use is only checked at connect time |
 | Command/Terminal | `send_command` `open_terminal` `open_url` | `send_command` runs blocking SSH work through the async runtime's blocking pool, keeping IPC/UI responsive; `open_terminal(hostId, path?)` opens the shell (a non-empty `path` first `cd`s into it); `open_url` opens http/https in the default browser |
 | Keys/Probe | `upload_public_key` `probe_connection` `get_host_fingerprint` `remove_known_host` | `probe_connection` returns `ready｜password_required｜host_key_changed`, or an Err with a reason for unreachable hosts |
-| Settings/Logs | `get_settings` `save_settings_cmd` `list_logs` | default theme is light |
+| Settings/Logs | `get_settings` `save_settings_cmd` `list_logs` `get_launch_at_login` `set_launch_at_login` | The default appearance is light with a blue accent. Launch at login is opt-in. |
 | System | `check_ssh` `install_openssh` | installs OpenSSH via elevated `Add-WindowsCapability` |
 | VS Code | `vscode_status` `vscode_open` `vscode_open_direct` `vscode_open_path` | `vscode_open(uri, hostId, label)` reopens the path with the host's current full SSH profile, bumps the entry, and rescans; history is discovered by IP but connection aliases must also match user/port/key/ProxyJump |
-| History | `list_history` | returns a host's open-history (recency-sorted), rescanning + merging VS Code's own history on the way; the Remote Connection dialog shows the `vscode` (remote-path) entries |
+| History | `list_history` | Merges VS Code history and returns a host’s entries by recency. Remote Connections shows `terminal-path` and `vscode` folder entries. |
 | Update | `check_update` `install_update` | channel-aware; each builds the updater with the channel's endpoint (`stable` = releases/latest, `preview` = releases/download/preview/latest.json) and verifies the configured `pubkey` |
 | Window | `hide_to_tray` `quit_app` | driven by the close prompt; the tray/single-instance raise the window in Rust |
 
@@ -184,7 +200,7 @@ Events: `log-entry` (one log line); `critical-error` (forward exited with code 2
   memory only if `keepConnected`), `host_key_changed` shows the fingerprint and offers `remove_known_host` + retry.
 - **External terminal**: `open_terminal` opens a visible, independent PowerShell window running interactive `ssh`; it's not
   tracked or cleaned up by the app. A non-empty `path` allocates a pty (`-t`) and `cd`s into that remote dir before the
-  login shell. A plain (no-path) open is recorded in the history.
+  login shell. Successful launches record a `terminal-path` or plain `terminal` entry.
 - **Remote Connection**: the per-host "Remote Connection" button (and the single Home icon) opens `RemoteConnectionDialog`.
   It lists the host's remote **paths** — `list_history` merges Remote-SSH's `state.vscdb` (preferred, freshest) with
   `storage.json` (fallback), matched to the host by IP. Clicking a record opens a terminal `cd`'d into that path; the
@@ -193,10 +209,10 @@ Events: `log-entry` (one log line); `critical-error` (forward exited with code 2
   (`vscode_open_path` → `open_direct_for_host`, which reuses or writes a matching `~/.ssh/config` alias); `~`/relative paths resolve
   against the remote `$HOME` via a one-time passwordless probe. Opening the dialog does not require VS Code; the
   install/Remote-SSH check happens only when a VS Code action is invoked.
-- **Open-history**: opening a port, a plain terminal, or a VS Code folder upserts a `HistoryEntry` (deduped per host,
-  bumped to now). Opening a port or launching VS Code also rescans VS Code's own history and merges any new folders.
-  Terminal-at-path opens are not recorded (they're already represented by the VS Code path list). The recency-sorted
-  `vscode` (path) entries feed `RemoteConnectionDialog`.
+- **Folder history**: opening a folder with Terminal or VS Code updates the shared per-host list. The file picker keeps
+  separate transfer history and records source and destination folders after at least one file is written.
+- **Native appearance**: on Windows 11, the main window’s title bar follows the selected appearance and accent. The
+  desktop window manager suppresses the outer window border.
 - **Close to tray / minimize**: `handle_close_requested` (a `WindowEvent::CloseRequested` handler) reads `closeBehavior` —
   `minimize` hides to the tray, `exit` quits when nothing is running, otherwise (or `exit` with forwards live) it prevents the
   close and emits `close-requested` so the UI can prompt. The tray menu offers Show/Quit; clicking the tray icon raises the window.
@@ -217,6 +233,8 @@ Events: `log-entry` (one log line); `critical-error` (forward exited with code 2
   `TAURI_SIGNING_PRIVATE_KEY[_PASSWORD]` repo secrets, `bundle.createUpdaterArtifacts` makes the build emit the signed
   archive and `latest.json`, and `.github/workflows/build.yml` publishes pre-release tags directly and mirrors their
   `latest.json` onto the `preview` release.
+  Stable releases require a 48-hour wait after the latest numbered public preview. The release check and workflow
+  are described in [AGENTS.md](../AGENTS.md).
 - **Portable packaging**: `scripts/package-portable.ps1` packages the compiled `sshdeck.exe`, bilingual portable notes,
   license, and `portable.flag` into `SSHDeck_<version>_x64-portable.zip`. The same workflow uploads it beside the NSIS
   installer on tagged releases and includes it in smoke-build artifacts. Portable data remains in the normal system
@@ -227,6 +245,6 @@ On app exit, all forward child processes started by this app are cleaned up.
 ## 8. Data Storage
 
 The backend resolves the operating system's per-user local app-data root with `directories::BaseDirs`, then writes
-`hosts.json`, `settings.json`, `history.json`, and `logs/` under `%LOCALAPPDATA%\SSHDeck\data` on Windows — never into
+`hosts.json`, `settings.json`, `history.json`, `transfer-folders.json`, and `logs/` under `%LOCALAPPDATA%\SSHDeck\data` on Windows — never into
 the source tree or the program's own folder. Config writes are atomic (temp file + rename). The legacy development-era
-directory is intentionally not migrated; beta.4 users must export hosts before upgrading and import them afterward.
+directory is intentionally not migrated. Users on v0.3.0-beta.4 or earlier should export their hosts before upgrading and import them afterward.

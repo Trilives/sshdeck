@@ -7,10 +7,17 @@ const accentPalettes = {
   violet: colors.violet,
   teal: { ...colors.teal, 500: "#0e776e", 600: "#14645e" },
   orange: { ...colors.orange, 500: "#bc3e0c", 600: "#a6360d" },
+  monochrome: { ...colors.neutral, 500: "#262626", 600: "#171717", 700: "#171717" },
 };
 
 function rgbChannels(hex: string) {
   return [1, 3, 5].map((start) => Number.parseInt(hex.slice(start, start + 2), 16)).join(" ");
+}
+
+function accentVariables(palette: Record<string, string>) {
+  return Object.fromEntries(
+    Object.entries(palette).map(([shade, hex]) => [`--accent-${shade}`, rgbChannels(hex)]),
+  );
 }
 
 const config: Config = {
@@ -41,12 +48,15 @@ const config: Config = {
     plugin(({ addBase }) => {
       for (const [name, palette] of Object.entries(accentPalettes)) {
         const selector = name === "blue" ? ':root, [data-accent="blue"]' : `[data-accent="${name}"]`;
-        addBase({
-          [selector]: Object.fromEntries(
-            Object.entries(palette).map(([shade, hex]) => [`--accent-${shade}`, rgbChannels(hex)]),
-          ),
-        });
+        addBase({ [selector]: accentVariables(palette) });
       }
+      addBase({
+        '.dark[data-accent="monochrome"], .dark [data-accent="monochrome"]': accentVariables({
+          500: "#6b6b6b",
+          600: colors.neutral[600],
+          700: colors.neutral[700],
+        }),
+      });
     }),
   ],
 };

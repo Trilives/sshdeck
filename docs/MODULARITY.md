@@ -18,6 +18,7 @@ Frontend `frontend/src/`:
   long, but **orchestration only**.
 - **Presentation layer**: `pages/*`, `components/*` (including `dialogs.tsx`, `ui/*`). Receive data and callbacks via props,
   **stay purely presentational** — no direct IPC calls, no cross-page state.
+  Keep local interaction and display preferences such as `AppSidebar` width in the component that owns the layout.
 - **Shared layer**: `api.ts` (IPC calls), `types.ts` (types), `i18n.ts` (copy).
 
 > Golden rule: once a `#[tauri::command]` file or a React component starts accumulating pure-logic concerns like

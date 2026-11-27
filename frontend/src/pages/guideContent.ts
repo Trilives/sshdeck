@@ -84,8 +84,8 @@ export const guideSections = {
       {
         title: ["重开历史路径", "Reopen a recent path"],
         body: [
-          "展开主机后会看到最近使用的路径。点击路径用终端重开，或点击同行的 VS Code 图标。需要同步新记录时点「刷新历史」，也可把历史路径填入目录框后修改。",
-          "Expand a host to see recently used paths. Click a path to reopen it in a terminal or use its VS Code icon. Choose Refresh history to reload the list, or fill the directory field from a history entry and edit it.",
+          "用终端或 VS Code 打开目录后，路径会按最近使用时间排列。点击路径可用终端重开，或点击同行的 VS Code 图标。「刷新历史」可同步记录，也可将历史路径填入目录框后修改。",
+          "Opening a folder in Terminal or VS Code moves it to the top of the recent list. Click the path to reopen it in Terminal or use the VS Code icon. Refresh history to sync the list, or copy a recent path into the field to edit it.",
         ],
       },
       {
@@ -119,6 +119,13 @@ export const guideSections = {
         body: [
           "双击文件夹进入，点小箭头展开。点路径栏可浏览目录树、查找历史或手动定位，选好后点击「使用此目录」。列表上方有「后退」和「上一级」，下方可「筛选当前目录」。以 . 开头的条目默认隐藏，可在文件面板或目录选择器中开启「隐藏文件」。",
           "Double-click a folder to enter it or use its arrow to expand it. Open the path bar to browse the tree, use history, or locate a path, then select Use this folder. Back and Parent folder sit above the list, and Filter this folder sits below. Dotfiles are hidden by default. Turn on Hidden files in the pane or picker to show them.",
+        ],
+      },
+      {
+        title: ["最近传输目录", "Recent transfer folders"],
+        body: [
+          "目录选择器的「最近传输」会记录实际传过文件的来源和目标目录。远程主机也可从同一页查找「远程连接」里用过的路径。",
+          "Recent transfer in the folder picker lists source and destination folders from actual file transfers. On remote hosts, the same tab also offers paths opened in Remote Connections.",
         ],
       },
       {
@@ -213,6 +220,13 @@ export const guideSections = {
   settings: {
     title: ["设置与更新", "Settings and updates"],
     items: [
+      {
+        title: ["主题与侧栏", "Theme and sidebar"],
+        body: [
+          "从侧栏打开「设置」，可选择浅色、深色或跟随系统，并更改强调色。「朴素」在浅色模式用近黑，深色模式用灰色。拖动侧栏右边缘可调整宽度，下次打开会保留。",
+          "Open Settings from the sidebar to choose an appearance and accent. Monochrome uses near-black in light mode and gray in dark mode. Drag the sidebar’s right edge to resize it. SSHDeck remembers the width.",
+        ],
+      },
       {
         title: ["开机自启和托盘运行", "Launch at login and tray behavior"],
         body: [

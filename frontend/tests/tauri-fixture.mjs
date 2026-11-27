@@ -1,6 +1,5 @@
 // Simulated IPC only: the real App and file-transfer components run in the browser.
 export function installTauriFixture() {
-  localStorage.clear();
   localStorage.setItem("sshdeck.file.right", "");
   const hosts = ["ready", "refused", "password", "slow"].map((id) => ({
     id,
@@ -134,7 +133,7 @@ export function installTauriFixture() {
         case "check_ssh":
           return true;
         case "plugin:app|version":
-          return "0.4.5-beta.6";
+          return "0.4.5-beta.7";
         case "plugin:event|listen": {
           const id = ++sequence;
           listeners.set(id, args);

@@ -78,6 +78,41 @@ async function chooseHost(page, id) {
     .click();
 }
 
+test("the sidebar centers its navigation and remembers the dragged width", () =>
+  withPage(async (page, errors) => {
+    await page.setViewportSize({ width: 980, height: 640 });
+    const sidebar = page.getByRole("navigation");
+    const divider = page.getByRole("separator", { name: "调整侧栏宽度" });
+    const menu = await sidebar.boundingBox();
+    const settings = await sidebar.getByRole("button", { name: "设置", exact: true }).boundingBox();
+    const guide = await sidebar.getByRole("button", { name: "使用说明", exact: true }).boundingBox();
+    assert.equal(await sidebar.getByRole("button").count(), 7);
+    assert.equal(settings.x, guide.x);
+    assert.ok(settings.y + settings.height < guide.y);
+    assert.equal(menu.y + menu.height / 2, 320);
+    const home = sidebar.getByRole("button", { name: "主页", exact: true });
+    assert.equal(await home.evaluate((button) => getComputedStyle(button).fontSize), "16px");
+    assert.equal(await divider.getAttribute("aria-valuenow"), "232");
+    assert.equal(await divider.locator("*").count(), 0);
+
+    const { x, y, width } = await divider.boundingBox();
+    const edge = x + width / 2;
+    await page.mouse.move(edge, y + 275);
+    await page.mouse.down();
+    await page.mouse.move(edge + 36, y + 275, { steps: 5 });
+    await page.mouse.up();
+    await divider.and(page.locator('[aria-valuenow="268"]')).waitFor();
+    await page.reload();
+    await divider.and(page.locator('[aria-valuenow="268"]')).waitFor();
+
+    await divider.focus();
+    await page.keyboard.press("Home");
+    await divider.and(page.locator('[aria-valuenow="192"]')).waitFor();
+    await sidebar.getByRole("button", { name: "使用说明", exact: true }).click();
+    await page.getByRole("heading", { name: "使用说明", level: 1 }).waitFor();
+    assert.deepEqual(errors, []);
+  }));
+
 test("long dashboard events keep the cards and connection actions within the window", () =>
   withPage(async (page, errors) => {
     await page.setViewportSize({ width: 980, height: 640 });
@@ -291,6 +326,7 @@ test("appearance saves independently and system mode responds to live changes", 
       ["紫色", "violet", "rgb(124, 58, 237)"],
       ["深橙", "orange", "rgb(166, 54, 13)"],
       ["青绿", "teal", "rgb(20, 100, 94)"],
+      ["朴素", "monochrome", "rgb(23, 23, 23)"],
     ]) {
       await page.getByText(label, { exact: true }).click();
       await page.getByRole("radio", { name: label, exact: true, checked: true }).waitFor();
@@ -303,14 +339,20 @@ test("appearance saves independently and system mode responds to live changes", 
 
     await page.reload();
     await settings.click();
-    await page.getByRole("radio", { name: "青绿", exact: true, checked: true }).waitFor();
+    await page.getByRole("radio", { name: "朴素", exact: true, checked: true }).waitFor();
     assert.equal(await page.getByRole("radio", { name: "跟随系统", exact: true }).isChecked(), true);
+    await page.emulateMedia({ colorScheme: "dark" });
+    await page.waitForFunction(() => {
+      const active = document.querySelector("aside nav [aria-current='page']");
+      return document.documentElement.classList.contains("dark") &&
+        active && getComputedStyle(active).backgroundColor === "rgb(82, 82, 82)";
+    });
     await page.getByText("深色", { exact: true }).click();
     await page.waitForFunction(() => document.documentElement.classList.contains("dark"));
     await page.emulateMedia({ colorScheme: "dark" });
     await page.emulateMedia({ colorScheme: "light" });
     assert.equal(await page.locator("html").evaluate((root) => root.classList.contains("dark")), true);
-    assert.equal(await page.getByRole("radio", { name: "青绿", exact: true }).isChecked(), true);
+    assert.equal(await page.getByRole("radio", { name: "朴素", exact: true }).isChecked(), true);
     assert.deepEqual(errors, []);
   }));
 
@@ -379,6 +421,7 @@ test("the guide follows the same task order in both languages and adapts to the 
     const headings = page.locator("main > div > section").locator("h1:visible, h2:visible");
     const chineseOrder = [
       "使用说明",
+      "快速开始",
       "主机配置与认证",
       "远程连接",
       "文件传输",
@@ -388,7 +431,7 @@ test("the guide follows the same task order in both languages and adapts to the 
     ];
     await headings.first().waitFor();
     assert.deepEqual(await headings.allTextContents(), chineseOrder);
-    const cards = chineseOrder.slice(1).map(
+    const cards = chineseOrder.slice(2).map(
       (name) => page.getByRole("heading", { name, exact: true }).locator("xpath=../.."),
     );
     const cardBoxes = () => Promise.all(cards.map((card) => card.boundingBox()));
@@ -411,10 +454,13 @@ test("the guide follows the same task order in both languages and adapts to the 
 
     await page.getByRole("button", { name: "设置", exact: true }).click();
     await page.locator("select").filter({ has: page.locator('option[value="en-US"]') }).selectOption("en-US");
+    const remoteLabel = page.getByRole("navigation").getByRole("button", { name: "Remote Connections", exact: true }).locator("span");
+    assert.ok(await remoteLabel.evaluate((label) => label.scrollWidth <= label.clientWidth));
     await page.getByRole("button", { name: "Guide", exact: true }).click();
     await headings.first().waitFor();
     assert.deepEqual(await headings.allTextContents(), [
       "Guide",
+      "Quick start",
       "Hosts and authentication",
       "Remote Connections",
       "File Transfer",
@@ -433,7 +479,7 @@ test("the guide follows the same task order in both languages and adapts to the 
 
 async function rapidScroll(page) {
   await page
-    .locator('[tabindex="0"]')
+    .locator('main > div > section div[tabindex="0"]')
     .first()
     .evaluate((element) => {
       // Two events in one frame make React defer a functional state updater.

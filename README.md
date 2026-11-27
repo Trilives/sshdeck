@@ -6,7 +6,7 @@ SSHDeck is a Windows app for managing SSH connections, port forwarding, and file
 
 ## Screenshots
 
-Click an image to open the full-resolution 3200 × 2000 PNG. Screenshots show the 0.4 interface with sample hosts and files.
+Click an image to open the full-resolution 3200 × 2000 PNG. The screenshots show the 0.4.5 preview with sample hosts and files.
 
 ### Remote Connections
 
@@ -27,6 +27,15 @@ Click an image to open the full-resolution 3200 × 2000 PNG. Screenshots show th
 
 [![SSHDeck English interface — Port Forwarding](docs/Pictures/port-forwarding-en.png)](docs/Pictures/port-forwarding-en.png)
 
+<details>
+<summary>Appearance settings and in-app guide</summary>
+
+[![SSHDeck English interface — Appearance settings](docs/Pictures/settings-en.png)](docs/Pictures/settings-en.png)
+
+[![SSHDeck English interface — Quick start guide](docs/Pictures/guide-en.png)](docs/Pictures/guide-en.png)
+
+</details>
+
 ## Features
 
 - **Manage your servers** — save and pin hosts, use jump hosts, and import or export SSH configurations.
@@ -35,7 +44,7 @@ Click an image to open the full-resolution 3200 × 2000 PNG. Screenshots show th
 - **Distribute to multiple hosts** — choose recipients and destination folders; optionally send directly between servers without routing file contents through your computer.
 - **Open your workspace** — choose a remote folder from the tree or history, open it in a terminal or VS Code, run commands, and set up key-based login.
 - **Track activity** — view connections, transfer progress and logs, and cancel or retry transfers as needed.
-- **Make it yours** — light/dark themes, Chinese/English, and in-app updates with Stable and Preview channels.
+- **Customize the app** — light, dark, or system appearance, five accents including Monochrome, a resizable sidebar, and Chinese or English.
 
 ## Download & Run
 
@@ -50,7 +59,7 @@ The portable package stores settings and hosts in `%LOCALAPPDATA%\SSHDeck\data`,
 
 > Upgrading from v0.3.0-beta.4 or earlier: export your hosts before updating, then import them after launching the new version. The old data directory is not migrated automatically.
 
-Using the installed edition? Open **Settings → Software Update** and click **Check for updates**.
+Using the installed edition? Open **Settings → Software Update**, choose **Stable** or **Preview**, and click **Check for updates**. Direct downloads are also listed on [GitHub Releases](https://github.com/Trilives/sshdeck/releases).
 
 Before running, make sure the Windows OpenSSH Client is installed and that PowerShell can run:
 
@@ -66,6 +75,9 @@ ssh -V
 4. Use the Home page to watch current connections and key events, and the Logs page for the full runtime log.
 
 In **Remote Connections**, expand a host and click **Choose folder** to browse its directories or history. Open the selected folder directly with **Terminal** or **VS Code** in the dialog.
+Both actions update the folder’s position in recent history.
+
+Drag the divider along the sidebar’s right edge to adjust its width. SSHDeck remembers the width when you reopen it. Open **Settings** or **Guide** from the sidebar.
 
 ## File Transfer
 
@@ -75,6 +87,7 @@ In **Remote Connections**, expand a host and click **Choose folder** to browse i
 4. Enable **Distribute** for multiple recipients. For two remote endpoints, **Bypass this computer** is available in the transfer confirmation dialog.
 
 Dotfiles and hidden folders are hidden by default. Use the **Hidden files** button in each file pane or folder picker to show them, including hidden folders in history.
+In the picker’s **Folder history** tab, **Recent transfer** marks source and destination folders from actual file transfers. **Remote connection history** marks other remote folders opened in Terminal or VS Code.
 
 When authentication is needed, connect with a password or upload this computer's public key for future passwordless access. The key button at the top of each remote pane also opens these options. Both key upload and direct setup check existing passwordless access first and skip key changes when it already works.
 

@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.4.5-beta.7
+
+- Make the sidebar narrower, enlarge the SSHDeck name beneath the logo, and center the navigation list vertically. Drag the divider to adjust the saved width.
+- Simplify Settings and align the Quick start headings with their numbered badges in the guide.
+- Add a Monochrome accent with near-black controls in light mode and gray controls in dark mode.
+- Refresh the English and Chinese documentation, in-app guide, and high-resolution screenshots.
+
 ## 0.4.5-beta.6
 
 - Give the two file lists and transfer queue more room by removing the outer File Transfer card.

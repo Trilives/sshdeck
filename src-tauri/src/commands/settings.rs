@@ -20,7 +20,7 @@ pub fn save_settings_cmd(
         theme: normalize_choice(&settings.theme, &["dark", "light", "system"], "light"),
         accent_color: normalize_choice(
             &settings.accent_color,
-            &["blue", "violet", "teal", "orange"],
+            &["blue", "violet", "teal", "orange", "monochrome"],
             "blue",
         ),
         language: normalize_choice(&settings.language, &["zh-CN", "en-US"], "zh-CN"),

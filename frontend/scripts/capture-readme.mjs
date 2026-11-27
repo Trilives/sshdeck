@@ -2,12 +2,12 @@
 // user profiles are accessed. Run: node frontend/scripts/capture-readme.mjs
 import { spawn } from "node:child_process";
 import { createServer } from "node:net";
-import { mkdir } from "node:fs/promises";
+import { mkdir, readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { resolve } from "node:path";
 import { chromium } from "playwright";
 
-function installDemo({ language }) {
+function installDemo({ language, version }) {
   localStorage.clear();
   localStorage.setItem("sshdeck.file.left", "");
   localStorage.setItem("sshdeck.file.right", "production");
@@ -153,6 +153,7 @@ function installDemo({ language }) {
         case "get_settings":
           return {
             theme: "light",
+            accentColor: "blue",
             language,
             logLevel: "info",
             closeBehavior: "ask",
@@ -161,7 +162,9 @@ function installDemo({ language }) {
             updateChannel: "stable",
           };
         case "plugin:app|version":
-          return "0.4.0";
+          return version;
+        case "get_launch_at_login":
+          return false;
         case "check_ssh":
           return true;
         case "plugin:event|listen":
@@ -229,6 +232,7 @@ function installDemo({ language }) {
 }
 
 const frontend = fileURLToPath(new URL("..", import.meta.url));
+const { version } = JSON.parse(await readFile(resolve(frontend, "package.json"), "utf8"));
 const output = resolve(frontend, "../docs/Pictures");
 await mkdir(output, { recursive: true });
 const reservation = createServer();
@@ -273,7 +277,7 @@ try {
       timezoneId: "Asia/Shanghai",
       reducedMotion: "reduce",
     });
-    await context.addInitScript(installDemo, { language });
+    await context.addInitScript(installDemo, { language, version });
     const page = await context.newPage();
     const errors = [];
     page.on("pageerror", (error) => errors.push(error.message));
@@ -333,6 +337,12 @@ try {
     }
     await page.getByText("PostgreSQL", { exact: true }).waitFor();
     await capture("port-forwarding");
+    await button(zh ? "设置" : "Settings").click();
+    await page.getByText(zh ? "外观" : "Appearance", { exact: true }).waitFor();
+    await capture("settings");
+    await button(zh ? "使用说明" : "Guide").click();
+    await page.getByRole("heading", { name: zh ? "快速开始" : "Quick start", exact: true }).waitFor();
+    await capture("guide");
     await context.close();
   }
 } finally {

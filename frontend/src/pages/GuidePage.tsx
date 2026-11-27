@@ -19,7 +19,7 @@ export function GuidePage({ language }: { language: Language }) {
       <PageHeader page="guide">{t(language, "guide")}</PageHeader>
       <Card>
         <CardHeader>
-          <CardDescription>{quickStart.title[locale]}</CardDescription>
+          <CardTitle>{quickStart.title[locale]}</CardTitle>
         </CardHeader>
         <ol className="flex flex-wrap gap-4">
           {quickStart.items.map(({ title, body }, index) => (
@@ -27,13 +27,15 @@ export function GuidePage({ language }: { language: Language }) {
               key={title[0]}
               className="min-w-0 flex-[1_1_12rem] rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-900"
             >
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-600 text-sm font-semibold text-white">
-                {index + 1}
+              <div className="flex items-center gap-3">
+                <span aria-hidden className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-blue-600 text-sm font-semibold text-white">
+                  {index + 1}
+                </span>
+                <h3 className="text-sm font-semibold text-slate-950 dark:text-slate-50">
+                  {title[locale]}
+                </h3>
               </div>
-              <h3 className="mt-3 text-sm font-semibold text-slate-950 dark:text-slate-50">
-                {title[locale]}
-              </h3>
-              <p className="mt-2 text-sm leading-6 text-slate-500 dark:text-slate-400">
+              <p className="mt-3 text-sm leading-6 text-slate-500 dark:text-slate-400">
                 {body[locale]}
               </p>
             </li>

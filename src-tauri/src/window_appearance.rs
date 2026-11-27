@@ -44,6 +44,8 @@ pub fn paint(app: &AppHandle, settings: &AppSettings, theme: Theme) {
             ("teal", true) => [25, 45, 43],
             ("orange", false) => [253, 240, 232],
             ("orange", true) => [53, 37, 31],
+            ("monochrome", false) => [241, 241, 241],
+            ("monochrome", true) => [42, 42, 42],
             (_, false) => [235, 242, 253],
             (_, true) => [29, 41, 62],
         };

@@ -2,7 +2,7 @@ import { useEffect, useId, useState, type ReactNode } from "react";
 import { Check, Monitor, Moon, Palette, Sun } from "lucide-react";
 import { api } from "../api";
 import { Button } from "../components/ui/button";
-import { Card, CardDescription, CardHeader } from "../components/ui/card";
+import { Card } from "../components/ui/card";
 import { PageHeader } from "../components/PageHeader";
 import { Select } from "../components/ui/select";
 import { t } from "../i18n";
@@ -20,6 +20,7 @@ const accentColors = [
   { value: "violet", label: "accentViolet" },
   { value: "teal", label: "accentTeal" },
   { value: "orange", label: "accentOrange" },
+  { value: "monochrome", label: "accentMonochrome" },
 ] as const;
 
 const appearanceOption = "inline-flex h-9 cursor-pointer items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 text-sm font-medium text-slate-600 transition hover:border-blue-300 peer-checked:border-blue-300 peer-checked:bg-blue-50 peer-checked:text-blue-800 peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-blue-500 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-300 dark:hover:border-blue-700 dark:peer-checked:border-blue-700 dark:peer-checked:bg-blue-950 dark:peer-checked:text-blue-200";
@@ -253,9 +254,6 @@ export function SettingsPage(props: {
     <div className="grid min-w-0 max-w-3xl gap-4">
       <PageHeader page="settings">{t(lang, "settingsTitle")}</PageHeader>
       <Card>
-        <CardHeader>
-          <CardDescription>{t(lang, "settingsDesc")}</CardDescription>
-        </CardHeader>
         <div className="grid gap-4">
           <AppearanceSettings settings={props.settings} onChange={props.setSettings} />
           <SettingSelect label={t(lang, "language")} value={props.settings.language} onChange={(v) => props.setSettings({ language: v as Language })}>

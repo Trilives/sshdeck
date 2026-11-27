@@ -8,7 +8,6 @@ export const languageLabels: Record<Language, string> = {
 const text = {
   "zh-CN": {
     title: "SSHDeck",
-    subtitle: "集中管理 SSH 主机与端口转发",
 
     // Navigation
     dashboard: "主页",
@@ -19,6 +18,7 @@ const text = {
     logs: "日志",
     settings: "设置",
     guide: "使用说明",
+    resizeSidebar: "调整侧栏宽度",
 
     // Home / dashboard
     dashboardTitle: "监控板",
@@ -207,7 +207,6 @@ const text = {
 
     // Settings page
     settingsTitle: "设置",
-    settingsDesc: "设置会自动保存到本机。",
     launchAtLogin: "开机自启",
     launchAtLoginDesc: "登录 Windows 后启动 SSHDeck。",
     autoSortHosts: "自动排序主机",
@@ -224,6 +223,7 @@ const text = {
     accentViolet: "紫色",
     accentTeal: "青绿",
     accentOrange: "深橙",
+    accentMonochrome: "朴素",
     logDebug: "调试",
     logInfo: "信息",
     logWarning: "警告",
@@ -276,7 +276,6 @@ const text = {
   },
   "en-US": {
     title: "SSHDeck",
-    subtitle: "Manage SSH hosts and port forwards",
 
     dashboard: "Home",
     config: "Port Forwarding",
@@ -286,6 +285,7 @@ const text = {
     logs: "Logs",
     settings: "Settings",
     guide: "Guide",
+    resizeSidebar: "Resize sidebar",
 
     dashboardTitle: "Dashboard",
     currentConnections: "Current Connections",
@@ -458,7 +458,6 @@ const text = {
     level: "Level",
 
     settingsTitle: "Settings",
-    settingsDesc: "Settings are saved on this computer.",
     launchAtLogin: "Launch at login",
     launchAtLoginDesc: "Start SSHDeck when you sign in to Windows.",
     autoSortHosts: "Automatic host sorting",
@@ -475,6 +474,7 @@ const text = {
     accentViolet: "Violet",
     accentTeal: "Teal",
     accentOrange: "Deep orange",
+    accentMonochrome: "Monochrome",
     logDebug: "Debug",
     logInfo: "Info",
     logWarning: "Warning",
