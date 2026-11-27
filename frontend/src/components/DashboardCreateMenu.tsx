@@ -43,7 +43,8 @@ export function DashboardCreateMenu(props: {
     >
       <Button
         type="button"
-        className="h-10 w-10 px-0"
+        variant="ghost"
+        className="h-10 w-10 bg-slate-50 px-0 text-slate-500 hover:bg-blue-50 hover:text-blue-600 aria-expanded:bg-blue-50 aria-expanded:text-blue-600 dark:bg-slate-900 dark:text-slate-400 dark:hover:bg-blue-950 dark:hover:text-blue-300 dark:aria-expanded:bg-blue-950 dark:aria-expanded:text-blue-300"
         aria-label={t(language, "new")}
         title={t(language, "new")}
         aria-expanded={open}

@@ -118,36 +118,66 @@ test("long dashboard events keep the cards and connection actions within the win
 test("the dashboard remote connection dialog keeps long paths and their actions in view", () =>
   withPage(async (page, errors) => {
     await page.setViewportSize({ width: 980, height: 640 });
-    const path = "/srv/projects/" + "long-remote-directory/".repeat(28);
-    await page.evaluate((label) => {
+    const path = "/srv/projects/" + "long-remote-directory/".repeat(28) + "assets/";
+    const medium = "/srv/projects/design-system/releases/0.4.5/fixtures/reference-layout";
+    await page.evaluate(({ path, medium }) => {
       window.fixture.hosts[0].pinned = true;
       window.fixture.hosts[0].name = "Remote ready " + "H".repeat(160);
-      window.fixture.history.ready = [{
-        id: "long-remote-directory",
+      const labels = [path, medium, ...Array.from({ length: 10 }, (_, index) => "/home/test/older-" + index)];
+      window.fixture.history.ready = labels.map((label, index) => ({
+        id: "remote-directory-" + index,
         hostId: "ready",
         kind: "vscode",
         label,
         uri: "",
         detail: "",
         openedAt: 0,
-      }];
-    }, path);
+      }));
+    }, { path, medium });
     await page.getByRole("button", { name: "主页", exact: true }).click();
     const dashboard = page.locator("main > div > section");
     await dashboard.getByRole("button", { name: "远程连接", exact: true }).click();
     const dialog = page.getByRole("dialog", { name: /^远程连接 — Remote ready/ });
-    await dialog.getByText(path, { exact: true }).waitFor();
+    const fullPath = dialog.getByText(path, { exact: true });
+    await fullPath.waitFor();
     const bounds = await dialog.boundingBox();
-    assert.ok(bounds && bounds.width <= 512 && bounds.x >= 0 && bounds.x + bounds.width <= 980);
+    assert.ok(bounds && bounds.width === 672 && bounds.x >= 0 && bounds.x + bounds.width <= 980);
+    assert.ok(await dialog.getByText(medium, { exact: true }).evaluate((element) =>
+      [...element.children].every((part) => part.scrollWidth <= part.clientWidth)));
+    assert.ok(await fullPath.evaluate((element) => {
+      const [prefix, suffix] = element.children;
+      return prefix.scrollWidth > prefix.clientWidth &&
+        suffix.scrollWidth <= suffix.clientWidth &&
+        suffix.textContent === "/assets/";
+    }), "the path can shorten in the middle while the final directory remains visible");
+
     const close = await dialog.getByRole("button", { name: "关闭", exact: true }).boundingBox();
     assert.ok(close && close.x + close.width <= bounds.x + bounds.width);
+    const row = fullPath.locator("xpath=ancestor::button[1]/..");
     for (const label of ["通过 VS Code 打开", "填入下方目录框（可继续编辑）"]) {
-      const button = await dialog.getByTitle(label, { exact: true }).boundingBox();
+      const action = row.getByRole("button", { name: label, exact: true });
+      const button = await action.boundingBox();
       assert.ok(button && button.x >= bounds.x && button.x + button.width <= bounds.x + bounds.width,
         label + " must stay inside the dialog");
+      assert.equal((await action.textContent()).trim(), "", "row actions use icon-only buttons");
     }
-    await dialog.getByTitle("填入下方目录框（可继续编辑）", { exact: true }).click();
+    const footerVscode = dialog.getByRole("button", { name: "VS Code", exact: true });
+    const footerBounds = await footerVscode.boundingBox();
+    assert.ok(footerBounds && footerBounds.y + footerBounds.height <= bounds.y + bounds.height);
+    const list = row.locator("..");
+    await list.evaluate((element) => { element.scrollTop = element.scrollHeight; });
+    assert.ok(await list.evaluate((element) => element.scrollTop > 0));
+    assert.deepEqual(await footerVscode.boundingBox(), footerBounds);
+    await page.setViewportSize({ width: 700, height: 540 });
+    const narrow = await dialog.boundingBox();
+    assert.ok(narrow && narrow.width < 672 && narrow.x >= 0 && narrow.x + narrow.width <= 700);
+    await list.evaluate((element) => { element.scrollTop = 0; });
+    await row.getByRole("button", { name: "填入下方目录框（可继续编辑）", exact: true }).click();
     assert.equal(await dialog.getByRole("textbox").inputValue(), path);
+    await row.getByRole("button", { name: "通过 VS Code 打开", exact: true }).click();
+    await page.waitForFunction((expectedPath) => window.fixture.requests.some(
+      (request) => request.command === "vscode_open_path" && request.path === expectedPath,
+    ), path);
     assert.deepEqual(errors, []);
   }));
 

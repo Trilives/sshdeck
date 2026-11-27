@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.4.5-beta.2
+
+- Use a borderless, softly shaded plus button on Home, with a blue highlight on hover and while the menu is open.
+- Widen the Home remote connection dialog so more of each recent path fits. Keep the last folder visible when a path is shortened, and use a compact VS Code icon in each history row.
+
 ## 0.4.5-beta.1
 
 - Keep the Home remote connection dialog within its available width when host names or recent paths are long. Row actions remain visible and copying a path into the field preserves the full value.
