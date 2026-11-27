@@ -116,6 +116,8 @@ store.rs           JSON reads and atomic writes
 state.rs           AppState, persistence paths, logs, and folder history
 host_order.rs      pinned grouping and manual/automatic host order
 window_appearance.rs  Windows title bar colors and border visibility
+window_icons.rs       Accent-aware Windows window and tray icons
+desktop_shortcut.rs  Refreshes the icon for the matching SSHDeck desktop shortcut
 validate.rs        validate_host / validate_forward / hostname_chars_ok (ASCII-only SSH host check)
 portcheck.rs       local port-in-use detection + owning process name/PID (netstat + tasklist)
 sshconfig.rs       parse/write ~/.ssh/config (import/export, find a VS Code alias by full connection profile)
@@ -212,7 +214,9 @@ Events: `log-entry` (one log line); `critical-error` (forward exited with code 2
 - **Folder history**: opening a folder with Terminal or VS Code updates the shared per-host list. The file picker keeps
   separate transfer history and records source and destination folders after at least one file is written.
 - **Native appearance**: on Windows 11, the main window’s title bar follows the selected appearance and accent. The
-  desktop window manager suppresses the outer window border.
+  desktop window manager suppresses the outer window border. On Windows, the app updates its window and tray icons
+  when the accent changes. A background worker updates the icon of the current user's `SSHDeck.lnk` desktop shortcut
+  when it targets the running executable and uses the default or app-managed icon.
 - **Close to tray / minimize**: `handle_close_requested` (a `WindowEvent::CloseRequested` handler) reads `closeBehavior` —
   `minimize` hides to the tray, `exit` quits when nothing is running, otherwise (or `exit` with forwards live) it prevents the
   close and emits `close-requested` so the UI can prompt. The tray menu offers Show/Quit; clicking the tray icon raises the window.

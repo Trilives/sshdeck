@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.4.5-beta.9
+
+- Match the Windows title bar icon, running window icon, and system tray icon to the selected accent. The default SSHDeck desktop shortcut can follow the accent too.
+- Fix the shadow from the Current Connections card overlapping the next card on Home.
+
 ## 0.4.5-beta.8
 
 - Restore the sidebar navigation text to 14 px.

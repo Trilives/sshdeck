@@ -15,6 +15,10 @@ mod validate;
 mod vscode;
 mod vscode_launcher;
 mod window_appearance;
+#[cfg(windows)]
+mod window_icons;
+#[cfg(windows)]
+mod desktop_shortcut;
 
 use tauri::menu::{Menu, MenuItem};
 use tauri::tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent};
@@ -23,6 +27,8 @@ use tauri::{Emitter, Manager, WindowEvent};
 use crate::commands::window::show_main_window;
 use crate::ssh::process::cleanup_tunnels;
 use crate::state::AppState;
+
+const TRAY_ID: &str = "sshdeck";
 
 pub fn run() {
     tauri::Builder::default()
@@ -89,13 +95,15 @@ pub fn run() {
             commands::window::quit_app
         ])
         .setup(|app| {
+            #[cfg(windows)]
+            app.manage(window_icons::WindowIcons::default());
+            build_tray(app)?;
             let state = app.state::<AppState>();
             let handle = app.handle().clone();
             if let Ok(settings) = state.settings.lock() {
                 window_appearance::apply(&handle, &settings);
             }
             state.add_log("info", "application started", Some(&handle));
-            build_tray(app)?;
             Ok(())
         })
         .on_window_event(|window, event| {
@@ -199,7 +207,7 @@ fn build_tray(app: &tauri::App) -> tauri::Result<()> {
     let quit = MenuItem::with_id(app, "quit", quit_label, true, None::<&str>)?;
     let menu = Menu::with_items(app, &[&show, &quit])?;
 
-    let mut builder = TrayIconBuilder::new()
+    let mut builder = TrayIconBuilder::with_id(TRAY_ID)
         .tooltip(tooltip)
         .menu(&menu)
         .show_menu_on_left_click(false)

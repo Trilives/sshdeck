@@ -75,6 +75,7 @@ pub fn paint(app: &AppHandle, settings: &AppSettings, theme: Theme) {
                 4,
             );
         }
+        crate::window_icons::apply(app, &settings.accent_color, dark);
     }
 
     #[cfg(not(windows))]

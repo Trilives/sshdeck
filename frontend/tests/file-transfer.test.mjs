@@ -223,6 +223,11 @@ test("the dashboard plus menu opens each workflow on its sidebar page", () =>
     const plus = page.getByRole("button", { name: "新建", exact: true });
     const menu = plus.locator("..");
     await home.click();
+    const connectionCard = plus.locator("xpath=ancestor::section[1]");
+    assert.deepEqual(await connectionCard.evaluate((card) => {
+      const style = getComputedStyle(card);
+      return [style.zIndex, style.backdropFilter];
+    }), ["auto", "none"], "the menu can float without raising the connection card's shadow");
     assert.equal(await plus.textContent(), "", "the create button shows only its icon");
     await plus.press("Enter");
     assert.equal(await plus.getAttribute("aria-expanded"), "true");

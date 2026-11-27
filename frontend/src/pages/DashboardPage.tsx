@@ -35,7 +35,7 @@ export function DashboardPage(props: {
   return (
     <div className="grid grid-cols-1 gap-4">
       <PageHeader page="dashboard">{t(lang, "dashboard")}</PageHeader>
-      <Card className="relative z-10">
+      <Card className="backdrop-filter-none">
         <CardHeader className="flex flex-row items-center justify-between gap-4 space-y-0">
           <CardTitle>{t(lang, "currentConnections")}</CardTitle>
           <div className="flex shrink-0 gap-2">

@@ -1,6 +1,6 @@
 [package]
 name = "sshdeck"
-version = "0.4.5-beta.8"
+version = "0.4.5-beta.9"
 description = "A modern visual SSH port forwarding manager for Windows."
 authors = ["Trlives"]
 edition = "2021"
@@ -27,5 +27,12 @@ tauri-plugin-updater = "2"
 uuid = { version = "1", features = ["v4", "serde"] }
 
 [target.'cfg(windows)'.dependencies]
+ico = "0.5"
 winreg = "0.55"
+windows = { version = "0.61", features = [
+    "Win32_Storage_FileSystem",
+    "Win32_System_Com",
+    "Win32_UI_Shell",
+    "Win32_UI_WindowsAndMessaging",
+] }
 windows-sys = { version = "0.61", features = ["Win32_Graphics_Dwm"] }
