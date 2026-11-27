@@ -17,12 +17,7 @@ import { HostCardHeader } from "../components/HostCardHeader";
 import { SortableHostList } from "../components/SortableHostList";
 import { HostTransferActions } from "../components/HostTransferActions";
 import { Button } from "../components/ui/button";
-import {
-  Card,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "../components/ui/card";
+import { Card, CardHeader, CardTitle } from "../components/ui/card";
 import { Input } from "../components/ui/input";
 import { t } from "../i18n";
 import type { HistoryEntry, Host, Language } from "../types";
@@ -245,11 +240,8 @@ export function RemoteConnectionsPage(props: {
   const lang = props.language;
   return (
     <Card>
-      <CardHeader className="flex flex-wrap items-start justify-between gap-4">
-        <div className="min-w-[16rem] flex-1 space-y-1">
-          <CardTitle>{t(lang, "remoteConnectionsTitle")}</CardTitle>
-          <CardDescription>{t(lang, "remoteConnectionsDesc")}</CardDescription>
-        </div>
+      <CardHeader className="flex flex-wrap items-center justify-between gap-4 space-y-0">
+        <CardTitle>{t(lang, "remoteConnectionsTitle")}</CardTitle>
         <HostTransferActions
           language={lang}
           onNewHost={props.onNewHost}

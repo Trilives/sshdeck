@@ -1,4 +1,4 @@
-import { Card, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
+import { Card, CardHeader, CardTitle } from "../components/ui/card";
 import { HostCard } from "../components/HostCard";
 import { SortableHostList } from "../components/SortableHostList";
 import { t } from "../i18n";
@@ -26,7 +26,6 @@ export function PortForwardingPage(props: {
       <Card>
         <CardHeader>
           <CardTitle>{t(lang, "configTitle")}</CardTitle>
-          <CardDescription>{t(lang, "configDesc")}</CardDescription>
         </CardHeader>
         {props.hosts.length === 0 ? (
           <p className="rounded-xl border border-dashed border-slate-200 px-4 py-10 text-center text-sm text-slate-400 dark:border-slate-800 dark:text-slate-500">

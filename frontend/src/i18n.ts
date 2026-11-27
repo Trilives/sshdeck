@@ -33,9 +33,7 @@ const text = {
 
     // Config page
     configTitle: "端口转发管理",
-    configDesc: "按主机管理 Local、Remote 与 Dynamic 端口转发；展开主机即可查看和操作其转发。",
     remoteConnectionsTitle: "远程连接",
-    remoteConnectionsDesc: "按主机查看历史远端路径，并用终端或 VS Code 重新打开。",
     remotePathsCount: "条路径",
     refreshHistory: "刷新历史",
     loading: "加载中",
@@ -203,7 +201,6 @@ const text = {
 
     // Logs page
     logsTitle: "运行日志",
-    logsDesc: "按等级过滤显示，同时写入本地日志目录。等级在「设置」中调整。",
     message: "消息",
     time: "时间",
     level: "等级",
@@ -301,9 +298,7 @@ const text = {
     host: "Host",
 
     configTitle: "Port Forwarding",
-    configDesc: "Manage Local, Remote, and Dynamic forwards by host; expand a host to view and control its forwards.",
     remoteConnectionsTitle: "Remote Connections",
-    remoteConnectionsDesc: "Browse remote path history by host and reopen a path in a terminal or VS Code.",
     remotePathsCount: "paths",
     refreshHistory: "Refresh history",
     loading: "Loading",
@@ -458,7 +453,6 @@ const text = {
     confirmDeleteHostDesc: "All its port forwards will be removed and any running connections disconnected. This cannot be undone.",
 
     logsTitle: "Runtime Logs",
-    logsDesc: "Filtered by level and written to the local log folder. Change the level in Settings.",
     message: "Message",
     time: "Time",
     level: "Level",
