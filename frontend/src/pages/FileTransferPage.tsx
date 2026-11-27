@@ -15,7 +15,6 @@ import { listen } from "@tauri-apps/api/event";
 import type { Host, Language } from "../types";
 import { Button } from "../components/ui/button";
 import { PageHeader } from "../components/PageHeader";
-import { Card } from "../components/ui/card";
 import { cn } from "../lib/utils";
 import { filesApi } from "../files/api";
 import { FilePane, type FileDrop } from "../files/FilePane";
@@ -360,141 +359,139 @@ export function FileTransferPage({
       >
         {ft(lang, "title")}
       </PageHeader>
-      <Card className="flex min-w-0 flex-1 flex-col gap-3 p-4 backdrop-filter-none">
-        {error && (
-          <div className="flex shrink-0 items-start gap-2 rounded-xl bg-rose-50 px-3 py-2 text-xs text-rose-600 dark:bg-rose-950/25 dark:text-rose-300">
-            <p className="max-h-24 min-w-0 flex-1 overflow-auto whitespace-pre-wrap break-words">
-              {error}
-            </p>
-            <button aria-label={ft(lang, "close")} onClick={() => setError("")}>
-              <X size={14} />
-            </button>
-          </div>
-        )}
+      {error && (
+        <div className="flex shrink-0 items-start gap-2 rounded-xl bg-rose-50 px-3 py-2 text-xs text-rose-600 dark:bg-rose-950/25 dark:text-rose-300">
+          <p className="max-h-24 min-w-0 flex-1 overflow-auto whitespace-pre-wrap break-words">
+            {error}
+          </p>
+          <button aria-label={ft(lang, "close")} onClick={() => setError("")}>
+            <X size={14} />
+          </button>
+        </div>
+      )}
+      <div
+        ref={splitContainer}
+        className="flex min-h-[260px] min-w-0 flex-1 basis-0 [contain:size]"
+      >
         <div
-          ref={splitContainer}
-          className="flex min-h-[260px] min-w-0 flex-1 basis-0 [contain:size]"
+          className="min-h-0 min-w-0"
+          style={{ width: `calc(${split}% - 9px)` }}
         >
-          <div
-            className="min-h-0 min-w-0"
-            style={{ width: `calc(${split}% - 9px)` }}
-          >
+          <FilePane
+            language={lang}
+            hosts={hosts}
+            hostId={leftId}
+            onHostChange={setLeftId}
+            browser={left}
+            onSelection={setLeftSelection}
+            onDropFiles={
+              distribution
+                ? undefined
+                : (drop, path) => dropped("left", drop, path)
+            }
+            footer={footer("left")}
+          />
+        </div>
+        <div
+          className="group relative flex w-[18px] shrink-0 cursor-col-resize touch-none items-center justify-center"
+          title={ft(lang, "resize")}
+          onPointerDown={(e) => {
+            if ((e.target as HTMLElement).closest("button")) return;
+            e.preventDefault();
+            const move = (ev: PointerEvent) => {
+              const rect = splitContainer.current?.getBoundingClientRect();
+              if (rect)
+                setSplit(
+                  Math.max(
+                    35,
+                    Math.min(65, ((ev.clientX - rect.left) / rect.width) * 100),
+                  ),
+                );
+            };
+            const up = () => {
+              window.removeEventListener("pointermove", move);
+              window.removeEventListener("pointerup", up);
+              window.removeEventListener("pointercancel", up);
+            };
+            window.addEventListener("pointermove", move);
+            window.addEventListener("pointerup", up);
+            window.addEventListener("pointercancel", up);
+          }}
+        >
+          <div className="h-12 w-1 rounded-full bg-slate-200 transition group-hover:bg-blue-300 dark:bg-slate-800 dark:group-hover:bg-blue-600" />
+          {!distribution && (
+            <button
+              className="absolute top-4 rounded-full border border-slate-200 bg-white p-1 text-slate-400 shadow-sm hover:text-blue-500 dark:border-slate-700 dark:bg-slate-900"
+              title={ft(lang, "swap")}
+              onClick={() => {
+                setLeftId(rightId);
+                setRightId(leftId);
+              }}
+            >
+              <ArrowLeftRight size={11} />
+            </button>
+          )}
+        </div>
+        <div className="min-h-0 min-w-0 flex-1">
+          <div className={cn("h-full", distribution && "hidden")}>
             <FilePane
               language={lang}
               hosts={hosts}
-              hostId={leftId}
-              onHostChange={setLeftId}
-              browser={left}
-              onSelection={setLeftSelection}
-              onDropFiles={
-                distribution
-                  ? undefined
-                  : (drop, path) => dropped("left", drop, path)
-              }
-              footer={footer("left")}
+              hostId={rightId}
+              onHostChange={setRightId}
+              browser={right}
+              onSelection={setRightSelection}
+              onDropFiles={(drop, path) => dropped("right", drop, path)}
+              footer={footer("right")}
             />
           </div>
-          <div
-            className="group relative flex w-[18px] shrink-0 cursor-col-resize touch-none items-center justify-center"
-            title={ft(lang, "resize")}
-            onPointerDown={(e) => {
-              if ((e.target as HTMLElement).closest("button")) return;
-              e.preventDefault();
-              const move = (ev: PointerEvent) => {
-                const rect = splitContainer.current?.getBoundingClientRect();
-                if (rect)
-                  setSplit(
-                    Math.max(
-                      35,
-                      Math.min(65, ((ev.clientX - rect.left) / rect.width) * 100),
-                    ),
-                  );
-              };
-              const up = () => {
-                window.removeEventListener("pointermove", move);
-                window.removeEventListener("pointerup", up);
-                window.removeEventListener("pointercancel", up);
-              };
-              window.addEventListener("pointermove", move);
-              window.addEventListener("pointerup", up);
-              window.addEventListener("pointercancel", up);
-            }}
-          >
-            <div className="h-12 w-1 rounded-full bg-slate-200 transition group-hover:bg-blue-300 dark:bg-slate-800 dark:group-hover:bg-blue-600" />
-            {!distribution && (
-              <button
-                className="absolute top-4 rounded-full border border-slate-200 bg-white p-1 text-slate-400 shadow-sm hover:text-blue-500 dark:border-slate-700 dark:bg-slate-900"
-                title={ft(lang, "swap")}
-                onClick={() => {
-                  setLeftId(rightId);
-                  setRightId(leftId);
-                }}
-              >
-                <ArrowLeftRight size={11} />
-              </button>
-            )}
-          </div>
-          <div className="min-h-0 min-w-0 flex-1">
-            <div className={cn("h-full", distribution && "hidden")}>
-              <FilePane
-                language={lang}
-                hosts={hosts}
-                hostId={rightId}
-                onHostChange={setRightId}
-                browser={right}
-                onSelection={setRightSelection}
-                onDropFiles={(drop, path) => dropped("right", drop, path)}
-                footer={footer("right")}
-              />
-            </div>
-            {distribution && (
-              <DistributionTargets
-                hosts={hosts}
-                language={lang}
-                selected={selectedRecipients}
-                onToggle={(id) =>
-                  setSelectedRecipients((prev) =>
-                    prev.includes(id)
-                      ? prev.filter((i) => i !== id)
-                      : [...prev, id],
-                  )
-                }
-                recipients={recipients}
-                onChange={onRecipient}
-                command={pathCommand}
-                onApply={(path) =>
-                  setPathCommand((v) => ({
-                    path,
-                    version: (v?.version || 0) + 1,
-                  }))
-                }
-                refreshVersion={recipientRefresh}
-              />
-            )}
-          </div>
+          {distribution && (
+            <DistributionTargets
+              hosts={hosts}
+              language={lang}
+              selected={selectedRecipients}
+              onToggle={(id) =>
+                setSelectedRecipients((prev) =>
+                  prev.includes(id)
+                    ? prev.filter((i) => i !== id)
+                    : [...prev, id],
+                )
+              }
+              recipients={recipients}
+              onChange={onRecipient}
+              command={pathCommand}
+              onApply={(path) =>
+                setPathCommand((v) => ({
+                  path,
+                  version: (v?.version || 0) + 1,
+                }))
+              }
+              refreshVersion={recipientRefresh}
+            />
+          )}
         </div>
-        <TransferQueue
-          language={lang}
-          jobs={jobs.filter((j) => !hiddenJobs.has(j.id))}
-          onCancel={(id) =>
-            void filesApi.cancel(id).catch((e) => setError(String(e)))
-          }
-          onRetry={(id) => void retry(id)}
-          canRetry={(id) => requests.current.has(id)}
-          onClear={() =>
-            setHiddenJobs(
-              (prev) =>
-                new Set([
-                  ...prev,
-                  ...jobs.filter((j) => !isActive(j)).map((j) => j.id),
-                ]),
-            )
-          }
-          height={queueHeight}
-          setHeight={setQueueHeight}
-          error={queueError}
-        />
-      </Card>
+      </div>
+      <TransferQueue
+        language={lang}
+        jobs={jobs.filter((j) => !hiddenJobs.has(j.id))}
+        onCancel={(id) =>
+          void filesApi.cancel(id).catch((e) => setError(String(e)))
+        }
+        onRetry={(id) => void retry(id)}
+        canRetry={(id) => requests.current.has(id)}
+        onClear={() =>
+          setHiddenJobs(
+            (prev) =>
+              new Set([
+                ...prev,
+                ...jobs.filter((j) => !isActive(j)).map((j) => j.id),
+              ]),
+          )
+        }
+        height={queueHeight}
+        setHeight={setQueueHeight}
+        error={queueError}
+      />
       {pending && (
         <ModalOverlay className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 p-6 backdrop-blur-sm">
           <div

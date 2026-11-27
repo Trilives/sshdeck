@@ -14,16 +14,15 @@ pub fn apply(app: &AppHandle, settings: &AppSettings) {
             app,
             settings,
             mode.or_else(|| window.theme().ok()).unwrap_or(Theme::Light),
-            None,
         );
     }
 }
 
-pub fn paint(app: &AppHandle, settings: &AppSettings, theme: Theme, focused: Option<bool>) {
+pub fn paint(app: &AppHandle, settings: &AppSettings, theme: Theme) {
     #[cfg(windows)]
     {
         use windows_sys::Win32::Graphics::Dwm::{
-            DwmSetWindowAttribute, DWMWA_BORDER_COLOR, DWMWA_CAPTION_COLOR, DWMWA_COLOR_DEFAULT,
+            DwmSetWindowAttribute, DWMWA_BORDER_COLOR, DWMWA_CAPTION_COLOR, DWMWA_COLOR_NONE,
             DWMWA_TEXT_COLOR,
         };
 
@@ -38,23 +37,18 @@ pub fn paint(app: &AppHandle, settings: &AppSettings, theme: Theme, focused: Opt
             "light" => false,
             _ => theme == Theme::Dark,
         };
-        let (caption, border) = match (settings.accent_color.as_str(), dark) {
-            ("violet", false) => ([243, 238, 253], [167, 139, 250]),
-            ("violet", true) => ([41, 32, 57], [139, 92, 246]),
-            ("teal", false) => ([231, 246, 243], [56, 157, 146]),
-            ("teal", true) => ([25, 45, 43], [45, 163, 154]),
-            ("orange", false) => ([253, 240, 232], [220, 128, 84]),
-            ("orange", true) => ([53, 37, 31], [214, 110, 68]),
-            (_, false) => ([235, 242, 253], [105, 149, 231]),
-            (_, true) => ([29, 41, 62], [88, 138, 230]),
+        let [r, g, b] = match (settings.accent_color.as_str(), dark) {
+            ("violet", false) => [243, 238, 253],
+            ("violet", true) => [41, 32, 57],
+            ("teal", false) => [231, 246, 243],
+            ("teal", true) => [25, 45, 43],
+            ("orange", false) => [253, 240, 232],
+            ("orange", true) => [53, 37, 31],
+            (_, false) => [235, 242, 253],
+            (_, true) => [29, 41, 62],
         };
-        let color_ref = |[r, g, b]: [u8; 3]| u32::from_le_bytes([r, g, b, 0]);
-        let caption = color_ref(caption);
-        let border = if focused.unwrap_or_else(|| window.is_focused().unwrap_or(false)) {
-            color_ref(border)
-        } else {
-            DWMWA_COLOR_DEFAULT
-        };
+        let caption = u32::from_le_bytes([r, g, b, 0]);
+        let border = DWMWA_COLOR_NONE;
         let text = if dark { 0x00fa_f8f8u32 } else { 0x0030_241cu32 };
         // Windows versions without support reject these attributes and keep their native colors.
         unsafe {
@@ -82,5 +76,5 @@ pub fn paint(app: &AppHandle, settings: &AppSettings, theme: Theme, focused: Opt
     }
 
     #[cfg(not(windows))]
-    let _ = (app, settings, theme, focused);
+    let _ = (app, settings, theme);
 }

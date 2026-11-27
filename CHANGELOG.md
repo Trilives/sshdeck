@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.4.5-beta.6
+
+- Give the two file lists and transfer queue more room by removing the outer File Transfer card.
+- Hide the outer border of the native window on Windows 11. The title bar still follows the selected accent.
+
 ## 0.4.5-beta.5
 
 - Move page headings and their actions above the content. Remote Connections and Port Forwarding give each host its own card, and File Transfer groups both panes with the queue.
