@@ -114,7 +114,7 @@ function SettingToggle(props: {
           />
           <span className="h-5 w-9 rounded-full bg-slate-300 transition after:absolute after:left-0.5 after:top-0.5 after:h-4 after:w-4 after:rounded-full after:bg-white after:transition-transform peer-checked:bg-blue-600 peer-checked:after:translate-x-4 peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-blue-500 dark:bg-slate-700" />
         </label>
-        <p id={descriptionId} className="text-slate-500 dark:text-slate-400">{props.description}</p>
+        <p id={descriptionId} className="whitespace-pre-line text-slate-500 dark:text-slate-400">{props.description}</p>
       </div>
     </div>
   );
