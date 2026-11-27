@@ -4,11 +4,13 @@
 
 :root {
   font-family: Inter, "Segoe UI", system-ui, sans-serif;
+  color-scheme: light;
   color: #0f172a;
   background: transparent;
 }
 
 html.dark {
+  color-scheme: dark;
   color: #f8fafc;
   background: transparent;
 }

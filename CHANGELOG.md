@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.5-beta.3
+
+- Add Appearance settings for light, dark, or system display mode and blue, violet, teal, or deep orange accents. Each choice is saved independently.
+- Restore the compact Home remote connection dialog while keeping the path and icon improvements.
+- Simplify the Current Connections and Pinned Hosts cards on Home by removing redundant help text.
+
 ## 0.4.5-beta.2
 
 - Use a borderless, softly shaded plus button on Home, with a blue highlight on hover and while the menu is open.

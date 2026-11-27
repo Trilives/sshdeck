@@ -119,7 +119,7 @@ test("the dashboard remote connection dialog keeps long paths and their actions 
   withPage(async (page, errors) => {
     await page.setViewportSize({ width: 980, height: 640 });
     const path = "/srv/projects/" + "long-remote-directory/".repeat(28) + "assets/";
-    const medium = "/srv/projects/design-system/releases/0.4.5/fixtures/reference-layout";
+    const medium = "/srv/projects/design-system/releases/0.4.5/frontend";
     await page.evaluate(({ path, medium }) => {
       window.fixture.hosts[0].pinned = true;
       window.fixture.hosts[0].name = "Remote ready " + "H".repeat(160);
@@ -141,7 +141,7 @@ test("the dashboard remote connection dialog keeps long paths and their actions 
     const fullPath = dialog.getByText(path, { exact: true });
     await fullPath.waitFor();
     const bounds = await dialog.boundingBox();
-    assert.ok(bounds && bounds.width === 672 && bounds.x >= 0 && bounds.x + bounds.width <= 980);
+    assert.ok(bounds && bounds.width === 512 && bounds.x >= 0 && bounds.x + bounds.width <= 980);
     assert.ok(await dialog.getByText(medium, { exact: true }).evaluate((element) =>
       [...element.children].every((part) => part.scrollWidth <= part.clientWidth)));
     assert.ok(await fullPath.evaluate((element) => {
@@ -168,9 +168,9 @@ test("the dashboard remote connection dialog keeps long paths and their actions 
     await list.evaluate((element) => { element.scrollTop = element.scrollHeight; });
     assert.ok(await list.evaluate((element) => element.scrollTop > 0));
     assert.deepEqual(await footerVscode.boundingBox(), footerBounds);
-    await page.setViewportSize({ width: 700, height: 540 });
+    await page.setViewportSize({ width: 500, height: 540 });
     const narrow = await dialog.boundingBox();
-    assert.ok(narrow && narrow.width < 672 && narrow.x >= 0 && narrow.x + narrow.width <= 700);
+    assert.ok(narrow && narrow.width < 512 && narrow.x >= 0 && narrow.x + narrow.width <= 500);
     await list.evaluate((element) => { element.scrollTop = 0; });
     await row.getByRole("button", { name: "填入下方目录框（可继续编辑）", exact: true }).click();
     assert.equal(await dialog.getByRole("textbox").inputValue(), path);
@@ -250,6 +250,47 @@ test("the dashboard forwarding shortcut offers to add the first host", () =>
     await page.getByRole("dialog", { name: "新建主机", exact: true }).waitFor();
     await page.getByRole("heading", { name: "远程连接", exact: true }).waitFor();
     assert.equal(await picker.count(), 0);
+    assert.deepEqual(errors, []);
+  }));
+
+test("appearance saves independently and system mode responds to live changes", () =>
+  withPage(async (page, errors) => {
+    const settings = page.getByRole("button", { name: "设置", exact: true });
+    await page.emulateMedia({ colorScheme: "dark" });
+    await settings.click();
+    assert.equal(await page.getByRole("radio", { name: "浅色", exact: true }).isChecked(), true);
+    assert.equal(await page.getByRole("radio", { name: "蓝色", exact: true }).isChecked(), true);
+    assert.equal(await page.locator("html").evaluate((root) => root.classList.contains("dark")), false);
+
+    await page.getByText("跟随系统", { exact: true }).click();
+    await page.waitForFunction(() => document.documentElement.classList.contains("dark"));
+    await page.emulateMedia({ colorScheme: "light" });
+    await page.waitForFunction(() => !document.documentElement.classList.contains("dark"));
+
+    for (const [label, accent, background] of [
+      ["紫色", "violet", "rgb(124, 58, 237)"],
+      ["深橙", "orange", "rgb(166, 54, 13)"],
+      ["青绿", "teal", "rgb(20, 100, 94)"],
+    ]) {
+      await page.getByText(label, { exact: true }).click();
+      await page.getByRole("radio", { name: label, exact: true, checked: true }).waitFor();
+      await page.waitForFunction(({ accent, background }) => {
+        const active = document.querySelector("aside nav .bg-blue-600");
+        return document.documentElement.dataset.accent === accent &&
+          active && getComputedStyle(active).backgroundColor === background;
+      }, { accent, background });
+    }
+
+    await page.reload();
+    await settings.click();
+    await page.getByRole("radio", { name: "青绿", exact: true, checked: true }).waitFor();
+    assert.equal(await page.getByRole("radio", { name: "跟随系统", exact: true }).isChecked(), true);
+    await page.getByText("深色", { exact: true }).click();
+    await page.waitForFunction(() => document.documentElement.classList.contains("dark"));
+    await page.emulateMedia({ colorScheme: "dark" });
+    await page.emulateMedia({ colorScheme: "light" });
+    assert.equal(await page.locator("html").evaluate((root) => root.classList.contains("dark")), true);
+    assert.equal(await page.getByRole("radio", { name: "青绿", exact: true }).isChecked(), true);
     assert.deepEqual(errors, []);
   }));
 

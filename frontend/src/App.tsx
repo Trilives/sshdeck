@@ -18,7 +18,7 @@ import { FileTransferPage } from "./pages/FileTransferPage";
 import { FileTransferBoundary } from "./files/FileTransferBoundary";
 import type { AppSettings, CriticalErrorPayload, Forward, HistoryEntry, Host, LogEntry, LogLevel, UpdateChannel, UpdateState } from "./types";
 
-const defaultSettings: AppSettings = { theme: "light", language: "zh-CN", logLevel: "info", closeBehavior: "ask", autoSortHosts: false, autoUpdate: false, updateChannel: "stable" };
+const defaultSettings: AppSettings = { theme: "light", accentColor: "blue", language: "zh-CN", logLevel: "info", closeBehavior: "ask", autoSortHosts: false, autoUpdate: false, updateChannel: "stable" };
 
 const newHost = (): Host => ({
   id: "",
@@ -111,8 +111,21 @@ export function App() {
   );
 
   useEffect(() => {
-    document.documentElement.classList.toggle("dark", settings.theme === "dark");
+    const root = document.documentElement;
+    if (settings.theme !== "system") {
+      root.classList.toggle("dark", settings.theme === "dark");
+      return;
+    }
+    const systemTheme = window.matchMedia("(prefers-color-scheme: dark)");
+    const applySystemTheme = () => root.classList.toggle("dark", systemTheme.matches);
+    applySystemTheme();
+    systemTheme.addEventListener("change", applySystemTheme);
+    return () => systemTheme.removeEventListener("change", applySystemTheme);
   }, [settings.theme]);
+
+  useEffect(() => {
+    document.documentElement.dataset.accent = settings.accentColor;
+  }, [settings.accentColor]);
 
   // Idle timer only runs on the Port Forwarding page with no dialog open: 3 minutes of no activity jumps back to Home.
   useEffect(() => {

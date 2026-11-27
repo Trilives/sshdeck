@@ -17,7 +17,12 @@ pub fn save_settings_cmd(
     app: AppHandle,
 ) -> Result<AppSettings, String> {
     let normalized = AppSettings {
-        theme: normalize_choice(&settings.theme, &["dark", "light"], "light"),
+        theme: normalize_choice(&settings.theme, &["dark", "light", "system"], "light"),
+        accent_color: normalize_choice(
+            &settings.accent_color,
+            &["blue", "violet", "teal", "orange"],
+            "blue",
+        ),
         language: normalize_choice(&settings.language, &["zh-CN", "en-US"], "zh-CN"),
         log_level: normalize_choice(&settings.log_level, &["debug", "info", "warning", "error"], "info"),
         close_behavior: normalize_choice(&settings.close_behavior, &["ask", "minimize", "exit"], "ask"),

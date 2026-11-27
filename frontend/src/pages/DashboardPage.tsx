@@ -1,7 +1,7 @@
 import { Activity, CircleSlash, Globe, Pin, Plug, PlugZap, Server } from "lucide-react";
 import { DashboardCreateMenu } from "../components/DashboardCreateMenu";
 import { Button } from "../components/ui/button";
-import { Card, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
+import { Card, CardHeader, CardTitle } from "../components/ui/card";
 import { cn } from "../lib/utils";
 import { t } from "../i18n";
 import type { Forward, Host, Language, LogEntry } from "../types";
@@ -34,11 +34,8 @@ export function DashboardPage(props: {
   return (
     <div className="grid grid-cols-1 gap-5">
       <Card className="relative z-10">
-        <CardHeader className="flex flex-row items-start justify-between gap-4">
-          <div className="space-y-1">
-            <CardTitle>{t(lang, "currentConnections")}</CardTitle>
-            <CardDescription>{t(lang, "dashboardDesc")}</CardDescription>
-          </div>
+        <CardHeader className="flex flex-row items-center justify-between gap-4 space-y-0">
+          <CardTitle>{t(lang, "currentConnections")}</CardTitle>
           <div className="flex shrink-0 gap-2">
             <DashboardCreateMenu language={lang} onNewHost={props.onNewHost} onForwarding={props.onChooseForwardHost} />
             {groups.length > 0 && (
@@ -104,7 +101,6 @@ export function DashboardPage(props: {
               <Pin size={15} className="fill-current text-blue-600 dark:text-blue-300" />
               {t(lang, "pinnedHosts")}
             </CardTitle>
-            <CardDescription>{t(lang, "pinnedHostsDesc")}</CardDescription>
           </CardHeader>
           <div className="grid grid-cols-1 gap-2">
             {pinned.map((host) => (

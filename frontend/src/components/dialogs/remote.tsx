@@ -57,7 +57,7 @@ export function RemoteConnectionDialog(props: {
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="flex w-full min-w-0 max-w-2xl flex-col !overflow-hidden border-blue-200 bg-white dark:border-blue-900 dark:bg-slate-950"
+        className="flex w-full min-w-0 max-w-lg flex-col !overflow-hidden border-blue-200 bg-white dark:border-blue-900 dark:bg-slate-950"
       >
         <CardHeader className="flex shrink-0 flex-row items-start justify-between gap-4">
           <div className="min-w-0 flex-1">

@@ -1,11 +1,82 @@
 import { useEffect, useId, useState, type ReactNode } from "react";
+import { Check, Monitor, Moon, Palette, Sun } from "lucide-react";
 import { api } from "../api";
 import { Button } from "../components/ui/button";
 import { Card, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
 import { Select } from "../components/ui/select";
 import { t } from "../i18n";
 import { languageLabels } from "../i18n";
-import type { AppSettings, CloseBehavior, Language, LogLevel, ThemeName, UpdateChannel, UpdateState } from "../types";
+import type { AppSettings, CloseBehavior, Language, LogLevel, UpdateChannel, UpdateState } from "../types";
+
+const displayModes = [
+  { value: "light", label: "themeLight", icon: Sun },
+  { value: "dark", label: "themeDark", icon: Moon },
+  { value: "system", label: "themeSystem", icon: Monitor },
+] as const;
+
+const accentColors = [
+  { value: "blue", label: "accentBlue" },
+  { value: "violet", label: "accentViolet" },
+  { value: "teal", label: "accentTeal" },
+  { value: "orange", label: "accentOrange" },
+] as const;
+
+const appearanceOption = "inline-flex h-9 cursor-pointer items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 text-sm font-medium text-slate-600 transition hover:border-blue-300 peer-checked:border-blue-300 peer-checked:bg-blue-50 peer-checked:text-blue-800 peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-blue-500 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-300 dark:hover:border-blue-700 dark:peer-checked:border-blue-700 dark:peer-checked:bg-blue-950 dark:peer-checked:text-blue-200";
+
+function AppearanceSettings({ settings, onChange }: {
+  settings: AppSettings;
+  onChange: (settings: Partial<Pick<AppSettings, "theme" | "accentColor">>) => void;
+}) {
+  const { language, theme, accentColor } = settings;
+  return (
+    <section className="mb-1 rounded-xl border border-slate-200/80 bg-slate-50/70 px-4 py-3 dark:border-slate-800 dark:bg-slate-900/40">
+      <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold">
+        <Palette size={16} className="text-blue-600 dark:text-blue-300" aria-hidden />
+        {t(language, "appearance")}
+      </h3>
+      <div className="grid grid-cols-[120px_minmax(0,1fr)] items-center gap-x-3 gap-y-2.5">
+        <span className="text-sm font-medium text-slate-600 dark:text-slate-300" aria-hidden>{t(language, "theme")}</span>
+        <fieldset aria-label={t(language, "theme")} className="flex min-w-0 flex-wrap gap-2">
+          {displayModes.map(({ value, label, icon: Icon }) => (
+            <label key={value}>
+              <input
+                type="radio"
+                name="display-mode"
+                checked={theme === value}
+                onChange={() => onChange({ theme: value })}
+                className="peer sr-only"
+              />
+              <span className={appearanceOption}>
+                <Icon size={15} aria-hidden />
+                {t(language, label)}
+              </span>
+            </label>
+          ))}
+        </fieldset>
+        <span className="text-sm font-medium text-slate-600 dark:text-slate-300" aria-hidden>{t(language, "accentColor")}</span>
+        <fieldset aria-label={t(language, "accentColor")} className="flex min-w-0 flex-wrap gap-2">
+          {accentColors.map(({ value, label }) => (
+            <label key={value}>
+              <input
+                type="radio"
+                name="accent-color"
+                checked={accentColor === value}
+                onChange={() => onChange({ accentColor: value })}
+                className="peer sr-only"
+              />
+              <span className={appearanceOption}>
+                <span data-accent={value} className="grid h-4 w-4 shrink-0 place-items-center rounded-full bg-blue-600 text-white" aria-hidden>
+                  {accentColor === value && <Check size={11} strokeWidth={3} />}
+                </span>
+                {t(language, label)}
+              </span>
+            </label>
+          ))}
+        </fieldset>
+      </div>
+    </section>
+  );
+}
 
 function SettingSelect(props: { label: string; value: string; onChange: (value: string) => void; children: ReactNode }) {
   return (
@@ -184,10 +255,7 @@ export function SettingsPage(props: {
         <CardDescription>{t(lang, "settingsDesc")}</CardDescription>
       </CardHeader>
       <div className="grid gap-4">
-        <SettingSelect label={t(lang, "theme")} value={props.settings.theme} onChange={(v) => props.setSettings({ theme: v as ThemeName })}>
-          <option value="light">{t(lang, "themeLight")}</option>
-          <option value="dark">{t(lang, "themeDark")}</option>
-        </SettingSelect>
+        <AppearanceSettings settings={props.settings} onChange={props.setSettings} />
         <SettingSelect label={t(lang, "language")} value={props.settings.language} onChange={(v) => props.setSettings({ language: v as Language })}>
           {Object.entries(languageLabels).map(([value, label]) => (
             <option key={value} value={value}>

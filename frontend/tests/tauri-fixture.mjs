@@ -22,12 +22,14 @@ export function installTauriFixture() {
   let launchAtLogin = false;
   let settings = {
     theme: "light",
+    accentColor: "blue",
     language: "zh-CN",
     logLevel: "info",
     closeBehavior: "ask",
     autoSortHosts: false,
     autoUpdate: false,
     updateChannel: "preview",
+    ...JSON.parse(sessionStorage.getItem("sshdeck.fixture.settings") ?? "{}"),
   };
   const fixture = (window.fixture = {
     hosts,
@@ -113,6 +115,7 @@ export function installTauriFixture() {
           return settings;
         case "save_settings_cmd":
           settings = args.settings;
+          sessionStorage.setItem("sshdeck.fixture.settings", JSON.stringify(settings));
           return settings;
         case "get_launch_at_login":
           return launchAtLogin;
@@ -128,7 +131,7 @@ export function installTauriFixture() {
         case "check_ssh":
           return true;
         case "plugin:app|version":
-          return "0.4.5-beta.2";
+          return "0.4.5-beta.3";
         case "plugin:event|listen": {
           const id = ++sequence;
           listeners.set(id, args);

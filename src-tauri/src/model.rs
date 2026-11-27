@@ -141,6 +141,8 @@ pub struct HostView {
 #[serde(rename_all = "camelCase")]
 pub struct AppSettings {
     pub theme: String,
+    #[serde(default = "default_accent_color")]
+    pub accent_color: String,
     pub language: String,
     pub log_level: String,
     /// What clicking the window's close button does: `ask` (prompt each time), `minimize` (to the tray),
@@ -158,6 +160,10 @@ pub struct AppSettings {
     pub update_channel: String,
 }
 
+fn default_accent_color() -> String {
+    "blue".to_string()
+}
+
 fn default_close_behavior() -> String {
     "ask".to_string()
 }
@@ -170,6 +176,7 @@ impl Default for AppSettings {
     fn default() -> Self {
         Self {
             theme: "light".to_string(),
+            accent_color: default_accent_color(),
             language: "zh-CN".to_string(),
             log_level: "info".to_string(),
             close_behavior: default_close_behavior(),
@@ -177,6 +184,27 @@ impl Default for AppSettings {
             auto_update: false,
             update_channel: default_update_channel(),
         }
+    }
+}
+
+#[cfg(test)]
+mod settings_tests {
+    use super::AppSettings;
+
+    #[test]
+    fn settings_saved_before_accent_colors_keep_the_display_mode() {
+        let settings: AppSettings = serde_json::from_value(serde_json::json!({
+            "theme": "dark",
+            "language": "en-US",
+            "logLevel": "warning",
+            "updateChannel": "preview"
+        }))
+        .unwrap();
+
+        assert_eq!(settings.theme, "dark");
+        assert_eq!(settings.language, "en-US");
+        assert_eq!(settings.update_channel, "preview");
+        assert_eq!(settings.accent_color, "blue");
     }
 }
 
