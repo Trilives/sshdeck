@@ -145,9 +145,9 @@ export function ForwardDialog(props: {
   return (
     <Modal maxWidth="max-w-2xl">
       <DialogHeader title={t(lang, "forwardDialogTitle")} description={t(lang, "forwardDialogDesc")} onClose={props.onClose} />
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid items-start gap-x-4 gap-y-5 sm:grid-cols-2">
         <Field label={t(lang, "name")} value={props.draft.name} onChange={(v) => update("name", v)} />
-        <label className="grid gap-2 text-sm font-medium text-slate-600 dark:text-slate-300">
+        <label className="grid min-w-0 gap-2 text-sm font-medium text-slate-600 dark:text-slate-300">
           {t(lang, "mode")}
           <Select value={props.draft.mode} onChange={(e) => update("mode", e.target.value as TunnelMode)}>
             <option value="local">local</option>
@@ -183,17 +183,17 @@ export function ForwardDialog(props: {
             />
           </>
         )}
-        <label className="col-span-2 flex items-center gap-3 rounded-2xl bg-slate-50 p-4 text-sm font-medium dark:bg-slate-900">
+        <label className="flex items-center gap-3 rounded-xl bg-slate-50 px-4 py-3 text-sm font-medium dark:bg-slate-900 sm:col-span-2">
           <input
             type="checkbox"
             checked={props.draft.keepConnected}
             onChange={(e) => update("keepConnected", e.target.checked)}
-            className="h-4 w-4 rounded border-slate-300"
+            className="h-4 w-4 shrink-0 accent-blue-600"
           />
           {t(lang, "keepConnected")}
         </label>
       </div>
-      <div className="mt-5 flex justify-end gap-3">
+      <div className="mt-5 flex justify-end gap-2 border-t border-slate-200 pt-4 dark:border-slate-800">
         <Button variant="secondary" onClick={props.onClose}>{t(lang, "cancel")}</Button>
         <Button onClick={props.onSave}>{t(lang, "save")}</Button>
       </div>

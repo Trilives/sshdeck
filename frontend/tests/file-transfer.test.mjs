@@ -235,6 +235,26 @@ test("the dashboard plus menu opens each workflow on its sidebar page", () =>
     assert.ok(scrolled > 0, "the selected host is scrolled into view");
     await card.getByRole("button", { name: "新建端口转发", exact: true }).click();
     await page.getByRole("heading", { name: "端口转发", exact: true }).waitFor();
+
+    const mode = page.getByRole("combobox", { name: "模式", exact: true });
+    const address = page.getByRole("textbox", { name: /^本机地址/ });
+    const port = page.getByRole("textbox", { name: /^本机端口/ });
+    const target = page.getByRole("textbox", { name: /^远端地址/ });
+    const targetPort = page.getByRole("textbox", { name: /^远程端口/ });
+    for (const value of ["local", "remote", "dynamic"]) {
+      await mode.selectOption(value);
+      const pairs = [[page.getByRole("textbox", { name: "名称", exact: true }), mode], [address, port]];
+      if (value === "dynamic") {
+        assert.equal(await target.count(), 0);
+      } else {
+        pairs.push([target, targetPort]);
+      }
+      for (const [left, right] of pairs) {
+        const [leftBounds, rightBounds] = await Promise.all([left.boundingBox(), right.boundingBox()]);
+        assert.ok(leftBounds && rightBounds && leftBounds.y === rightBounds.y,
+          value + " fields must align even when their hints wrap differently");
+      }
+    }
     assert.deepEqual(errors, []);
   }));
 

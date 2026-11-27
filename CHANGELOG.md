@@ -5,6 +5,7 @@
 - Add Appearance settings for light, dark, or system display mode and blue, violet, teal, or deep orange accents. Each choice is saved independently.
 - Restore the compact Home remote connection dialog while keeping the path and icon improvements.
 - Remove redundant descriptions from Home, Remote Connections, Port Forwarding, and Logs.
+- Align paired controls in the port forwarding dialog and stack them in narrow windows.
 
 ## 0.4.5-beta.2
 
