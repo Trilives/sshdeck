@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.4.5-beta.1
+
+- Keep the Home remote connection dialog within its available width when host names or recent paths are long. Row actions remain visible and copying a path into the field preserves the full value.
+- Require a 48-hour wait after the latest public preview for the same version before building a stable release.
+
 ## 0.4.4
 
 - Add a plus menu on Home. Open the New Host form in Remote Connections or choose and reveal a saved host in Port Forwarding.

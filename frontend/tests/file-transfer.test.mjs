@@ -115,6 +115,42 @@ test("long dashboard events keep the cards and connection actions within the win
     assert.deepEqual(errors, []);
   }));
 
+test("the dashboard remote connection dialog keeps long paths and their actions in view", () =>
+  withPage(async (page, errors) => {
+    await page.setViewportSize({ width: 980, height: 640 });
+    const path = "/srv/projects/" + "long-remote-directory/".repeat(28);
+    await page.evaluate((label) => {
+      window.fixture.hosts[0].pinned = true;
+      window.fixture.hosts[0].name = "Remote ready " + "H".repeat(160);
+      window.fixture.history.ready = [{
+        id: "long-remote-directory",
+        hostId: "ready",
+        kind: "vscode",
+        label,
+        uri: "",
+        detail: "",
+        openedAt: 0,
+      }];
+    }, path);
+    await page.getByRole("button", { name: "主页", exact: true }).click();
+    const dashboard = page.locator("main > div > section");
+    await dashboard.getByRole("button", { name: "远程连接", exact: true }).click();
+    const dialog = page.getByRole("dialog", { name: /^远程连接 — Remote ready/ });
+    await dialog.getByText(path, { exact: true }).waitFor();
+    const bounds = await dialog.boundingBox();
+    assert.ok(bounds && bounds.width <= 512 && bounds.x >= 0 && bounds.x + bounds.width <= 980);
+    const close = await dialog.getByRole("button", { name: "关闭", exact: true }).boundingBox();
+    assert.ok(close && close.x + close.width <= bounds.x + bounds.width);
+    for (const label of ["通过 VS Code 打开", "填入下方目录框（可继续编辑）"]) {
+      const button = await dialog.getByTitle(label, { exact: true }).boundingBox();
+      assert.ok(button && button.x >= bounds.x && button.x + button.width <= bounds.x + bounds.width,
+        label + " must stay inside the dialog");
+    }
+    await dialog.getByTitle("填入下方目录框（可继续编辑）", { exact: true }).click();
+    assert.equal(await dialog.getByRole("textbox").inputValue(), path);
+    assert.deepEqual(errors, []);
+  }));
+
 test("the dashboard plus menu opens each workflow on its sidebar page", () =>
   withPage(async (page, errors) => {
     await page.setViewportSize({ width: 980, height: 640 });

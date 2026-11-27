@@ -1,5 +1,5 @@
 import { ModalOverlay } from "../ui/ModalOverlay";
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { Code2, FolderOpen, PenLine, Terminal, X } from "lucide-react";
 import { t } from "../../i18n";
 import type { HistoryEntry, Language } from "../../types";
@@ -23,6 +23,8 @@ export function RemoteConnectionDialog(props: {
   onCancel: () => void;
 }) {
   const lang = props.language;
+  const titleId = useId();
+  const title = t(lang, "historyTitle") + " — " + props.hostName;
   const [customPath, setCustomPath] = useState("");
   const path = customPath.trim();
   useEffect(() => {
@@ -36,17 +38,22 @@ export function RemoteConnectionDialog(props: {
 
   return (
     <ModalOverlay className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-950/55 p-6 backdrop-blur-sm">
-      <Card className="w-full max-w-lg border-blue-200 bg-white dark:border-blue-900 dark:bg-slate-950">
+      <Card
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        className="w-full min-w-0 max-w-lg border-blue-200 bg-white dark:border-blue-900 dark:bg-slate-950"
+      >
         <CardHeader className="flex flex-row items-start justify-between gap-4">
-          <div>
-            <CardTitle>{`${t(lang, "historyTitle")} — ${props.hostName}`}</CardTitle>
+          <div className="min-w-0 flex-1">
+            <CardTitle id={titleId} className="truncate" title={title}>{title}</CardTitle>
             <CardDescription className="mt-1">{t(lang, "historyDesc")}</CardDescription>
           </div>
-          <button onClick={props.onCancel} className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" aria-label={t(lang, "close")}>
+          <button onClick={props.onCancel} className="shrink-0 rounded-lg p-1 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" aria-label={t(lang, "close")}>
             <X size={18} />
           </button>
         </CardHeader>
-        <div className="grid max-h-80 gap-1 overflow-auto">
+        <div className="grid max-h-80 grid-cols-1 gap-1 overflow-y-auto">
           {props.entries.length === 0 && (
             <p className="rounded-xl border border-dashed border-slate-200 px-4 py-4 text-sm leading-6 text-slate-500 dark:border-slate-800 dark:text-slate-400">{t(lang, "historyEmpty")}</p>
           )}
@@ -73,7 +80,7 @@ export function RemoteConnectionDialog(props: {
           <label className="mb-2 block text-xs font-medium text-slate-500 dark:text-slate-400">{t(lang, "remoteOpenPathLabel")}</label>
           <Input value={customPath} placeholder={t(lang, "remoteOpenPathPlaceholder")} onChange={(event) => setCustomPath(event.target.value)} autoFocus />
         </div>
-        <div className="mt-5 flex justify-end gap-3">
+        <div className="mt-5 flex flex-wrap justify-end gap-3">
           <Button variant="secondary" className="min-w-[7.5rem]" onClick={() => props.onOpenTerminalPath(path)}><Terminal size={16} />{t(lang, "remoteOpenTerminal")}</Button>
           <Button className="min-w-[7.5rem]" onClick={() => props.onOpenVscodePath(path)}><Code2 size={16} />{t(lang, "remoteOpenVscode")}</Button>
           <Button variant="secondary" onClick={props.onCancel}>{t(lang, "cancel")}</Button>
