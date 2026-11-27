@@ -72,7 +72,7 @@ export function AppSidebar(props: {
               aria-current={props.page === id ? "page" : undefined}
               title={label}
               className={cn(
-                "flex w-full min-w-0 items-center gap-2.5 rounded-xl px-2.5 py-3 text-left text-base font-medium leading-5 transition duration-200",
+                "flex w-full min-w-0 items-center gap-2.5 rounded-xl px-2.5 py-3 text-left text-sm font-medium leading-5 transition duration-200",
                 props.page === id
                   ? "bg-blue-600 text-white shadow-soft"
                   : "text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-900",

@@ -91,7 +91,7 @@ test("the sidebar centers its navigation and remembers the dragged width", () =>
     assert.ok(settings.y + settings.height < guide.y);
     assert.equal(menu.y + menu.height / 2, 320);
     const home = sidebar.getByRole("button", { name: "主页", exact: true });
-    assert.equal(await home.evaluate((button) => getComputedStyle(button).fontSize), "16px");
+    assert.equal(await home.evaluate((button) => getComputedStyle(button).fontSize), "14px");
     assert.equal(await divider.getAttribute("aria-valuenow"), "232");
     assert.equal(await divider.locator("*").count(), 0);
 

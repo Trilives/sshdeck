@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.4.5-beta.8
+
+- Restore the sidebar navigation text to 14 px.
+
 ## 0.4.5-beta.7
 
 - Make the sidebar narrower, enlarge the SSHDeck name beneath the logo, and center the navigation list vertically. Drag the divider to adjust the saved width.
