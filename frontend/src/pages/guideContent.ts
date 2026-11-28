@@ -44,8 +44,8 @@ export const guideSections = {
       {
         title: ["新建或编辑主机", "Create or edit a host"],
         body: [
-          "在「远程连接」点击「新建主机」，填写名称、远程 IP（也可填域名）、登录用户和 SSH 端口（默认 22），然后保存。修改配置时展开主机，点击「编辑主机」。",
-          "In Remote Connections, choose New Host. Enter a name, remote IP or hostname, login user, and SSH port (22 by default), then save. Expand a host and choose Edit Host to change its settings.",
+          "在「远程连接」点击「新建主机」，填写名称、远程 IP（也可填域名）、登录用户和 SSH 端口（默认 22），然后保存。修改配置时展开主机，从「⋯」菜单选择「编辑主机」。",
+          "In Remote Connections, choose New Host. Enter a name, remote IP or hostname, login user, and SSH port (22 by default), then save. To change these settings, expand the host and choose Edit Host from the ⋯ menu.",
         ],
       },
       {
@@ -84,8 +84,8 @@ export const guideSections = {
       {
         title: ["重开历史路径", "Reopen a recent path"],
         body: [
-          "用终端或 VS Code 打开目录后，路径会按最近使用时间排列。点击路径可用终端重开，或点击同行的 VS Code 图标。「刷新历史」可同步记录，也可将历史路径填入目录框后修改。",
-          "Opening a folder in Terminal or VS Code moves it to the top of the recent list. Click the path to reopen it in Terminal or use the VS Code icon. Refresh history to sync the list, or copy a recent path into the field to edit it.",
+          "用终端或 VS Code 打开目录后，路径会按最近使用时间排列。点击路径可用终端重开，或点击同行的 VS Code 图标。从「⋯」菜单选择「刷新历史」可同步记录。也可将历史路径填入目录框后修改。",
+          "Opening a folder in Terminal or VS Code moves it to the top of the recent list. Click the path to reopen it in Terminal or use the VS Code icon. Choose Refresh history from the ⋯ menu to sync the list, or copy a recent path into the field to edit it.",
         ],
       },
       {
@@ -211,8 +211,8 @@ export const guideSections = {
       {
         title: ["认证失败或主机指纹变化", "Authentication failed or host key changed"],
         body: [
-          "认证失败时核对登录用户、密码或私钥。收到主机指纹变化提示时，先从服务器管理员处核对指纹，再在确认可信后更新并重连。若转发因关键错误停止重试，修复后可手动连接。",
-          "If authentication fails, check the login user, password, or private key. If a host key changes, verify the fingerprint with the server administrator before trusting the new key and reconnecting. If a critical error stops retries, fix the cause and reconnect manually.",
+          "认证失败时核对登录用户、密码或私钥。地址或网络变更后，可在「远程连接」展开主机，从「⋯」菜单选择「检查 SSH 指纹」。弹窗会显示需要验证的目标或跳板机。向管理员核对后再信任新密钥。若转发因关键错误停止重试，修复后可手动连接。",
+          "If authentication fails, check the login user, password, or private key. After an address or network change, expand the host in Remote Connections and select Check SSH fingerprint from the ⋯ menu. Verify the destination or jump host fingerprint with the administrator before trusting the new key. If a critical error stops forwarding retries, correct the cause and reconnect manually.",
         ],
       },
     ],

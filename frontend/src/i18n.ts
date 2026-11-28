@@ -36,6 +36,8 @@ const text = {
     remoteConnectionsTitle: "远程连接",
     remotePathsCount: "条路径",
     refreshHistory: "刷新历史",
+    moreHostActions: "更多操作",
+    checkHostFingerprint: "检查 SSH 指纹",
     loading: "加载中",
     loadingHistory: "正在加载远程连接历史…",
     newHost: "新建主机",
@@ -172,13 +174,16 @@ const text = {
     detectingConnection: "正在检测连接方式…",
 
     // Host key changed dialog
-    hostKeyChangedTitle: "远程主机指纹已改变",
+    hostKeyChangedTitle: "验证 SSH 主机指纹",
     hostKeyChangedWarn:
-      "主机密钥已变更，连接已拒绝。\n请通过可信渠道核对新指纹后再继续。",
-    hostKeyFingerprintLabel: "当前远程主机密钥指纹：",
-    hostKeyFetching: "正在获取指纹…",
-    hostKeyUnavailable: "无法获取远程指纹，请谨慎操作。",
+      "目标主机或跳板机的指纹需要确认。\n请通过可信渠道核对下方指纹。",
+    hostKeyFingerprintLabel: "需要确认的 SSH 主机和指纹",
+    hostKeyFetching: "正在检查 SSH 主机指纹…",
+    hostKeyVerified: "这条 SSH 路线上的主机指纹均已通过验证。",
+    hostKeyCheckFailed: "指纹检查未完成。",
+    hostKeySaving: "正在更新指纹…",
     hostKeyTrust: "信任新密钥并重试",
+    hostKeyTrustAndCheck: "信任新密钥并继续检查",
 
     // Critical error dialog
     criticalTitle: "连接出现关键错误",
@@ -303,6 +308,8 @@ const text = {
     remoteConnectionsTitle: "Remote Connections",
     remotePathsCount: "paths",
     refreshHistory: "Refresh history",
+    moreHostActions: "More actions",
+    checkHostFingerprint: "Check SSH fingerprint",
     loading: "Loading",
     loadingHistory: "Loading remote connection history…",
     newHost: "New Host",
@@ -431,13 +438,16 @@ const text = {
     keyUploadNotNeeded: "This host already supports passwordless login; no upload needed.",
     detectingConnection: "Checking connection…",
 
-    hostKeyChangedTitle: "Remote Host Key Changed",
+    hostKeyChangedTitle: "Verify SSH Host Fingerprint",
     hostKeyChangedWarn:
-      "The host key changed, so the connection was refused.\nVerify the new fingerprint through a trusted channel.",
-    hostKeyFingerprintLabel: "Current remote host key fingerprint:",
-    hostKeyFetching: "Fetching fingerprint…",
-    hostKeyUnavailable: "Could not fetch the remote fingerprint; proceed with caution.",
+      "The destination or a jump host requires confirmation.\nVerify the fingerprint below through a trusted channel.",
+    hostKeyFingerprintLabel: "SSH host and fingerprint to verify",
+    hostKeyFetching: "Checking SSH host fingerprints…",
+    hostKeyVerified: "All host fingerprints on this SSH route have been verified.",
+    hostKeyCheckFailed: "The fingerprint check could not be completed.",
+    hostKeySaving: "Updating fingerprint…",
     hostKeyTrust: "Trust New Key & Retry",
+    hostKeyTrustAndCheck: "Trust New Key & Continue Check",
 
     criticalTitle: "Critical Connection Error",
     criticalDesc: "Automatic retries stopped. Fix the error, then reconnect manually.",

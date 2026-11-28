@@ -99,6 +99,29 @@ pub fn build_probe_command(host: &Host) -> Result<Vec<String>, String> {
     Ok(command)
 }
 
+pub fn build_host_key_check(host: &Host, options: &[String]) -> Result<Vec<String>, String> {
+    let mut command = vec!["-v".into(), "-N".into(), "-T".into()];
+    for option in options.iter().map(String::as_str).chain([
+        "BatchMode=yes",
+        "PreferredAuthentications=none",
+        "ConnectTimeout=6",
+        "ControlPath=none",
+        "ClearAllForwardings=yes",
+        "PermitLocalCommand=no",
+        "FingerprintHash=sha256",
+        "UpdateHostKeys=no",
+    ]) {
+        command.extend(["-o".into(), option.into()]);
+    }
+    if !host.ssh_port.is_empty() {
+        command.extend(["-p".into(), host.ssh_port.trim().into()]);
+    }
+    push_identity_and_extra(host, &mut command)?;
+    push_proxy_jump(host, &mut command);
+    command.extend(["--".into(), destination(host)]);
+    Ok(command)
+}
+
 /// Upload-public-key command (allows interactive password entry).
 pub fn build_key_upload_command(host: &Host) -> Result<Vec<String>, String> {
     let mut command = vec![

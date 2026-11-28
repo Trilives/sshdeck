@@ -76,7 +76,7 @@ pub fn run() {
             commands::keys::upload_public_key,
             commands::keys::probe_connection,
             commands::keys::get_host_fingerprint,
-            commands::keys::remove_known_host,
+            commands::keys::trust_host_fingerprint,
             commands::settings::get_settings,
             commands::settings::save_settings_cmd,
             commands::startup::get_launch_at_login,

@@ -39,6 +39,7 @@ export function installTauriFixture() {
     requests: [],
     closed: [],
     breakNextListing: false,
+    pendingHostFingerprint: null,
     setupNeedsPassword: false,
     setupFailure: "",
     directAlreadyReady: false,
@@ -133,8 +134,21 @@ export function installTauriFixture() {
           return [];
         case "check_ssh":
           return true;
+        case "get_host_fingerprint": {
+          const fingerprint = fixture.pendingHostFingerprint;
+          if (!fingerprint || fingerprint.hostId !== args.hostId) return null;
+          if (fingerprint.unavailable) throw "Fingerprint unavailable";
+          return { endpoint: fingerprint.endpoint, fingerprint: fingerprint.fingerprint };
+        }
+        case "trust_host_fingerprint": {
+          const fingerprint = fixture.pendingHostFingerprint;
+          if (fingerprint?.hostId !== args.hostId || fingerprint.endpoint !== args.confirmed.endpoint ||
+              fingerprint.fingerprint !== args.confirmed.fingerprint) throw "Fingerprint changed again";
+          fixture.pendingHostFingerprint = null;
+          return;
+        }
         case "plugin:app|version":
-          return "0.4.5-beta.10";
+          return "0.4.5-beta.11";
         case "plugin:event|listen": {
           const id = ++sequence;
           listeners.set(id, args);

@@ -1,16 +1,18 @@
 import {
   Code2,
+  Ellipsis,
   FolderOpen,
   KeyRound,
   LoaderCircle,
   Pencil,
   PenLine,
   RefreshCw,
+  ShieldCheck,
   Terminal,
   Trash2,
   Zap,
 } from "lucide-react";
-import { useCallback, useId, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { RemoteDirectoryPicker } from "../files/RemoteDirectoryPicker";
 import { ft } from "../files/i18n";
 import { HistoryPath } from "../components/HistoryPath";
@@ -30,6 +32,87 @@ function formatOpenedAt(ms: number): string {
   return `${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
 
+function RemoteHostMenu(props: {
+  language: Language;
+  loading: boolean;
+  onCheckFingerprint: () => void;
+  onRefresh: () => void;
+  onEdit: () => void;
+  onDelete: () => void;
+}) {
+  const lang = props.language;
+  const popupId = useId();
+  const root = useRef<HTMLDivElement>(null);
+  const trigger = useRef<HTMLButtonElement>(null);
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    if (!open) return;
+    const closeOutside = (event: PointerEvent) => {
+      if (event.target instanceof Node && !root.current?.contains(event.target)) setOpen(false);
+    };
+    window.addEventListener("pointerdown", closeOutside);
+    return () => window.removeEventListener("pointerdown", closeOutside);
+  }, [open]);
+
+  const actions = [
+    { label: t(lang, "checkHostFingerprint"), icon: ShieldCheck, accent: true, onClick: props.onCheckFingerprint },
+    { label: t(lang, "refreshHistory"), icon: RefreshCw, disabled: props.loading, onClick: props.onRefresh },
+    { label: t(lang, "editHost"), icon: Pencil, onClick: props.onEdit },
+    { label: t(lang, "deleteHost"), icon: Trash2, danger: true, onClick: props.onDelete },
+  ];
+
+  return (
+    <div
+      ref={root}
+      className="relative ml-auto"
+      onBlur={(event) => {
+        if (event.relatedTarget && !event.currentTarget.contains(event.relatedTarget)) setOpen(false);
+      }}
+      onKeyDown={(event) => {
+        if (event.key !== "Escape" || !open) return;
+        event.stopPropagation();
+        trigger.current?.focus();
+        setOpen(false);
+      }}
+    >
+      <button
+        ref={trigger}
+        type="button"
+        aria-label={t(lang, "moreHostActions")}
+        aria-expanded={open}
+        aria-controls={open ? popupId : undefined}
+        title={t(lang, "moreHostActions")}
+        onClick={() => setOpen(!open)}
+        className="grid h-10 w-10 place-items-center rounded-xl bg-slate-100 text-slate-900 transition hover:bg-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 aria-expanded:bg-blue-100 aria-expanded:text-blue-700 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700 dark:aria-expanded:bg-blue-950 dark:aria-expanded:text-blue-300"
+      >
+        <Ellipsis size={20} />
+      </button>
+      {open && (
+        <div id={popupId} className="absolute right-0 top-full z-20 mt-2 w-52 rounded-xl border border-slate-200 bg-white p-1 shadow-float dark:border-slate-800 dark:bg-slate-950">
+          {actions.map(({ label, icon: Icon, accent, danger, disabled, onClick }) => (
+            <div key={label} className={danger ? "mt-1 border-t border-slate-200 pt-1 dark:border-slate-800" : undefined}>
+              <button
+                type="button"
+                disabled={disabled}
+                onClick={() => {
+                  trigger.current?.focus();
+                  setOpen(false);
+                  onClick();
+                }}
+                className={`flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-sm hover:bg-slate-100 focus-visible:bg-slate-100 focus-visible:outline-none disabled:opacity-50 dark:hover:bg-slate-900 dark:focus-visible:bg-slate-900 ${danger ? "text-rose-700 dark:text-rose-300" : "text-slate-700 dark:text-slate-200"}`}
+              >
+                <Icon size={16} className={accent ? "text-blue-600 dark:text-blue-300" : danger ? undefined : "text-slate-500 dark:text-slate-400"} />
+                {label}
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function RemoteHostCard(props: {
   language: Language;
   host: Host;
@@ -46,6 +129,7 @@ function RemoteHostCard(props: {
   onRefresh: () => void;
   onSendCommand: () => void;
   onUploadKey: () => void;
+  onCheckFingerprint: () => void;
   onOpenTerminalEntry: (entry: HistoryEntry) => void;
   onOpenVscodeEntry: (entry: HistoryEntry) => void;
   onOpenTerminalPath: (path: string) => void;
@@ -80,7 +164,7 @@ function RemoteHostCard(props: {
   );
 
   const details = props.expanded && (
-        <div className="flex min-w-0 flex-1 flex-col gap-4 border-t border-slate-200 px-5 py-4 dark:border-slate-800">
+        <div className="host-detail-content flex min-w-0 flex-1 flex-col gap-4 border-t border-slate-200 px-5 py-4 dark:border-slate-800">
           <div className="flex flex-wrap items-center gap-2 whitespace-nowrap">
             <div className="flex max-w-full flex-wrap gap-2">
               <Button variant="secondary" onClick={props.onSendCommand}>
@@ -91,21 +175,15 @@ function RemoteHostCard(props: {
                 <KeyRound size={15} />
                 {t(lang, "uploadKey")}
               </Button>
-              <Button variant="secondary" onClick={props.onRefresh} disabled={props.loading}>
-                <RefreshCw size={15} className={props.loading ? "animate-spin" : ""} />
-                {t(lang, "refreshHistory")}
-              </Button>
             </div>
-            <div className="ml-auto flex max-w-full flex-wrap justify-end gap-2">
-              <Button variant="ghost" onClick={props.onEditHost}>
-                <Pencil size={15} />
-                {t(lang, "editHost")}
-              </Button>
-              <Button variant="danger" onClick={props.onDeleteHost}>
-                <Trash2 size={15} />
-                {t(lang, "deleteHost")}
-              </Button>
-            </div>
+            <RemoteHostMenu
+              language={lang}
+              loading={props.loading}
+              onCheckFingerprint={props.onCheckFingerprint}
+              onRefresh={props.onRefresh}
+              onEdit={props.onEditHost}
+              onDelete={props.onDeleteHost}
+            />
           </div>
 
           {props.loading ? (
@@ -241,6 +319,7 @@ export function RemoteConnectionsPage(props: {
   onRefresh: (host: Host) => void;
   onSendCommand: (host: Host) => void;
   onUploadKey: (host: Host) => void;
+  onCheckFingerprint: (host: Host) => void;
   onOpenTerminalEntry: (host: Host, entry: HistoryEntry) => void;
   onOpenVscodeEntry: (host: Host, entry: HistoryEntry) => void;
   onOpenTerminalPath: (host: Host, path: string) => void;
@@ -294,6 +373,7 @@ export function RemoteConnectionsPage(props: {
               onRefresh={() => props.onRefresh(host)}
               onSendCommand={() => props.onSendCommand(host)}
               onUploadKey={() => props.onUploadKey(host)}
+              onCheckFingerprint={() => props.onCheckFingerprint(host)}
               onOpenTerminalEntry={(entry) =>
                 props.onOpenTerminalEntry(host, entry)
               }

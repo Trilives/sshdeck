@@ -1,6 +1,7 @@
 pub mod command;
 pub mod diagnose;
 pub mod exec;
+pub mod host_keys;
 pub mod keys;
 pub mod probe;
 pub mod process;

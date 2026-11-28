@@ -58,33 +58,38 @@ function SortableHost(props: {
     </button>
   );
 
-  return props.renderHost(host, (header, details) => (
-    <>
-      <div
-        id={props.anchorPrefix ? props.anchorPrefix + host.id : undefined}
-        ref={setNodeRef}
-        className={cn(cardClass, "relative scroll-mt-6", isDragging && "z-10 shadow-float ring-2 ring-blue-500")}
-        style={{
-          ...hostPlacement(props.index),
-          transform: CSS.Translate.toString(transform && (props.twoColumn ? transform : { ...transform, x: 0 })),
-          transition,
-        }}
-      >
-        {header}
-        {!props.twoColumn && details}
-      </div>
-      {props.twoColumn && details && (
-        <section
-          className={cn(cardClass, "host-details flex flex-col")}
-          style={hostPlacement(props.index, true, props.pairedDetails)}
-          aria-label={host.name}
+  return props.renderHost(host, (header, details) => {
+    const joined = props.twoColumn && !!details;
+    const edge = props.index % 2 === 0 ? "left" : "right";
+    return (
+      <>
+        <div
+          id={props.anchorPrefix ? props.anchorPrefix + host.id : undefined}
+          ref={setNodeRef}
+          className={cn(cardClass, "relative scroll-mt-6", joined && "host-joined-header", isDragging && "z-10 shadow-float ring-2 ring-blue-500")}
+          data-join-edge={joined && !props.pairedDetails ? edge : undefined}
+          style={{
+            ...hostPlacement(props.index),
+            transform: CSS.Translate.toString(transform && (props.twoColumn ? transform : { ...transform, x: 0 })),
+            transition,
+          }}
         >
-          <h3 className="truncate bg-slate-50 px-5 py-2 text-sm font-semibold dark:bg-slate-900">{host.name}</h3>
-          {details}
-        </section>
-      )}
-    </>
-  ), handle);
+          {header}
+          {!props.twoColumn && details}
+        </div>
+        {props.twoColumn && details && (
+          <section
+            className={cn(cardClass, "host-details flex flex-col")}
+            data-join-edge={props.pairedDetails ? "both" : edge}
+            style={hostPlacement(props.index, true, props.pairedDetails)}
+            aria-label={host.name}
+          >
+            {details}
+          </section>
+        )}
+      </>
+    );
+  }, handle);
 }
 
 export function SortableHostList(props: {

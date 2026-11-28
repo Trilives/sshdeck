@@ -465,8 +465,30 @@ test("paired host details align and stay usable with long paths and many rules",
     const right = page.getByRole("region", { name: "Remote refused", exact: true });
     const expandPair = async (name) => {
       await nav(name);
-      await page.getByRole("button", { name: /^Remote ready test@/ }).click();
-      await page.getByRole("button", { name: /^Remote refused test@/ }).click();
+      const leftHost = page.getByRole("button", { name: /^Remote ready test@/ });
+      const rightHost = page.getByRole("button", { name: /^Remote refused test@/ });
+      async function assertJoined(button, other, panel, edge) {
+        const header = button.locator("xpath=../..");
+        const neighbor = other.locator("xpath=../..");
+        const [target, rest, details] = await Promise.all([header.boundingBox(), neighbor.boundingBox(), panel.boundingBox()]);
+        assert.equal(await header.getAttribute("data-join-edge"), edge);
+        assert.equal(await neighbor.getAttribute("data-join-edge"), null);
+        assert.equal(details.x, Math.min(target.x, rest.x));
+        assert.ok(Math.abs(details.x + details.width - Math.max(target.x + target.width, rest.x + rest.width)) < 1);
+        assert.ok(Math.abs(details.y - (rest.y + rest.height) - 12) < 1, "the closed card keeps its gap");
+        assert.equal(await header.evaluate((card) => getComputedStyle(card, "::before").height), "13px");
+        assert.ok(await neighbor.evaluate((card) => {
+          const style = getComputedStyle(card);
+          return parseFloat(style.borderBottomRightRadius) > 0 && parseFloat(style.borderBottomWidth) > 0;
+        }));
+        assert.equal(await panel.getByRole("heading", { name: /Remote (ready|refused)/ }).count(), 0);
+      }
+      await leftHost.click();
+      await assertJoined(leftHost, rightHost, left, "left");
+      await leftHost.click();
+      await rightHost.click();
+      await assertJoined(rightHost, leftHost, right, "right");
+      await leftHost.click();
     };
     const assertEqualPanels = async () => {
       const [a, b] = await Promise.all([left.boundingBox(), right.boundingBox()]);
@@ -488,20 +510,78 @@ test("paired host details align and stay usable with long paths and many rules",
       const panel = button.closest("section").getBoundingClientRect();
       return panel.right - box.right <= 22 && box.right < panel.right;
     }));
+    const leftMore = left.getByRole("button", { name: "更多操作" });
+    const rightMore = right.getByRole("button", { name: "更多操作" });
+    await leftMore.click();
+    await left.getByRole("button", { name: "检查 SSH 指纹" }).waitFor();
+    await rightMore.click();
+    await right.getByRole("button", { name: "检查 SSH 指纹" }).waitFor();
+    assert.equal(await leftMore.getAttribute("aria-expanded"), "false");
+    await rightMore.press("Escape");
 
     await expandPair("端口转发");
     await right.getByText("Rule 1", { exact: true }).waitFor();
     await assertEqualPanels();
     const rules = left.locator(".forward-rules");
-    assert.ok(await rules.evaluate((list) => list.clientHeight === 256 && list.scrollHeight > list.clientHeight && list.scrollWidth === list.clientWidth));
+    assert.ok(await rules.evaluate((list) => list.clientHeight === 336 && list.scrollHeight > list.clientHeight && list.scrollWidth === list.clientWidth));
     assert.ok(await rules.locator(".forward-rule-actions").first().evaluate((group) => {
       const { left, right, top } = group.getBoundingClientRect();
       const buttons = [...group.children].map((button) => button.getBoundingClientRect());
-      return buttons.length === 4 && buttons.every((button) => button.top === top) &&
+      return buttons.length === 4 && buttons.every((button) => button.top === top && button.height === 32) &&
         buttons[0].left === left && Math.abs(buttons.at(-1).right - right) < 1;
     }));
     await rules.getByText("Rule 9", { exact: true }).scrollIntoViewIfNeeded();
     assert.ok(await rules.evaluate((list) => list.scrollTop > 0));
+    assert.deepEqual(errors, []);
+  }, { connectLocal: false }));
+
+test("the host menu checks SSH fingerprints independently of launching remote sessions", () =>
+  withPage(async (page, errors) => {
+    await page.evaluate(() => {
+      window.fixture.pendingHostFingerprint = {
+        hostId: "ready",
+        endpoint: "[jump.example.test]:2222",
+        fingerprint: "SHA256:example-confirmed-fingerprint",
+        unavailable: true,
+      };
+    });
+    await page.getByRole("navigation").getByRole("button", { name: "远程连接", exact: true }).click();
+    await page.getByRole("button", { name: /^Remote ready test@/ }).click();
+    const launch = page.getByRole("button", { name: "终端", exact: true });
+    const more = page.getByRole("button", { name: "更多操作" });
+    const check = page.getByRole("button", { name: "检查 SSH 指纹" });
+    const trust = page.getByRole("button", { name: "信任新密钥并继续检查" });
+    const close = page.getByRole("button", { name: "关闭", exact: true });
+    assert.equal(await check.count(), 0);
+    await launch.click();
+    await page.getByRole("button", { name: "VS Code", exact: true }).click();
+    await page.waitForFunction(() => window.fixture.requests.some((entry) => entry.command === "vscode_open_path"));
+    assert.equal(await page.evaluate(() => window.fixture.requests.filter((entry) => entry.command === "get_host_fingerprint").length), 0);
+
+    await more.press("Enter");
+    await more.press("Tab");
+    assert.ok(await check.evaluate((item) => item === document.activeElement));
+    await check.press("Escape");
+    assert.equal(await more.getAttribute("aria-expanded"), "false");
+    assert.ok(await more.evaluate((item) => item === document.activeElement));
+    await more.click();
+    await check.click();
+    await page.getByText("Fingerprint unavailable", { exact: true }).waitFor();
+    assert.equal(await trust.count(), 0);
+    await close.click();
+    await page.evaluate(() => { window.fixture.pendingHostFingerprint.unavailable = false; });
+    await more.click();
+    await check.click();
+    await page.getByText("[jump.example.test]:2222", { exact: true }).waitFor();
+    await page.getByText("SHA256:example-confirmed-fingerprint", { exact: true }).waitFor();
+    await trust.click();
+    await page.getByText(/这条 SSH 路线上的主机指纹均已通过验证/).waitFor();
+    assert.equal(await page.evaluate(() => window.fixture.requests.filter((entry) => entry.command === "open_terminal").length), 1);
+    assert.deepEqual(await page.evaluate(() => window.fixture.requests.filter((entry) => entry.command === "trust_host_fingerprint")), [{
+      command: "trust_host_fingerprint",
+      hostId: "ready",
+      confirmed: { endpoint: "[jump.example.test]:2222", fingerprint: "SHA256:example-confirmed-fingerprint" },
+    }]);
     assert.deepEqual(errors, []);
   }, { connectLocal: false }));
 
@@ -654,6 +734,7 @@ test("long forms and stacked password dialogs fit a small window in dark mode", 
     await page.setViewportSize({ width: 1280, height: 640 });
     await openLongRemotePage(page);
     await page.evaluate(() => document.documentElement.classList.add("dark"));
+    await page.getByRole("button", { name: "更多操作", exact: true }).last().click();
     await page
       .getByRole("button", { name: "编辑主机", exact: true })
       .last()

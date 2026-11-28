@@ -9,6 +9,7 @@ import {
   ForwardDialog,
   HostDialog,
   HostKeyChangedDialog,
+  type HostKeyPrompt,
   ImportConflictDialog,
   InputPasswordDialog,
   KeyUploadDialog,
@@ -21,6 +22,11 @@ import {
 import { RemoteConnectionDialog } from "./dialogs/remote";
 
 type Setter<T> = Dispatch<SetStateAction<T>>;
+
+export interface HostKeyRequest extends HostKeyPrompt {
+  host: Host;
+  retry?: () => Promise<void>;
+}
 
 export interface AppDialogsProps {
   language: Language;
@@ -53,10 +59,8 @@ export interface AppDialogsProps {
   keyUploadPassword: string;
   setKeyUploadPassword: Setter<string>;
   uploadKeyWithPassword: () => void;
-  hostKeyTarget: { host: Host; forward?: Forward; action: "connect" | "upload" } | null;
-  setHostKeyTarget: Setter<{ host: Host; forward?: Forward; action: "connect" | "upload" } | null>;
-  hostKeyFingerprint: string;
-  hostKeyFetching: boolean;
+  hostKeyTarget: HostKeyRequest | null;
+  setHostKeyTarget: Setter<HostKeyRequest | null>;
   trustHostKeyAndRetry: () => void;
   criticalError: CriticalErrorPayload | null;
   setCriticalError: Setter<CriticalErrorPayload | null>;
@@ -129,7 +133,16 @@ export function AppDialogs(props: AppDialogsProps) {
         <KeyUploadDialog language={lang} hostName={props.keyUploadTarget.name} password={props.keyUploadPassword} setPassword={props.setKeyUploadPassword} onCancel={() => { props.setKeyUploadTarget(null); props.setKeyUploadPassword(""); }} onSubmit={props.uploadKeyWithPassword} />
       )}
       {props.hostKeyTarget && (
-        <HostKeyChangedDialog language={lang} hostName={props.hostKeyTarget.host.name} fingerprint={props.hostKeyFingerprint} fetching={props.hostKeyFetching} onCancel={() => props.setHostKeyTarget(null)} onTrust={props.trustHostKeyAndRetry} />
+        <HostKeyChangedDialog
+          language={lang}
+          hostName={props.hostKeyTarget.host.name}
+          fingerprint={props.hostKeyTarget.fingerprint}
+          status={props.hostKeyTarget.status}
+          error={props.hostKeyTarget.error}
+          standalone={!props.hostKeyTarget.retry}
+          onCancel={() => props.setHostKeyTarget(null)}
+          onTrust={props.trustHostKeyAndRetry}
+        />
       )}
       {props.criticalError && <CriticalErrorDialog language={lang} error={props.criticalError} onClose={() => props.setCriticalError(null)} />}
       {props.connectError && <ConnectionErrorDialog language={lang} message={props.connectError} onClose={() => props.setConnectError(null)} />}

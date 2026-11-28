@@ -4,6 +4,7 @@ import type {
   Forward,
   HistoryEntry,
   Host,
+  HostFingerprint,
   ImportResult,
   LogEntry,
   UpdateChannel,
@@ -52,8 +53,9 @@ export const api = {
   openUrl: (url: string) => invoke<void>("open_url", { url }),
   uploadPublicKey: (hostId: string, password: string) => invoke<Host>("upload_public_key", { hostId, password }),
   probeConnection: (hostId: string) => invoke<string>("probe_connection", { hostId }),
-  getHostFingerprint: (hostId: string) => invoke<string>("get_host_fingerprint", { hostId }),
-  removeKnownHost: (hostId: string) => invoke<void>("remove_known_host", { hostId }),
+  getHostFingerprint: (hostId: string) => invoke<HostFingerprint | null>("get_host_fingerprint", { hostId }),
+  trustHostFingerprint: (hostId: string, confirmed: HostFingerprint) =>
+    invoke<void>("trust_host_fingerprint", { hostId, confirmed }),
 
   // System environment
   checkSsh: () => invoke<boolean>("check_ssh"),

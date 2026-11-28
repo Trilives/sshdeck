@@ -1,4 +1,3 @@
-import { ModalOverlay } from "../components/ui/ModalOverlay";
 import {
   useEffect,
   useCallback,
@@ -32,6 +31,7 @@ import type { Host, Language } from "../types";
 import { api } from "../api";
 import { cn } from "../lib/utils";
 import { Button } from "../components/ui/button";
+import { HostKeyChangedDialog, type HostKeyPrompt } from "../components/dialogs";
 import { FileAuthentication } from "./FileAuthentication";
 import { filesApi } from "./api";
 import { ft } from "./i18n";
@@ -75,9 +75,7 @@ export function FilePane(props: {
     [],
   );
   const [passwordOpen, setPasswordOpen] = useState(false);
-  const [fingerprint, setFingerprint] = useState("");
-  const [trustOpen, setTrustOpen] = useState(false);
-  const [trustBusy, setTrustBusy] = useState(false);
+  const [trust, setTrust] = useState<HostKeyPrompt | null>(null);
   const [dropPath, setDropPath] = useState<string | null>(null);
   const [viewport, setViewport] = useState({ top: 0, height: 400 });
   const scroller = useRef<HTMLDivElement>(null);
@@ -87,7 +85,7 @@ export function FilePane(props: {
 
   useEffect(() => {
     setPasswordOpen(false);
-    setTrustOpen(false);
+    setTrust(null);
   }, [props.hostId]);
 
   useEffect(() => {
@@ -265,15 +263,27 @@ export function FilePane(props: {
     }
   }
   async function showTrust() {
-    setTrustOpen(true);
-    setTrustBusy(true);
-    setFingerprint("");
+    const pending = { status: "loading" } as const;
+    setTrust(pending);
     try {
-      setFingerprint(await api.getHostFingerprint(props.hostId));
+      const fingerprint = await api.getHostFingerprint(props.hostId);
+      setTrust((current) => current === pending
+        ? fingerprint ? { status: "ready", fingerprint } : { status: "verified" }
+        : current);
     } catch (e) {
-      b.setError(String(e));
-    } finally {
-      setTrustBusy(false);
+      setTrust((current) => current === pending ? { status: "ready", error: String(e) } : current);
+    }
+  }
+  async function confirmTrust() {
+    if (!trust?.fingerprint || trust.status !== "ready") return;
+    const pending = { status: "saving", fingerprint: trust.fingerprint } as const;
+    setTrust(pending);
+    try {
+      await api.trustHostFingerprint(props.hostId, trust.fingerprint);
+      setTrust((current) => current === pending ? null : current);
+      await b.connect();
+    } catch (e) {
+      setTrust((current) => current === pending ? { status: "ready", error: String(e) } : current);
     }
   }
   const host = props.hosts.find((h) => h.id === props.hostId);
@@ -754,42 +764,16 @@ export function FilePane(props: {
           }}
         />
       )}
-      {trustOpen && (
-        <ModalOverlay className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-950/55 p-6 backdrop-blur-sm">
-          <div className="w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-6 shadow-float dark:border-slate-700 dark:bg-slate-950">
-            <h3 className="font-semibold">{ft(lang, "trustTitle")}</h3>
-            <p className="mt-2 text-sm text-slate-400">
-              {ft(lang, "trustHint")}
-            </p>
-            <pre className="my-4 overflow-auto whitespace-pre-wrap break-all rounded-xl bg-slate-100 p-3 text-xs dark:bg-slate-900">
-              {trustBusy
-                ? ft(lang, "loading")
-                : fingerprint || ft(lang, "fingerprintUnavailable")}
-            </pre>
-            <div className="flex justify-end gap-2">
-              <Button variant="secondary" onClick={() => setTrustOpen(false)}>
-                {ft(lang, "cancel")}
-              </Button>
-              <Button
-                disabled={trustBusy || !fingerprint}
-                onClick={async () => {
-                  setTrustBusy(true);
-                  try {
-                    await api.removeKnownHost(props.hostId);
-                    setTrustOpen(false);
-                    await b.connect();
-                  } catch (e) {
-                    b.setError(String(e));
-                  } finally {
-                    setTrustBusy(false);
-                  }
-                }}
-              >
-                {ft(lang, "trust")}
-              </Button>
-            </div>
-          </div>
-        </ModalOverlay>
+      {trust && host && (
+        <HostKeyChangedDialog
+          language={lang}
+          hostName={host.name}
+          fingerprint={trust.fingerprint}
+          status={trust.status}
+          error={trust.error}
+          onCancel={() => setTrust(null)}
+          onTrust={confirmTrust}
+        />
       )}
     </div>
   );

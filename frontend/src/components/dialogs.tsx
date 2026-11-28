@@ -6,7 +6,7 @@ import { Card, CardDescription, CardHeader, CardTitle } from "./ui/card";
 import { Input } from "./ui/input";
 import { Select } from "./ui/select";
 import { t } from "../i18n";
-import type { CriticalErrorPayload, Forward, Host, Language, TunnelMode } from "../types";
+import type { CriticalErrorPayload, Forward, Host, HostFingerprint, Language, TunnelMode } from "../types";
 
 function Modal(props: { children: ReactNode; maxWidth?: string }) {
   return (
@@ -363,30 +363,50 @@ export function KeyUploadDialog(props: {
   );
 }
 
-export function HostKeyChangedDialog(props: {
+export interface HostKeyPrompt {
+  fingerprint?: HostFingerprint;
+  status: "loading" | "ready" | "saving" | "verified";
+  error?: string;
+}
+
+export function HostKeyChangedDialog(props: HostKeyPrompt & {
   language: Language;
   hostName: string;
-  fingerprint: string;
-  fetching: boolean;
+  standalone?: boolean;
   onCancel: () => void;
   onTrust: () => void;
 }) {
   const lang = props.language;
+  const verified = props.status === "verified";
   return (
     <ModalOverlay className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/55 p-6 backdrop-blur-sm">
       <Card className="w-full shadow-float max-w-lg border-amber-300 bg-white dark:border-amber-800 dark:bg-slate-950">
         <CardHeader>
-          <CardTitle>⚠️ {t(lang, "hostKeyChangedTitle")}</CardTitle>
-          <CardDescription>{props.hostName} — {t(lang, "hostKeyChangedWarn")}</CardDescription>
+          <CardTitle>{t(lang, "hostKeyChangedTitle")}</CardTitle>
+          <CardDescription className="whitespace-pre-line">
+            {props.hostName} — {t(lang, verified ? "hostKeyVerified" : props.status === "loading" ? "hostKeyFetching" : props.error ? "hostKeyCheckFailed" : "hostKeyChangedWarn")}
+          </CardDescription>
         </CardHeader>
         <div className="grid gap-3">
-          <p className="text-sm font-medium text-slate-600 dark:text-slate-300">{t(lang, "hostKeyFingerprintLabel")}</p>
-          <pre className="max-h-40 overflow-auto rounded-2xl bg-slate-100 p-4 text-xs leading-6 text-slate-700 dark:bg-slate-900 dark:text-slate-200">
-            {props.fetching ? t(lang, "hostKeyFetching") : props.fingerprint || t(lang, "hostKeyUnavailable")}
-          </pre>
+          {props.fingerprint && (
+            <>
+              <p className="text-sm font-medium text-slate-600 dark:text-slate-300">{t(lang, "hostKeyFingerprintLabel")}</p>
+              <div className="min-w-0 rounded-xl bg-slate-100 px-4 py-3 text-sm dark:bg-slate-900">
+                <p className="break-all font-medium">{props.fingerprint.endpoint}</p>
+                <p className="break-all font-mono text-xs leading-6">{props.fingerprint.fingerprint}</p>
+              </div>
+            </>
+          )}
+          {props.error && <p role="alert" className="max-h-32 overflow-auto break-words text-sm text-rose-700 dark:text-rose-300">{props.error}</p>}
           <div className="flex justify-end gap-3">
-            <Button onClick={props.onCancel}>{t(lang, "cancel")}</Button>
-            <Button variant="danger" onClick={props.onTrust}>{t(lang, "hostKeyTrust")}</Button>
+            <Button variant={verified ? "default" : "secondary"} disabled={props.status === "saving"} onClick={props.onCancel}>
+              {t(lang, verified || props.error ? "close" : "cancel")}
+            </Button>
+            {props.fingerprint && (
+              <Button onClick={props.onTrust} disabled={props.status !== "ready"}>
+                {t(lang, props.status === "saving" ? "hostKeySaving" : props.standalone ? "hostKeyTrustAndCheck" : "hostKeyTrust")}
+              </Button>
+            )}
           </div>
         </div>
       </Card>

@@ -23,7 +23,6 @@ export function HostCardHeader(props: {
     <div className={cn(
       "flex w-full items-center gap-2 pr-4 transition hover:bg-slate-50 dark:hover:bg-slate-900",
       props.compact && "gap-1 pr-2",
-      props.compact && props.expanded && "bg-blue-50 hover:bg-blue-50 dark:bg-slate-900",
     )}>
       <button
         aria-expanded={props.expanded}
@@ -38,9 +37,8 @@ export function HostCardHeader(props: {
           <div className="flex items-center gap-2">
             <span title={props.host.name} className="truncate text-sm font-semibold text-slate-900 dark:text-slate-100">{props.host.name}</span>
             {props.host.pinned && (
-              <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-blue-100 px-2 py-0.5 text-[11px] font-medium text-blue-700 dark:bg-blue-950 dark:text-blue-300">
-                <Pin size={11} className="fill-current" />
-                {t(lang, "pinned")}
+              <span title={t(lang, "pinned")} className="shrink-0 text-blue-600 dark:text-blue-300">
+                <Pin size={13} className="fill-current" aria-label={t(lang, "pinned")} role="img" />
               </span>
             )}
           </div>

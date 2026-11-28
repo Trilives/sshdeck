@@ -5,7 +5,7 @@ import { api } from "./api";
 import { forwardWebUrl, isDirectoryHistory } from "./lib/utils";
 import { t } from "./i18n";
 import { AppSidebar, type AppPage } from "./components/AppSidebar";
-import { AppDialogs } from "./components/AppDialogs";
+import { AppDialogs, type HostKeyRequest } from "./components/AppDialogs";
 import { ForwardHostPicker } from "./components/ForwardHostPicker";
 import { ToastNotifications } from "./components/ToastNotifications";
 import { DashboardPage } from "./pages/DashboardPage";
@@ -75,9 +75,7 @@ export function App() {
   const [passwordValue, setPasswordValue] = useState("");
   const [keyUploadTarget, setKeyUploadTarget] = useState<Host | null>(null);
   const [keyUploadPassword, setKeyUploadPassword] = useState("");
-  const [hostKeyTarget, setHostKeyTarget] = useState<{ host: Host; forward?: Forward; action: "connect" | "upload" } | null>(null);
-  const [hostKeyFingerprint, setHostKeyFingerprint] = useState("");
-  const [hostKeyFetching, setHostKeyFetching] = useState(false);
+  const [hostKeyTarget, setHostKeyTarget] = useState<HostKeyRequest | null>(null);
   const [criticalError, setCriticalError] = useState<CriticalErrorPayload | null>(null);
   const [connectError, setConnectError] = useState<string | null>(null);
   // Import/export: host-selection dialog and duplicate-conflict dialog.
@@ -472,7 +470,7 @@ export function App() {
       const status = await api.probeConnection(host.id);
       setNotice("");
       if (status === "host_key_changed") {
-        await openHostKeyDialog(host, "connect", forward);
+        await openHostKeyDialog(host, () => connectForward(host, forward));
         return;
       }
       if (status === "password_required") {
@@ -532,7 +530,7 @@ export function App() {
         return;
       }
       if (status === "host_key_changed") {
-        await openHostKeyDialog(host, "upload");
+        await openHostKeyDialog(host, () => requestKeyUpload(host));
         return;
       }
       setKeyUploadTarget(host);
@@ -556,32 +554,36 @@ export function App() {
   }
 
   // ---- Host key changed flow ----
-  async function openHostKeyDialog(host: Host, action: "connect" | "upload", forward?: Forward) {
-    setHostKeyTarget({ host, action, forward });
-    setHostKeyFingerprint("");
-    setHostKeyFetching(true);
+  async function openHostKeyDialog(host: Host, retry?: () => Promise<void>) {
+    const pending = { host, retry, status: "loading" } as const;
+    setHostKeyTarget(pending);
+    let result: HostKeyRequest;
     try {
-      setHostKeyFingerprint(await api.getHostFingerprint(host.id));
-    } catch {
-      setHostKeyFingerprint("");
-    } finally {
-      setHostKeyFetching(false);
+      const fingerprint = await api.getHostFingerprint(host.id);
+      result = fingerprint
+        ? { ...pending, status: "ready", fingerprint }
+        : { ...pending, status: "verified" };
+    } catch (err) {
+      result = { ...pending, status: "ready", error: String(err) };
     }
+    setHostKeyTarget((current) => current === pending ? result : current);
   }
 
   async function trustHostKeyAndRetry() {
-    if (!hostKeyTarget) return;
-    const { host, forward, action } = hostKeyTarget;
-    setHostKeyTarget(null);
+    if (!hostKeyTarget?.fingerprint || hostKeyTarget.status !== "ready") return;
+    const { host, fingerprint, retry } = hostKeyTarget;
+    setHostKeyTarget({ ...hostKeyTarget, status: "saving", error: undefined });
     try {
-      await api.removeKnownHost(host.id);
-      if (action === "connect" && forward) {
-        await connectForward(host, forward);
-      } else {
-        await requestKeyUpload(host);
-      }
+      await api.trustHostFingerprint(host.id, fingerprint);
     } catch (err) {
-      setError(String(err));
+      setHostKeyTarget({ host, retry, status: "ready", error: String(err) });
+      return;
+    }
+    if (retry) {
+      setHostKeyTarget(null);
+      await retry();
+    } else {
+      await openHostKeyDialog(host);
     }
   }
 
@@ -708,8 +710,8 @@ export function App() {
   async function openVscodePath(host: Host, path: string) {
     try {
       if (!(await ensureVscode())) return;
-      const result = await api.vscodeOpenPath(host.id, path.trim());
       setHistoryDialog(null);
+      const result = await api.vscodeOpenPath(host.id, path.trim());
       if (path.trim()) void refreshRemoteHistory(host);
       if (result.addedToConfig) {
         setNotice(t(language, "vscodeAddedToConfig").replace("{alias}", result.alias));
@@ -728,8 +730,8 @@ export function App() {
     }
     try {
       if (!(await ensureVscode())) return;
-      await api.vscodeOpen(entry.uri, host.id, entry.label);
       setHistoryDialog(null);
+      await api.vscodeOpen(entry.uri, host.id, entry.label);
       void refreshRemoteHistory(host);
     } catch (err) {
       setHistoryDialog(null);
@@ -812,7 +814,7 @@ export function App() {
     passwordTarget, setPasswordTarget, passwordValue, setPasswordValue, connectWithPassword,
     cancelSendCommand,
     keyUploadTarget, setKeyUploadTarget, keyUploadPassword, setKeyUploadPassword, uploadKeyWithPassword,
-    hostKeyTarget, setHostKeyTarget, hostKeyFingerprint, hostKeyFetching, trustHostKeyAndRetry,
+    hostKeyTarget, setHostKeyTarget, trustHostKeyAndRetry,
     criticalError, setCriticalError, connectError, setConnectError, selectHosts, setSelectHosts,
     toggleSelectHost, confirmSelectHosts, importConflict, setImportConflict, applyImportStrategy,
     deleteHostTarget, setDeleteHostTarget, confirmDeleteHost, sshMissing, setSshMissing, installSsh,
@@ -888,6 +890,7 @@ export function App() {
                 onRefresh={(host) => void refreshRemoteHistory(host)}
                 onSendCommand={openSendCommand}
                 onUploadKey={requestKeyUpload}
+                onCheckFingerprint={openHostKeyDialog}
                 onOpenTerminalEntry={(host, entry) => openTerminalPath(host, entry.label)}
                 onOpenVscodeEntry={openVscodeEntry}
                 onOpenTerminalPath={openTerminalPath}

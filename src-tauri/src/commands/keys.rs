@@ -1,11 +1,9 @@
 use tauri::{AppHandle, Manager, State};
 
 use crate::model::HostView;
+use crate::ssh::host_keys::{self, HostFingerprint};
 use crate::ssh::keys::{ensure_public_key, upload_if_needed, upload_key_to_remote};
-use crate::ssh::probe::{
-    get_host_fingerprint as fingerprint, probe_connection as probe,
-    remove_known_host as remove_host,
-};
+use crate::ssh::probe::probe_connection as probe;
 use crate::state::AppState;
 use crate::validate::validate_host_connection;
 
@@ -65,25 +63,23 @@ pub async fn probe_connection(
 pub async fn get_host_fingerprint(
     host_id: String,
     state: State<'_, AppState>,
-    _app: AppHandle,
-) -> Result<String, String> {
+) -> Result<Option<HostFingerprint>, String> {
     let host = state.find_host(&host_id)?;
     validate_host_connection(&host)?;
-    tauri::async_runtime::spawn_blocking(move || fingerprint(&host))
+    tauri::async_runtime::spawn_blocking(move || host_keys::fingerprint(&host))
         .await
         .map_err(|e| e.to_string())?
 }
 
 #[tauri::command]
-pub async fn remove_known_host(
+pub async fn trust_host_fingerprint(
     host_id: String,
+    confirmed: HostFingerprint,
     state: State<'_, AppState>,
-    app: AppHandle,
 ) -> Result<(), String> {
     let host = state.find_host(&host_id)?;
-    tauri::async_runtime::spawn_blocking(move || {
-        remove_host(&host, app.state::<AppState>().inner(), &app)
-    })
-    .await
-    .map_err(|e| e.to_string())?
+    validate_host_connection(&host)?;
+    tauri::async_runtime::spawn_blocking(move || host_keys::trust(&host, &confirmed))
+        .await
+        .map_err(|e| e.to_string())?
 }

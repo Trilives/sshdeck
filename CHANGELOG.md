@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.4.5-beta.11
+
+- Join expanded details to their host cards in the two-column layout. When only one host is expanded, its details span both columns while the neighboring card keeps its own outline.
+- Replace the pinned text badge with a pin icon and show more rules in paired Port Forwarding panels.
+- Simplify Remote Connections with a More actions menu for checking SSH fingerprints, refreshing history, editing hosts, and deleting hosts.
+- Check the destination and jump host fingerprints on demand. After confirmation, SSHDeck updates the matching local OpenSSH record. Terminal and VS Code open directly.
+
 ## 0.4.5-beta.10
 
 - Add an optional two-column host list for Remote Connections and Port Forwarding. Hosts keep their columns as details expand. Paired details have equal height and one open detail uses the full row.

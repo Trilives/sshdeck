@@ -26,6 +26,11 @@ export interface Forward {
 }
 
 /** Level 1: an SSH server and its list of forwards. */
+export interface HostFingerprint {
+  endpoint: string;
+  fingerprint: string;
+}
+
 export interface Host {
   id: string;
   name: string;
